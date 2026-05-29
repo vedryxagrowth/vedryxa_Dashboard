@@ -579,13 +579,13 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
 
     const onChangeCampaignLevelDailyBudget = (event) => {
         setCampaignLevelDailyBudget(parseFloat(event.target.value));
-        console.log(event.target.value);
+        // console.log(event.target.value);
     }
 
     const onChangeAdsetLevelDailyBudget = (event) => {
         setAdsetLevelDailyBudget(parseFloat(event.target.value));
-        console.log(event.target.value);
-        console.log(parseFloat(event.target.value));
+        // console.log(event.target.value);
+        // console.log(parseFloat(event.target.value));
     }
 
 
@@ -622,8 +622,8 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
     };
 
     const handlePositionChange = (values, options) => {
-        console.log(values, "values");
-        console.log(options, "options");
+        // console.log(values, "values");
+        // console.log(options, "options");
         const formatted = options.map(opt => ({
             value: opt.value,
             label: opt.label || opt.children
@@ -645,7 +645,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
     };
 
     const setFormValuesFromDraft = (draft) => {
-        console.log("draft", draft);
+        // console.log("draft", draft);
         form.setFieldsValue({
             positions: draft?.adsetlevel?.position || [],
             // Account_Number: draft?.Account_Number,
@@ -728,8 +728,8 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
     }, [websiteURL, form]);
 
     useEffect(() => {
-        console.log("selectedDraftToEdit", selectedDraftToEdit);
-        console.log(selectedDraftToEdit && Object.keys(selectedDraftToEdit).length > 0);
+        // console.log("selectedDraftToEdit", selectedDraftToEdit);
+        // console.log(selectedDraftToEdit && Object.keys(selectedDraftToEdit).length > 0);
         // console.log("selectedDraftToEdit", selectedDraftToEdit.length > 0);
         if (selectedDraftToEdit && Object.keys(selectedDraftToEdit).length > 0) {
             setFormValuesFromDraft(selectedDraftToEdit);
@@ -830,7 +830,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                     }
                 }
             );
-            console.log("account data", ...response?.data);
+            // console.log("account data", ...response?.data);
 
 
             setimagehash(...response?.data)
@@ -881,7 +881,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                     if (file?.url) {
                         if (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") || file?.url?.endsWith('.mp4')) {
                             const formData = new FormData();
-                            const response = await fetch(`https://prodapis.adsgoat.in/s3?s3Url=${file.url}`, {
+                            const response = await fetch(`https://app.vyaktimetrics.com/creatives/userfiles/s3?s3Url=${file.url}`, {
                                 method: 'GET',
                                 headers: {
                                     'Content-Type': 'application/json',
@@ -965,13 +965,13 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                         if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
                             const formData = new FormData();
                             const uniqueId = uuidv4(); // Generate a unique ID for the file
-                            console.log(editedImages, "editedImages");
-                            console.log(editedImages[fileId], "file");
+                            // console.log(editedImages, "editedImages");
+                            // console.log(editedImages[fileId], "file");
                             const fileId = `${uniqueId}_${file.name}`;
                             const editedImage = editedImages[fileId];
                             const uploadFile = editedImage ? await fetch(editedImage).then(res => res.blob()) : null;
 
-                            console.log(file.originFileObj.name);
+                            // console.log(file.originFileObj.name);
 
                             if (uploadFile) {
                                 formData.append("file", uploadFile, `blob/${uniqueId}_${file.name}`);
@@ -1090,7 +1090,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
 
         try {
             const mediaHashArray = uploadFilesSequentially(selectedFiles);
-            console.log("All media files uploaded successfully. Media Hash Array:", mediaHashArray);
+            // console.log("All media files uploaded successfully. Media Hash Array:", mediaHashArray);
             return mediaHashArray;
         } catch (error) {
             console.error("One or more media uploads failed:", error);
@@ -1221,10 +1221,10 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
             );
             return acc;
         }, {});
-        console.log({
-            publisher_platforms: values.publisher_platforms,
-            ...selectedPlatforms, ...values
-        });
+        // console.log({
+        //     publisher_platforms: values.publisher_platforms,
+        //     ...selectedPlatforms, ...values
+        // });
 
         setIsModalVisible(true);
         setFormValues({
@@ -1239,7 +1239,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
 
         if (formValues) {
             const onSuccess = (status, response) => {
-                console.log("Upload success:", response);
+                // console.log("Upload success:", response);
             };
 
             const onError = (status, error) => {
@@ -1272,7 +1272,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                             const editedImage = editedImages[file.name];
                             const uploadFile = editedImage ? await fetch(editedImage).then(res => res.blob()) : null;
 
-                            console.log(file.originFileObj.name);
+                            // console.log(file.originFileObj.name);
 
                             if (uploadFile) {
                                 formData.append("file", uploadFile, `blob/${uniqueId}_${file.name}`);
@@ -1331,9 +1331,9 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                 }
             }
 
-            console.log("Form Values before customRequest:", formValues);
-            console.log("Selected Files before customRequest:", selectedFiles);
-            console.log("Updated Images before customRequest:", updatedImages);
+            // console.log("Form Values before customRequest:", formValues);
+            // console.log("Selected Files before customRequest:", selectedFiles);
+            // console.log("Updated Images before customRequest:", updatedImages);
 
             setLoading(false); // 
 
@@ -1396,7 +1396,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                 }
             };
 
-            console.log(draftData, "data1");
+            // console.log(draftData, "data1");
 
             try {
                 if ((Object.keys(selectedDraftToEdit).length > 0) && selectedDraftToEdit?.id) {
@@ -1477,10 +1477,10 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
     }
 
     const postData = async (values) => {
-        console.log("Form Values:", values);
+        // console.log("Form Values:", values);
         setLoading(true); // Start the spinner
         try {
-            console.log("Image Hashes before creating addlevel:", values.imageHashes);
+            // console.log("Image Hashes before creating addlevel:", values.imageHashes);
 
             const addLevelData = values.imageHashes.map((media, index) => {
                 if (media.imag_hash) {
@@ -1576,7 +1576,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
 
             // console.log("selectedPositions:", selectedPositions);
 
-            console.log("Final Data to Submit:", data1);
+            // console.log("Final Data to Submit:", data1);
 
             const response = await fetch('https://www.testapi.adsgoat.in/api/submitFormData', {
                 method: 'POST',
@@ -1588,7 +1588,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
             });
 
             if (response.ok) {
-                console.log('Form data submitted successfully');
+                // console.log('Form data submitted successfully');
                 setSelectedFilesFromCreatives([]);
                 setSelectedFilesFromMedia([]);
                 setSelectedFiles([]);
@@ -1596,17 +1596,17 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                 setSelectedPositions([]);
                 isManual !== "manual" && setIsManual(false);
             } else {
-                console.error('Failed to submit form data');
+                // console.error('Failed to submit form data');
             }
         } catch (error) {
-            console.error('Error submitting form data:', error);
+            // console.error('Error submitting form data:', error);
         } finally {
             setLoading(false); // Stop the spinner after the process is complete
         }
 
     };
 
-    console.log("test:");
+    // console.log("test:");
 
     const handleChange = (info) => {
         const newFiles = info.fileList.map(file => ({
@@ -1630,7 +1630,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
     };
 
     const currentDate = dayjs();
-    console.log(moment(), "currentDate")
+    // console.log(moment(), "currentDate")
     let initialValues = {
         Status: "PAUSED",
         // Objectives: "OUTCOME_LEADS",
@@ -1701,12 +1701,12 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
     };
 
     const onClickCreativesDrawer = () => {
-        console.log("Creatives Drawer Opened");
+        // console.log("Creatives Drawer Opened");
         setOpenCreativesDrawer(true);
     }
 
     const selectedFilesData = (data) => {
-        console.log("Selected Files Data:", data);
+        // console.log("Selected Files Data:", data);
         setSelectedFiles(prev => [...prev, ...data.map((file, index) => {
             return ({
                 uid: file.uid || `-${index + 1}`,
@@ -1751,7 +1751,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
         }
     }
 
-    console.log("Selected Files:", selectedFiles);
+    // console.log("Selected Files:", selectedFiles);
 
     const handleRemoveFile = (uidToRemove) => {
         setSelectedFilesFromCreatives(prev =>
@@ -3084,7 +3084,9 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                             </div>
                         )}
                     </Form.Item> */}
-                    <Form.Item label=" "><Button style={{ backgroundColor: '#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px" }} htmlType="submit" onClick={() => { console.log(form, "form Values value") }}>Save</Button></Form.Item>
+                    <Form.Item label=" "><Button style={{ backgroundColor: '#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px" }} htmlType="submit" onClick={() => {
+                        //  console.log(form, "form Values value")
+                          }}>Save</Button></Form.Item>
 
                     {isImgEditorShown && currentFile && (
                         <FabricCanvas

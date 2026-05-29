@@ -63,9 +63,9 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
     const [currentFile, setCurrentFile] = useState(null); // File to be edited
     const [editedImageUrl, setEditedImageUrl] = useState(null);
     const { theme } = useTokenContext();
-    console.log(network);
-    console.log(dupdata, "duplicatedata")
-    console.log(selectedFile, "selectedFileselectedFile")
+    // console.log(network);
+    // console.log(dupdata, "duplicatedata")
+    // console.log(selectedFile, "selectedFileselectedFile")
     function getNextAddName(data) {
         let maxNumber = -Infinity;
         let prefix = "";
@@ -107,12 +107,12 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
         form
             .validateFields()
             .then((values) => {
-                console.log('Form data:', values);
+                // console.log('Form data:', values);
                 setFormData(values);
                 setIsModalVisible(true);
             })
             .catch((errorInfo) => {
-                console.log('Validation failed:', errorInfo);
+                // console.log('Validation failed:', errorInfo);
             });
     };
 
@@ -192,7 +192,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
     };
 
     const closeCanvasModal = () => {
-        console.log("Closing editor...");
+        // console.log("Closing editor...");
         // setIsImgEditorShown(false);
         setIsImgEditorShown(false); // Close the image editor
     };
@@ -228,9 +228,9 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
 
                 if (response.status === 200 && fbResponse.status === 200) {
                     onSuccess("ok", response);
-                    console.log(response);
+                    // console.log(response);
                     hashid = fbResponse.data?.images?.[selectedFile?.name]?.hash;
-                    console.log("hashid is", hashid);
+                    // console.log("hashid is", hashid);
                     s3UrlPath = response.data.imageUrl;
                     return {
                         type: 'image',
@@ -287,8 +287,8 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                     hashid = videoid;
                     thambnailurl = uri;
 
-                    console.log("videoid is", videoid);
-                    console.log("Thumbnail URL is", uri);
+                    // console.log("videoid is", videoid);
+                    // console.log("Thumbnail URL is", uri);
                     return {
                         type: 'video',
                         filename: s3UrlPath,
@@ -361,7 +361,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
 
             if (formData) {
                 const onSuccess = (status, response) => {
-                    console.log("Upload success:", response);
+                    // console.log("Upload success:", response);
                     // Add any success handling logic here
                 };
 
@@ -379,7 +379,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                     }
                 );
 
-                console.log("siddu account data", response.data);
+                // console.log("siddu account data", response.data);
                 const imagehash = response.data[0];
 
                 const mediaData = await customRequest(imageshow, imagehash, onSuccess, onError);
@@ -472,7 +472,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                     }
                 }
             );
-            console.log("account data", ...response?.data);
+            // console.log("account data", ...response?.data);
             setimagehash(...response?.data)
         } catch (error) {
             console.error("Error fetching campaign data:", error);
@@ -509,7 +509,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
                 data1.thambnailurl = values.thambnailurl;
             }
 
-            console.log(data1, "from UI");
+            // console.log(data1, "from UI");
 
             const response = await fetch(
                 `https://www.testapi.adsgoat.in/api/Createadd/${data.identifier}`,
@@ -524,7 +524,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
             );
 
             if (response.ok) {
-                console.log("Form data submitted successfully");
+                // console.log("Form data submitted successfully");
                 message.success("Your add is created successfully", 2, () => {
                     setIsModalVisible(false);
                 }); // Close the drawer or perform any other action
@@ -579,7 +579,7 @@ const Duplicatenewads = ({ data, dupdata, changeRRefrst, onClose, rerenders, net
 
     const handleModalCancel = () => {
         setIsModalVisible(false);
-        console.log('Modal cancel clicked');
+        // console.log('Modal cancel clicked');
     };
     var initialValue = {
         page_id: dupdata.page_id,

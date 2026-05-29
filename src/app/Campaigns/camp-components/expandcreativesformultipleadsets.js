@@ -58,7 +58,7 @@ const AdsetCard = ({
   viewCampaignData,
   network,
 }) => {
-  console.log(adset);
+  // console.log(adset);
   const [expanded, setExpanded] = useState(false);
   const [isRejectModalVisible, setIsRejectModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -115,7 +115,7 @@ const AdsetCard = ({
 
     try {
       await axios.post(
-        "https://www.testapi.adsgoat.in/api/newtoggleAdsetStatus",
+        "https://fblaunching.vyaktimetrics.com/adsets/toggle-status",
         {
           // backend should accept these fields:
           campaignRef: campaignIdentifier,   // prefer UUID identifier
@@ -155,7 +155,7 @@ const AdsetCard = ({
 
     try {
       await axios.post(
-        "https://www.testapi.adsgoat.in/api/newtoggleAdStatus",
+        "https://fblaunching.vyaktimetrics.com/ads/newtoggleAdStatus",
         { campaignRef: campaignIdentifier, adsetKey, adIdentifier, newStatus, username: username },
         { headers: { Authorization: token } }
       );
@@ -189,12 +189,11 @@ const AdsetCard = ({
   };
 
   const handleApprove = async (item) => {
-    console.log("item in handle approve", item, "userdetails", userdetails);
+    // console.log("item in handle approve", item, "userdetails", userdetails);
     setLoading(true);
     try {
-      //https://www.testapi.adsgoat.in
       const response = await axios.post(
-        "https://www.testapi.adsgoat.in/api/newapproveAdstest",
+        "https://fblaunching.vyaktimetrics.com/open/approval/ad",
         {
           id: item.id,
           Approved: userdetails.userName, // Assuming userdetails has a name property
@@ -211,7 +210,7 @@ const AdsetCard = ({
         }
       );
       if (response.status === 200) {
-        console.log("Approved");
+        // console.log("Approved");
         // changeRRefrst && changeRRefrst();
         setadlevel(prev=>prev.map(aditem=>{
           if(aditem.id === item.id){
@@ -239,9 +238,8 @@ const AdsetCard = ({
 
   const removeAdset = async (adsetId, campaignIdentifier) => {
     try {
-      //https://www.testapi.adsgoat.in
       const response = await axios.post(
-        `https://www.testapi.adsgoat.in/api/newdeleteAdsets`,
+        `https://fblaunching.vyaktimetrics.com/open/newdeleteAdsets`,
         {
           adsetId: adsetId,
           identifier: campaignIdentifier,
@@ -253,7 +251,7 @@ const AdsetCard = ({
         }
       );
       if (response.status === 200) {
-        console.log("Adset deleted successfully");
+        // console.log("Adset deleted successfully");
         changeRRefrst && changeRRefrst();
       }
     } catch (error) {
@@ -276,10 +274,8 @@ const AdsetCard = ({
     setError("");
     setLoading(true);
     try {
-      //https://www.testapi.adsgoat.in
-
       const response = await axios.post(
-        "https://www.testapi.adsgoat.in/api/newrejectAdsnew",
+        "https://fblaunching.vyaktimetrics.com/open/reject/ad",
         {
           id: currentItem.id,
           reason: rejectionReason,
@@ -294,7 +290,7 @@ const AdsetCard = ({
         }
       );
       if (response.status === 200) {
-        console.log("Rejected:", currentItem.id);
+        // console.log("Rejected:", currentItem.id);
         setadlevel(prev=>prev.map(aditem=>{
           if(aditem.id === currentItem.id){
             return({...aditem, status: "Rejected", rejectionReason: rejectionReason})
@@ -346,7 +342,7 @@ const AdsetCard = ({
       setLoading(true);
 
       await axios.put(
-        `https://www.testapi.adsgoat.in/api/updateRejectReason/${viewCampaignData.identifier}`,
+        `https://fblaunching.vyaktimetrics.com/open/reject/reason/${viewCampaignData.identifier}`,
         {
           adsetKey: adsetKey,
           adId: selectedItem?.Addid || selectedItem?.id,
@@ -1708,12 +1704,12 @@ const ExpandedAdsetsContent = ({ record, changeRRefrst, network }) => {
   const [newAdsetDrawerVisible, setNewAdsetDrawerVisible] = useState(false);
   const [error, setError] = useState("");
 
-  console.log(userdetails, "userdetails");
-  console.log(record, "record in expanded adsets content");
-  console.log("network", network);
-  console.log("imagehash", imagehash, "imagehash in expanded adsets content");
-  console.log("token", token, "token in expanded adsets content");
-  console.log(viewCampaignData, "viewCampaignData in expanded adsets content");
+  // console.log(userdetails, "userdetails");
+  // console.log(record, "record in expanded adsets content");
+  // console.log("network", network);
+  // console.log("imagehash", imagehash, "imagehash in expanded adsets content");
+  // console.log("token", token, "token in expanded adsets content");
+  // console.log(viewCampaignData, "viewCampaignData in expanded adsets content");
 
   const { theme } = useTokenContext();
   // console.log(record);
@@ -1738,14 +1734,14 @@ const ExpandedAdsetsContent = ({ record, changeRRefrst, network }) => {
   const imageHashCaller = async (record) => {
     try {
       const response = await axios.get(
-        `https://www.testapi.adsgoat.in/api/hashimageidentity/${record.Account_Number}`,
+        `https://fblaunching.vyaktimetrics.com/open/accounts/hashimageidentity/${record.Account_Number}`,
         {
           headers: {
             Authorization: token,
           },
         }
       );
-      console.log("account data", ...response?.data);
+      // console.log("account data", ...response?.data);
       setimagehash(...response?.data);
     } catch (error) {
       console.error("Error fetching campaign data:", error);
@@ -1763,16 +1759,15 @@ const ExpandedAdsetsContent = ({ record, changeRRefrst, network }) => {
     const fetchData = async () => {
       try {
         if (record) {
-          //https://www.testapi.adsgoat.in
           const response = await axios.get(
-            `https://www.testapi.adsgoat.in/api/newviecampaigndata/${record.identifier}`,
+            `https://fblaunching.vyaktimetrics.com/open/campaigns/view/${record.identifier}`,
             {
               headers: {
                 Authorization: token,
               },
             }
           );
-          setViewCampaignData(response.data[0]);
+          setViewCampaignData(response?.data?.data[0]);
         }
       } catch (error) {
         console.error("Error fetching campaign data:", error);
@@ -1804,7 +1799,7 @@ const ExpandedAdsetsContent = ({ record, changeRRefrst, network }) => {
         }
       );
       if (response.status === 200) {
-        console.log("Approved");
+        // console.log("Approved");
         // setadlevel(prev=>prev.map(aditem=>{
         //   if(aditem.id === item.id){
         //     return({...aditem, status: "Approved"})
@@ -1841,7 +1836,7 @@ const ExpandedAdsetsContent = ({ record, changeRRefrst, network }) => {
         }
       );
       if (response.status === 200) {
-        console.log("Rejected:", currentItem.id);
+        // console.log("Rejected:", currentItem.id);
         changeRRefrst && changeRRefrst();
       }
     } catch (error) {

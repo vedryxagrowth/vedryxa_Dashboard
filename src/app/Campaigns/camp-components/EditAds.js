@@ -510,7 +510,7 @@ const Editads = ({ doubleAdset, viewCampaignData, changeRRefrst, editdata, onClo
 
     if (formData) {
       const onSuccess = (status, response) => {
-        console.log('Upload success:', response);
+        // console.log('Upload success:', response);
       };
 
       const onError = (status, error) => {
@@ -605,8 +605,8 @@ const Editads = ({ doubleAdset, viewCampaignData, changeRRefrst, editdata, onClo
       };
 
       // Send the POST request to your API endpoint
-      const response = await axios.post( //https://www.testapi.adsgoat.in
-        `https://www.testapi.adsgoat.in/api/${doubleAdset ? "newupdatededitedadd" : "updatededitedadd"}`,
+      const response = await axios.post( 
+        `https://fblaunching.vyaktimetrics.com/open/ads/${doubleAdset ? "update-edited-ad" : "updatededitedadd"}`,
         payload, // This is the data (payload) that is being sent in the body
         {
           headers: {
@@ -618,7 +618,7 @@ const Editads = ({ doubleAdset, viewCampaignData, changeRRefrst, editdata, onClo
 
       if (response.status === 200) {
         // Handle success response
-        console.log('Ad updated successfully:', response.data);
+        // console.log('Ad updated successfully:', response.data);
         onClose && onClose()
         message.success('Ad updated successfully');
 

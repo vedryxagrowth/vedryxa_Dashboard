@@ -76,7 +76,7 @@ export default function Createads({ selectedRow, network }) {
           }
         });
 
-        console.log(response?.data);
+        // console.log(response?.data);
         setovrallcampdetal(response?.data[0])
         setData(response?.data[0]?.addlevel)
       } catch (error) {
@@ -93,12 +93,12 @@ export default function Createads({ selectedRow, network }) {
   }
 
   const createnewads = () => {
-    console.log(network, "network ads");
+    // console.log(network, "network ads");
     setnewadsDrawerVisible(true)
     setVisibleNewAdset(true)
   };
   const duplicatenewads = (record) => {
-    console.log(record, "duplicated")
+    // console.log(record, "duplicated")
     setduplicatedata(record)
     setduplicateDrawerVisible(true)
     setVisibleDuplicateAdd(true);
@@ -121,10 +121,10 @@ export default function Createads({ selectedRow, network }) {
   const handleadsView = (record) => {
     setviewadsdata(record)
     setviewadsDrawerVisible(true)
-    console.log(record)
+    // console.log(record)
   }
   const handleadsdelete = async (record) => {
-    console.log(record, "deleted record");
+    // console.log(record, "deleted record");
     const id = record.id;
 
     try {
@@ -137,7 +137,7 @@ export default function Createads({ selectedRow, network }) {
       });
 
       if (response.ok) {
-        console.log('Record deleted successfully');
+        // console.log('Record deleted successfully');
         const updatedData = data.filter(item => item.id !== id);
         // Update the data state with the filtered array
         setData(updatedData);
@@ -161,17 +161,17 @@ export default function Createads({ selectedRow, network }) {
         `https://graph.facebook.com/v22.0/${ad_id}`,
         new URLSearchParams({ status, access_token })
       );
-      console.log("Ad Response:", res.data);
+      // console.log("Ad Response:", res.data);
     } catch (err) {
       console.error("Ad Error:", err.response?.data || err.message);
     }
   };
 
   const onToggleStatus = async (record, checked) => {
-    console.log(record, "record")
-    console.log(checked, "checked")
-    console.log(record.Addid, "Adid");
-    console.log(selectedRow?.camapaignlevel?.access_token, "access_token");
+    // console.log(record, "record")
+    // console.log(checked, "checked")
+    // console.log(record.Addid, "Adid");
+    // console.log(selectedRow?.camapaignlevel?.access_token, "access_token");
     const response = await axios.post(
       `https://www.testapi.adsgoat.in/api/adlevel`,
       {
@@ -273,7 +273,7 @@ export default function Createads({ selectedRow, network }) {
     },
 
   ];
-  console.log(selectedRow, "selected rows");
+  // console.log(selectedRow, "selected rows");
   return (
     <>
       <Flex justify="space-between" align="center">

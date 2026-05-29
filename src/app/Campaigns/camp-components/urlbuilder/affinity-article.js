@@ -13,11 +13,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { useTokenContext } from '../../../components/parent';
 import JoditEditor from "jodit-react";
 
-
 const CreateArticle = ({ theme, onCreate }) => {
     const [form] = Form.useForm();
     const { apiClient, userdetails } = useTokenContext();
     const [loading, setLoading] = useState(false);
+    const token = localStorage.getItem("token")
 
 
     const convertHTMLToArray = (html) => {
@@ -70,7 +70,7 @@ const CreateArticle = ({ theme, onCreate }) => {
 
         try {
             const response = await fetch(
-                "https://prodapis.adsgoat.in/uploadUserFiles",
+                "https://app.vyaktimetrics.com/creatives/userfiles/uploaduserfiles",
                 {
                     method: "POST",
                     headers: {
@@ -185,7 +185,7 @@ const CreateArticle = ({ theme, onCreate }) => {
             };
 
 
-            console.log("Final Payload:", payload);
+            // console.log("Final Payload:", payload);
 
 
             // ✅ API call
@@ -247,15 +247,27 @@ const CreateArticle = ({ theme, onCreate }) => {
             // console.log("API Response:", response.data);
 
 
-            const response = await apiClient.post(
-                "/affinity/article",
-                { data: payload },
-                {
-                    params: {
-                        username: userdetails.userName,
-                    },
-                }
-            );
+            // const response = await apiClient.post(
+            //     "/affinity/article",
+            //     { data: payload },
+            //     {
+            //         params: {
+            //             username: userdetails.userName,
+            //         },
+            //     }
+            // );
+
+            const response = await axios({
+                method: "POST",
+                url: "https://fblaunching.vyaktimetrics.com/open/affinity/article",
+                data: { data: payload },
+                params: {
+                    username: userdetails.userName,
+                },
+                headers: {
+                    Authorization: token,
+                },
+            });
 
 
             if (response.status === 200 || response.status === 201) {
@@ -437,7 +449,7 @@ const CreateArticle = ({ theme, onCreate }) => {
 
 
                                     img.onload = () => {
-                                        console.log(img.width, img.height);
+                                        // console.log(img.width, img.height);
 
 
                                         const isValidSize =
@@ -579,6 +591,7 @@ const ArticlesList = ({ theme, newArticle }) => {
     const { apiClient } = useTokenContext();
     const [articles, setArticles] = useState([]);
     const [loadingId, setLoadingId] = useState(null);
+    const token = localStorage.getItem("token")
     const columns = [
         {
             title: 'Created',
@@ -681,9 +694,20 @@ const ArticlesList = ({ theme, newArticle }) => {
     const handleIconClick = async (id, domain) => {
         try {
             setLoadingId(id);
-            const res = await apiClient.post('/affinity/getArticleStatus/', {
-                id,
-                domain
+            // const res = await apiClient.post('/affinity/getArticleStatus/', {
+            //     id,
+            //     domain
+            // });
+            const res = await axios({
+                method: "POST",
+                url: "https://fblaunching.vyaktimetrics.com/open/affinity/getArticleStatus/",
+                data: {
+                    id,
+                    domain,
+                },
+                headers: {
+                    Authorization: token,
+                },
             });
             const { status, articleLink } = res.data.data;
             setArticles((prev) =>
@@ -698,7 +722,7 @@ const ArticlesList = ({ theme, newArticle }) => {
                 )
             );
 
-            console.log(res.data);
+            // console.log(res.data);
         } catch (err) {
             console.error(err);
         } finally {
@@ -712,7 +736,14 @@ const ArticlesList = ({ theme, newArticle }) => {
     useEffect(() => {
         const fetchArticles = async () => {
             try {
-                const response = await apiClient.get("/affinity/article");
+                // const response = await apiClient.get("/affinity/article");
+                const response = await axios({
+                    method: "GET",
+                    url: "https://fblaunching.vyaktimetrics.com/open/affinity/article",
+                    headers: {
+                        Authorization: token,
+                    },
+                });
                 const results = response.data.data || [];
                 setArticles(results.map(article => ({
                     id: article.trace_id,

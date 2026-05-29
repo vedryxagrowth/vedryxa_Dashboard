@@ -27,7 +27,7 @@ const EditCampaignDrawer1 = ({ rowData, visible, onClose, changeRRefrst}) => {
                         { headers: { Authorization: token } }
                     );
                     setEditCampaignData(response.data[0]);
-                    console.log(response.data[0],"setEditCampaignData")
+                    // console.log(response.data[0],"setEditCampaignData")
                 }
             } catch (error) {
                 console.error("Error fetching campaign data:", error);
@@ -45,7 +45,7 @@ const EditCampaignDrawer1 = ({ rowData, visible, onClose, changeRRefrst}) => {
     };
 
     const onFinish = async () => {
-        console.log("Changed Data:", changedData); // Log the changed data after submission
+        // console.log("Changed Data:", changedData); // Log the changed data after submission
         try {
             // Prepare the campaign data
             const updatedCampaignData = {

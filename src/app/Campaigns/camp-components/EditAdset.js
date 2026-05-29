@@ -561,10 +561,10 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
           );
           return acc;
         }, {});
-        console.log({
-          publisher_platforms: values.publisher_platforms,
-          ...selectedPlatforms, ...values
-        });
+        // console.log({
+        //   publisher_platforms: values.publisher_platforms,
+        //   ...selectedPlatforms, ...values
+        // });
 
         // setIsModalVisible(true);
         setFormData({
@@ -576,7 +576,7 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
         setIsModalVisible(true);
       })
       .catch((errorInfo) => {
-        console.log('Validation failed:', errorInfo);
+        // console.log('Validation failed:', errorInfo);
       });
   };
 
@@ -594,7 +594,7 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
       }
     }
     message.success("Adset Edited successfully");
-    console.log('Modal ok clicked');
+    // console.log('Modal ok clicked');
     rerender()
     onClose()
 
@@ -602,7 +602,7 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
 
   const handleModalCancel = () => {
     setIsModalVisible(false);
-    console.log('Modal cancel clicked');
+    // console.log('Modal cancel clicked');
   };
   const currentDate = dayjs();
   var initialValue = {
@@ -674,7 +674,7 @@ export default function Editadset({ selectedRow, onClose, editadsetlevel, change
       });
 
       if (response.ok) {
-        console.log('Form data submitted successfully');
+        // console.log('Form data submitted successfully');
         // onClose(); // Close the drawer or perform any other action
       } else {
         console.error('Failed to submit form data');

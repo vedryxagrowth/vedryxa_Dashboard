@@ -40,13 +40,13 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
     const [form] = Form.useForm();
     const [formData, setFormData] = useState(null);
     const token = localStorage.getItem("token");
-    console.log(viewadsetlevel);
+    // console.log(viewadsetlevel);
     const defaultDate = viewadsetlevel?.start_time
         ? dayjs(viewadsetlevel?.start_time) // Parse ISO date using Day.js
         : null;
 
     const [date, setDate] = useState(defaultDate);
-    console.log(date);
+    // console.log(date);
 
     useEffect(() => {
         if (viewadsetlevel) {
@@ -94,7 +94,7 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
         Facebook_positions: viewadsetlevel?.Facebook_positions,
         placements: viewadsetlevel?.placements
     };
-    console.log(initialValue, "initialValueinitialValueinitialValue")
+    // console.log(initialValue, "initialValueinitialValueinitialValue")
 
     return (
         <>

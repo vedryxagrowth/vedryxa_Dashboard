@@ -81,7 +81,7 @@ const ViewDrawer = ({ rowData, visible, onClose }) => {
                             }
                         }
                     );
-                    console.log("hello viewdata", response.data[0]);
+                    // console.log("hello viewdata", response.data[0]);
                     setViewCampaignData(response.data[0]);
                 }
             } catch (error) {
@@ -105,7 +105,7 @@ const ViewDrawer = ({ rowData, visible, onClose }) => {
 
             if (response.ok) {
                 const data = await response.json();
-                console.log(data);
+                // console.log(data);
             } else {
                 console.error('Failed to update approval');
                 // Handle failure
@@ -129,7 +129,7 @@ const ViewDrawer = ({ rowData, visible, onClose }) => {
             // Call the handleUpdateApproval function with the appropriate parameters
             await handleUpdateApproval(rowData.identifier, "Approved");
             // Log the message to the console
-            console.log('Approval confirmed');
+            // console.log('Approval confirmed');
             message.success("Approval confirmed");
             onClose();
             setTimeout(() => {
