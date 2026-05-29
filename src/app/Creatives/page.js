@@ -228,7 +228,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                         }
                                     });
                                 } else {
-                                    const proxyUrl = `/creatives/proxy?url=${encodeURIComponent(file.url)}`;
+                                    const proxyUrl = `https://app.vyaktimetrics.com/creatives/proxy?url=${encodeURIComponent(file.url)}`;
                                     const res = await fetch(proxyUrl, {
                                         method: "GET",
                                         headers: {
@@ -573,7 +573,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
             }
 
             // Use backend proxy
-            const proxyUrl = `/creatives/proxy?url=${encodeURIComponent(finalUrl)}`;
+            const proxyUrl = `https://app.vyaktimetrics.com/creatives/proxy?url=${encodeURIComponent(finalUrl)}`;
             const response = await fetch(proxyUrl, {
                 method: "GET",
                 headers: {
@@ -739,7 +739,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
         try {
 
             // 🔹 Use proxy to fetch the image and bypass CORS restrictions
-            const proxyUrl = `/creatives/proxy?url=${encodeURIComponent(image.url)}`;
+            const proxyUrl = `https://app.vyaktimetrics.com/creatives/proxy?url=${encodeURIComponent(image.url)}`;
             // console.log("Cloning using Proxy:", proxyUrl);
 
             const response = await fetch(proxyUrl, {
@@ -815,7 +815,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
         }
 
         // 🔹 Proxy the image URL
-        const proxyUrl = `/creatives/proxy?url=${encodeURIComponent(image.url)}`;
+        const proxyUrl = `https://app.vyaktimetrics.com/creatives/proxy?url=${encodeURIComponent(image.url)}`;
 
         // console.log("Editing Image URL:", proxyUrl);
 
@@ -1346,7 +1346,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
     const downloadFile = async (fileUrl, filename) => {
         const safeName = filename || fileUrl.split("/").pop();
         try {
-            const proxyUrl = `/creatives/proxy?url=${encodeURIComponent(fileUrl)}`;
+            const proxyUrl = `https://app.vyaktimetrics.com/creatives/proxy?url=${encodeURIComponent(fileUrl)}`;
             const res = await fetch(proxyUrl, {
                 method: "GET",
                 headers: {
@@ -2638,7 +2638,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                                                 const newName = `${base}(${cloneNumber})${ext}`;
                                                                 destinationKey = `${uploadPrefix}${currentFolder}${newName}`;
 
-                                                                const proxyUrl = `/creatives/proxy?url=${encodeURIComponent(file.url)}`;
+                                                                const proxyUrl = `https://app.vyaktimetrics.com/creatives/proxy?url=${encodeURIComponent(file.url)}`;
                                                                 const res = await fetch(proxyUrl, {
                                                                     method: "GET",
                                                                     headers: {
@@ -3335,7 +3335,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                         };
 
                         const replaceFolder = async () => {
-                            await apiClient.delete("/creatives/folders/deletefolder", {
+                            await axios.delete("https://app.vyaktimetrics.com/creatives/folders/deletefolder", {
                                 headers: {
                                     Authorization: localStorage.getItem("token"),
                                     username: userdetails.userName,
@@ -3404,7 +3404,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                     const folderKey = deleteFolderModal.folder?.uid;
                     if (!folderKey) return;
 
-                    await apiClient.delete("/creatives/folders/deletefolder", {
+                    await axios.delete("https://app.vyaktimetrics.com/creatives/folders/deletefolder", {
                         headers: {
                             Authorization: localStorage.getItem("token"),
                             username: userdetails.userName,

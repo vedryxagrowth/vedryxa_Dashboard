@@ -382,7 +382,7 @@ const Editads = ({ doubleAdset, viewCampaignData, changeRRefrst, editdata, onClo
       let response, fbResponse;
 
       if (filesof.type.startsWith('image/')) {
-        response = await axios.post('https://www.testapi.adsgoat.in/upload', imageshow, {
+        response = await axios.post('https://app.vyaktimetrics.com/creatives/userfiles/uploaduserimage', imageshow, {
           headers: {
             Authorization: localStorage.getItem('token'),
             'Content-Type': 'multipart/form-data',
@@ -416,7 +416,7 @@ const Editads = ({ doubleAdset, viewCampaignData, changeRRefrst, editdata, onClo
           onError('error', response);
         }
       } else if (filesof.type.startsWith('video/')) {
-        response = await axios.post('https://www.testapi.adsgoat.in/upload', imageshow, {
+        response = await axios.post('https://app.vyaktimetrics.com/creatives/userfiles/uploaduserimage', imageshow, {
           headers: {
             Authorization: localStorage.getItem('token'),
             'Content-Type': 'multipart/form-data',

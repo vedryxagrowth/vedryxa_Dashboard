@@ -1546,7 +1546,7 @@ useEffect(() => {
       // console.log("FormData prepared for upload:", formData);
 
       // Call your API here to upload the image
-      fetch('https://www.testapi.adsgoat.in/upload', {
+      fetch('https://app.vyaktimetrics.com/creatives/userfiles/uploaduserimage', {
         method: 'POST',
         headers: {
           Authorization: localStorage.getItem('token'),

@@ -295,7 +295,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData, ads
 
               if (file.type.startsWith('image/')) {
                 response = await axios.post(
-                  'https://www.testapi.adsgoat.in/upload',
+                  'https://app.vyaktimetrics.com/creatives/userfiles/uploaduserimage',
                   formData,
                   {
                     headers: {
@@ -334,7 +334,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData, ads
                 }
               } else if (file.type.startsWith('video/')) {
                 response = await axios.post(
-                  'https://www.testapi.adsgoat.in/upload',
+                  'https://app.vyaktimetrics.com/creatives/userfiles/uploaduserimage',
                   formData,
                   {
                     headers: {

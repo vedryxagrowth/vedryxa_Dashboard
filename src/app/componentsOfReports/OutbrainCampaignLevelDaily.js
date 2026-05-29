@@ -3273,7 +3273,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.current.map(col => {
         network: collectionName,
         accountNumbers: accountsParam
       });
-      const mainData = resp.data;
+      const mainData = resp.data.data;
 
       const campaignsByAccount = {};
       mainData.forEach(item => {
@@ -3589,51 +3589,51 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.current.map(col => {
   // useEffect(() => {
   //   console.log(campaignIds, "campaignIds updated");
   // }, [campaignIds]);
-  useEffect(() => {
-    if (!campaignIds || Object.keys(campaignIds).length === 0) return;
+  // useEffect(() => {
+  //   if (!campaignIds || Object.keys(campaignIds).length === 0) return;
 
-    const fetchCreatives = async () => {
-      const token = localStorage.getItem("token");
-      try {
-        const creativesData = await sendCreativesRequest(
-          campaignIds,
-          token
-        );
+  //   const fetchCreatives = async () => {
+  //     const token = localStorage.getItem("token");
+  //     try {
+  //       const creativesData = await sendCreativesRequest(
+  //         campaignIds,
+  //         token
+  //       );
 
-        // console.log('Final creatives data:', creativesData);
-        setAdLevelCreatives(creativesData)
+  //       // console.log('Final creatives data:', creativesData);
+  //       setAdLevelCreatives(creativesData)
 
-      } catch (err) {
-        console.error('Creatives fetch failed', err);
-      }
-    };
+  //     } catch (err) {
+  //       console.error('Creatives fetch failed', err);
+  //     }
+  //   };
 
-    fetchCreatives();
-  }, [campaignIds]);
+  //   fetchCreatives();
+  // }, [campaignIds]);
 
-  const sendCreativesRequest = async (campaignIdsByAccount, token) => {
-    if (!campaignIdsByAccount || typeof campaignIdsByAccount !== "object") return [];
+  // const sendCreativesRequest = async (campaignIdsByAccount, token) => {
+  //   if (!campaignIdsByAccount || typeof campaignIdsByAccount !== "object") return [];
 
-    // 🔹 build single payload
-    const items = Object.entries(campaignIdsByAccount).map(
-      ([accountNumber, campaignIds]) => ({
-        accountNumber: String(accountNumber),
-        campaignIds: campaignIds.map(String)
-      })
-    );
+  //   // 🔹 build single payload
+  //   const items = Object.entries(campaignIdsByAccount).map(
+  //     ([accountNumber, campaignIds]) => ({
+  //       accountNumber: String(accountNumber),
+  //       campaignIds: campaignIds.map(String)
+  //     })
+  //   );
 
-    const resp = await apiClient.post(
-      "/reports/data/creatives",
-      { items },
-      {
-        headers: {
-          Authorization: token
-        }
-      }
-    );
+  //   const resp = await apiClient.post(
+  //     "/reports/data/creatives",
+  //     { items },
+  //     {
+  //       headers: {
+  //         Authorization: token
+  //       }
+  //     }
+  //   );
 
-    return resp.data?.data || [];
-  };
+  //   return resp.data?.data || [];
+  // };
 
   const defaultColDef = {
     comparator: (valueA, valueB) => {

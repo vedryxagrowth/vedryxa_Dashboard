@@ -62,7 +62,7 @@ const UserLocationFinder = ({ children, onComplete }) => {
       });
 
     // Fetch Location
-    const location = await fetch(`/auth/userip?ip=${ip}`)
+    const location = await fetch(`https://app.vyaktimetrics.com/auth/userip?ip=${ip}`)
       .then((res) =>
         res.ok ? res.json() : Promise.reject("Failed to fetch location")
       )
