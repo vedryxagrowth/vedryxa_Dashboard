@@ -8249,26 +8249,41 @@ const CreateCampaignDrawer = ({
   // };
 
   useEffect(() => {
-    if (!account || account.length === 0) return;
+    if (!account) return;
 
-    const accountArray = Array.isArray(account) ? account : [account];
+    const accountArray = (Array.isArray(account) ? account : [account])
+      .filter(acc => acc && String(acc).trim());
+
+    if (accountArray.length === 0) {
+      console.log("Skipping API call");
+      return;
+    }
 
     (async () => {
-      const resp = await fetch(
-        // `https://www.testapi.adsgoat.in/api/getreportcategories`, 
-        "https://fblaunching.vyaktimetrics.com/open/report-category/get",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: token,
-          },
-          body: JSON.stringify({ accountNumber: accountArray }),
-        });
+      try {
+        const resp = await fetch(
+          "https://fblaunching.vyaktimetrics.com/open/report-category/get",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: token,
+            },
+            body: JSON.stringify({
+              accountNumber: accountArray,
+            }),
+          }
+        );
 
-      const { data } = await resp.json();
-      if (data?.ok) {
-        setReportCategories(data.reportcategories);
+        const result = await resp.json();
+
+        if (result?.data?.ok) {
+          setReportCategories(
+            result.data.reportcategories
+          );
+        }
+      } catch (err) {
+        console.error(err);
       }
     })();
   }, [account, token]);
@@ -9580,30 +9595,53 @@ const CreateCampaignDrawer = ({
   const fetchDraftDetails = async () => {
     if (!account) return;
 
-    // normalize `account` to an array
-    const accounts = Array.isArray(account) ? account.filter(Boolean) : [account];
+    const accounts = (
+      Array.isArray(account) ? account : [account]
+    ).filter(
+      (acc) =>
+        acc !== null &&
+        acc !== undefined &&
+        String(acc).trim() !== ""
+    );
+
+    if (accounts.length === 0) {
+      return;
+    }
 
     try {
-      const res = await axios.post(
-        // "https://www.testapi.adsgoat.in/api/newGetDraftData",
+      const response = await fetch(
         "https://fblaunching.vyaktimetrics.com/open/templates/get",
-        { accounts },
         {
-          headers: { Authorization: token },
-          validateStatus: () => true,
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token,
+          },
+          body: JSON.stringify({
+            accounts,
+          }),
         }
       );
 
-      if (res.status === 200 && res.data?.ok) {
-        // flat list; each draft has `accountNumber`
-        setDraftsData(Array.isArray(res.data.drafts) ? res.data.drafts : []);
-        // If you prefer per-account map later:
-        // setDraftsByAccount(res.data.draftsByAccount);
+      const data = await response.json();
+
+      if (response.ok && data?.ok) {
+        setDraftsData(
+          Array.isArray(data.drafts)
+            ? data.drafts
+            : []
+        );
       } else {
-        message.error(res.data?.message || `Failed to load drafts (${res.status})`);
+        message.error(
+          data?.message ||
+          `Failed to load drafts (${response.status})`
+        );
       }
     } catch (err) {
-      console.error("fetchDraftDetails error:", err);
+      console.error(
+        "fetchDraftDetails error:",
+        err
+      );
       message.error("Error fetching drafts");
     }
   };
