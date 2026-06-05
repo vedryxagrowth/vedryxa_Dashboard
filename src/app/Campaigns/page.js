@@ -206,6 +206,14 @@ const App = () => {
   const [adsCount, setAdsCount] = useState({});
   const [loadingAd, setLoadingAd] = useState(null);
   const [typeFilter, setTypeFilter] = useState('All');
+  const [adIds, setAdIds] = useState("");
+  const [showTaboolaStatus, setShowTaboolaStatus] = useState(false);
+  const [showPredictoadStatus, setShowPredictoadStatus] = useState(false);
+  const [platform, setPlatform] = useState(2);
+  const [tableData, setTableData] = useState([]);
+  const [predictoAdStatusData, setPredictoAdStatusData] = useState([]);
+  const [searchAdId, setSearchAdId] = useState("");
+  const [appliedSearch, setAppliedSearch] = useState("");
   // console.log(checkedRowRecords);
   // console.log(multipleAdsetCampaignData);
   // const [isOpen, setIsOpen] = useState(false);
@@ -919,6 +927,8 @@ const App = () => {
   const handleKeyChange = (key) => {
     setSelectedKey(key);
     setSelectedValue([]);
+    setShowPredictoadStatus(false);
+    setShowTaboolaStatus(false);
   };
 
   const handleValueChange = (value) => {
@@ -2487,7 +2497,169 @@ const App = () => {
       ),
     },
   ];
+  const columnsforTaboolaStatus = [
+    {
+      title: "Session ID",
+      dataIndex: "sessionId",
+      key: "sessionId",
+      width: 250,
+    },
+    {
+      title: "Ad ID",
+      dataIndex: "adId",
+      key: "adId",
+    },
+    {
+      title: "Account ID",
+      dataIndex: "accountId",
+      key: "accountId",
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      render: (status) => {
+        const statusMap = {
+          "-1": "Unknown",
+          "0": "Failed",
+          "1": "Pass",
+          "2": "ApprovalOverride",
+          "3": "FailedOverride",
+          "4": "Error",
+          "5": "Appealed",
+          "6": "Resubmit",
+          "7": "Invalid URL",
+        };
 
+        return statusMap[status] || status;
+      },
+    },
+    {
+      title: "Blacklisted",
+      dataIndex: "isBlacklisted",
+      key: "isBlacklisted",
+      render: (value) => (value ? "Yes" : "No"),
+    },
+    {
+      title: "Creative Score",
+      dataIndex: "creativeScore",
+      key: "creativeScore",
+    },
+    {
+      title: "Reason",
+      dataIndex: "scoringReasoning",
+      key: "scoringReasoning",
+      width: 200,
+      render: (text) => (
+        <Tooltip
+          placement="right"
+          overlayInnerStyle={{
+            backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+            color: theme === "dark" ? "#ffffff" : "#000000",
+          }}
+          title={
+            <div
+              style={{
+                maxWidth: "500px",
+              }}
+            >
+              {text}
+            </div>
+          }
+        >
+          <span
+            style={{
+              display: "inline-block",
+              width: "200px",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {text}
+          </span>
+        </Tooltip>
+      ),
+    }
+
+  ];
+  const columnsforPredictoadStatus = [
+    {
+      title: "Account ID",
+      dataIndex: "ad_account_id",
+      key: "accountId",
+    },
+    {
+      title: "Campaign ID",
+      dataIndex: "campaign_id",
+      key: "campaignId",
+    },
+    {
+      title: "Adset ID",
+      dataIndex: "adset_id",
+      key: "adsetId",
+    },
+    {
+      title: "Ad ID",
+      dataIndex: "ad_id",
+      key: "adId",
+    },
+
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+    },
+    {
+      title: "Created At",
+      dataIndex: "created_at",
+      key: "created_at",
+      render: (value) => value.split("T")[0],
+    },
+    {
+      title: "Updated At",
+      dataIndex: "updated_at",
+      key: "updated_at",
+      render: (value) => value.split("T")[0],
+    },
+    {
+      title: "Reason",
+      dataIndex: "reason",
+      key: "reason",
+      width: 200,
+      render: (text) => (
+        <Tooltip
+          placement="right"
+          overlayInnerStyle={{
+            backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+            color: theme === "dark" ? "#ffffff" : "#000000",
+          }}
+          title={
+            <div
+              style={{
+                maxWidth: "500px",
+              }}
+            >
+              {text}
+            </div>
+          }
+        >
+          <span
+            style={{
+              display: "inline-block",
+              width: "200px",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {text}
+          </span>
+        </Tooltip>
+      ),
+    }
+
+  ];
   const columnsformultipleadsets = [
     {
       title: "Status",
@@ -4348,6 +4520,186 @@ const App = () => {
     );
   };
 
+  const fetchInitialData = async () => {
+    try {
+      const response = await axios.get(
+        "https://fblaunching.vyaktimetrics.com/open/taboola/ad-status/list",
+        {
+          headers: {
+            Authorization: token,
+          },
+        }
+      );
+
+      if (response.data?.ok) {
+        setTableData(response.data.data || []);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const fetchInitialDataForPredictoAdStatus = async () => {
+    try {
+      const response = await axios.get(
+        "https://fblaunching.vyaktimetrics.com/open/predicto/ad-status/list",
+        {
+          headers: {
+            Authorization: token,
+          },
+        }
+      );
+
+      if (response.data?.ok) {
+        setPredictoAdStatusData(response.data.data || []);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleCheckStatus = async () => {
+    try {
+      setLoading(true);
+
+      const ids = adIds
+        .split(",")
+        .map((id) => id.trim())
+        .filter(Boolean);
+
+      const response = await axios.post(
+        "https://fblaunching.vyaktimetrics.com/open/taboola/ad-status",
+        {
+          adIds: ids,
+          adNetwork: platform
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // const { sessionId, results } = response.data;
+
+      // const tableRows = results.map((item) => ({
+      //   ...item,
+      //   sessionId,
+      // }));
+
+      // setTableData(tableRows);
+      const { sessionId, results } = response.data;
+
+      setTableData(prev => {
+        const existing = new Map(
+          prev.map(item => [item.adId, item])
+        );
+
+        results.forEach(item => {
+          existing.set(item.adId, {
+            ...existing.get(item.adId),
+            ...item,
+            sessionId,
+          });
+        });
+
+        return [...existing.values()];
+      });
+
+      message.success("Ad status fetched successfully");
+    } catch (error) {
+      console.error(error);
+      message.error(
+        error?.response?.data?.message ||
+        "Failed to fetch ad status"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+  const handleCheckPredictoAdStatus = async () => {
+    try {
+      setLoading(true);
+
+      const ids = adIds
+        .split(",")
+        .map((id) => id.trim())
+        .filter(Boolean);
+
+      const response = await axios.post(
+        "https://fblaunching.vyaktimetrics.com/open/predicto/ad-status",
+        {
+          adIds: ids,
+          adNetwork: platform
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // const { sessionId, results } = response.data;
+
+      // const tableRows = results.map((item) => ({
+      //   ...item,
+      //   sessionId,
+      // }));
+
+      // setTableData(tableRows);
+      const { sessionId, results } = response.data;
+
+      setPredictoAdStatusData(prev => {
+        const existing = new Map(
+          prev.map(item => [item.ad_id, item])
+        );
+
+        results.forEach(item => {
+          existing.set(item.ad_id, {
+            ...existing.get(item.ad_id),
+            ...item,
+          });
+        });
+
+        return [...existing.values()];
+      });
+
+      message.success("Ad status fetched successfully");
+    } catch (error) {
+      console.error(error);
+      message.error(
+        error?.response?.data?.message ||
+        "Failed to fetch ad status"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+  const handleToggleTaboolaStatus = async () => {
+    if (!showTaboolaStatus) {
+      await fetchInitialData();
+    }
+    setShowTaboolaStatus(!showTaboolaStatus);
+  };
+
+  const handleTogglePredictoAdStatus = async () => {
+    if (!showPredictoadStatus) {
+      await fetchInitialDataForPredictoAdStatus();
+    }
+    setShowPredictoadStatus(!showPredictoadStatus);
+  }
+
+  const filteredTableData = appliedSearch
+    ? tableData.filter((item) =>
+      item.adId?.toString().includes(appliedSearch.trim())
+    )
+    : tableData;
+
+  const filteredPredictoAdStatusData = appliedSearch
+    ? predictoAdStatusData.filter((item) =>
+      item.ad_id?.toString().includes(appliedSearch.trim())
+    )
+    : predictoAdStatusData;
 
   const renderExpandedRow = useCallback(
     (record) => (
@@ -4798,6 +5150,46 @@ const App = () => {
             >
               Apply
             </Button>
+            {(selectedKey === "Taboola_Inuvoprism" &&
+              <Button
+                type="primary"
+                // onMouseEnter={() => setHovered(true)}
+                // onMouseLeave={() => setHovered(false)}
+                // onClick={() => setShowTaboolaStatus(!showTaboolaStatus)}
+                onClick={handleToggleTaboolaStatus}
+                style={{
+                  backgroundColor: "#91C25F",
+                  border: "1px solid #4CAF50",
+                  borderRadius: "8px",
+                  color: theme === "dark" ? "#ffffff" : "#000000",
+                  height: "32px",
+                  padding: "0 8px",
+                  transition: "all 0.15s ease-in-out",
+                }}
+              >
+                {showTaboolaStatus ? "Launching" : "Ad Policies"}
+              </Button>
+            )}
+            {(selectedKey === "FB_Predicto" &&
+              <Button
+                type="primary"
+                // onMouseEnter={() => setHovered(true)}
+                // onMouseLeave={() => setHovered(false)}
+                // onClick={() => setShowTaboolaStatus(!showTaboolaStatus)}
+                onClick={handleTogglePredictoAdStatus}
+                style={{
+                  backgroundColor: "#91C25F",
+                  border: "1px solid #4CAF50",
+                  borderRadius: "8px",
+                  color: theme === "dark" ? "#ffffff" : "#000000",
+                  height: "32px",
+                  padding: "0 8px",
+                  transition: "all 0.15s ease-in-out",
+                }}
+              >
+                {showPredictoadStatus ? "Launching" : "Ad Policies"}
+              </Button>
+            )}
             {isMobile && filteredMultipleAdsetCampaigns.length > 0 && (
               <div
                 style={{
@@ -5264,14 +5656,186 @@ const App = () => {
         </div>
         // </div>
       )} */}
+      {showTaboolaStatus && !showPredictoadStatus && (
+        <div>
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <div
+              style={{
+                display: "flex",
+                gap: "10px",
+                alignItems: "center",
+                marginBottom: "5px",
+                padding: "3px",
 
-      <div>
-        <Tabs
-          activeKey={activeTab}
-          onChange={handleTabChange}
-          renderTabBar={() => <></>}
-        >
-          {/* <Tabs.TabPane key="1">
+              }}
+            >
+              <Input.TextArea
+                rows={2}
+                value={adIds}
+                style={{
+                  minWidth: "450px",
+                  backgroundColor: theme === "dark" ? "#313131" : "#ffffff",
+                  color: theme === "dark" ? "#ffffff" : "#000000",
+                  borderColor: theme === "dark" ? "#434343" : "#d9d9d9",
+                }}
+                onChange={(e) => setAdIds(e.target.value)}
+                placeholder="Enter Ad IDs separated by commas"
+              />
+              <Select
+                value={platform}
+                onChange={value => setPlatform(value)}
+                dropdownClassName={theme === "dark" && "custom-dropdown"}
+                style={{ width: 170 }}
+                options={[
+                  { label: "Facebook", value: 1 },
+                  { label: "Taboola", value: 2 },
+                ]}
+              />
+              <Button
+                loading={loading}
+                disabled={loading}
+                style={{
+                  backgroundColor: "#91c25f",
+                  border: "1px solid #91c25f",
+                  width: "100px",
+                }}
+                type="primary"
+                onClick={handleCheckStatus}
+              >
+                {loading ? "Fetching..." : "Check Status"}
+              </Button>
+            </div>
+            <div>
+
+              <Input
+                placeholder="Search Ad ID..."
+                value={searchAdId}
+                onChange={(e) => setSearchAdId(e.target.value)}
+                onPressEnter={() => setAppliedSearch(searchAdId)}
+                className={
+                  theme === "dark" ? "custom-input-dark" : "custom-input-light"
+                }
+                style={{
+                  width: "180px",
+                  border: "1px solid #4caf50",
+                  margin: "10px",
+                }}
+              />
+            </div>
+          </div>
+          <Table
+            columns={columnsforTaboolaStatus}
+            className={`custom-dark-table ${theme === "dark"
+              ? "dark-mode-pagination"
+              : "light-mode-pagination"
+              }`}
+            // dataSource={tableData}
+            dataSource={filteredTableData}
+            rowKey="adId"
+            pagination={{
+              pageSize: paginationSize,
+              showSizeChanger: true,
+              onChange: (page, pageSize) => {
+                setPaginationSize(pageSize);
+              }
+            }}
+          />
+        </div>
+      )}
+      {showPredictoadStatus && !showTaboolaStatus && (
+        <div>
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <div
+              style={{
+                display: "flex",
+                gap: "10px",
+                alignItems: "center",
+                marginBottom: "5px",
+                padding: "3px",
+
+              }}
+            >
+              <Input.TextArea
+                rows={2}
+                value={adIds}
+                style={{
+                  minWidth: "450px",
+                  backgroundColor: theme === "dark" ? "#313131" : "#ffffff",
+                  color: theme === "dark" ? "#ffffff" : "#000000",
+                  borderColor: theme === "dark" ? "#434343" : "#d9d9d9",
+                }}
+                onChange={(e) => setAdIds(e.target.value)}
+                placeholder="Enter Ad IDs separated by commas"
+              />
+              <Button
+                loading={loading}
+                disabled={loading}
+                style={{
+                  backgroundColor: "#91c25f",
+                  border: "1px solid #91c25f",
+                  width: "100px",
+                }}
+                type="primary"
+                onClick={handleCheckPredictoAdStatus}
+              >
+                {loading ? "Fetching..." : "Check Status"}
+              </Button>
+              <Button
+                type="primary"
+                onClick={fetchInitialDataForPredictoAdStatus}
+                icon={<ReloadOutlined className="black-icon" />}
+                style={{
+                  backgroundColor: "#91C25F",
+                  color: "#000",
+                  border: "none",
+                  width: "50px",
+                }}
+              />
+            </div>
+            <div>
+              <Input
+                placeholder="Search Ad ID..."
+                value={searchAdId}
+                onChange={(e) => setSearchAdId(e.target.value)}
+                onPressEnter={() => setAppliedSearch(searchAdId)}
+                className={
+                  theme === "dark" ? "custom-input-dark" : "custom-input-light"
+                }
+                style={{
+                  width: "250px",
+                  border: "1px solid #4caf50",
+                  margin: "10px",
+                }}
+              />
+            </div>
+          </div>
+          <Table
+            columns={columnsforPredictoadStatus}
+            className={`custom-dark-table ${theme === "dark"
+              ? "dark-mode-pagination"
+              : "light-mode-pagination"
+              }`}
+            // dataSource={tableData}
+            dataSource={filteredPredictoAdStatusData}
+            rowKey="adId"
+            pagination={{
+              pageSize: paginationSize,
+              showSizeChanger: true,
+              onChange: (page, pageSize) => {
+                setPaginationSize(pageSize);
+              }
+            }}
+          />
+        </div>
+      )}
+      {!showTaboolaStatus && !showPredictoadStatus && (
+        <div>
+          <Tabs
+            activeKey={activeTab}
+            onChange={handleTabChange}
+            renderTabBar={() => <></>}
+          >
+            {/* <Tabs.TabPane key="1">
             {loading ? (
               <Skeleton
                 active
@@ -5342,46 +5906,46 @@ const App = () => {
             )
             }
           </Tabs.TabPane> */}
-          <Tabs.TabPane key="2">
-            {loadingForMultipleAdsets ? (
-              <Skeleton
-                active
-                paragraph={{ rows: isMobile ? 20 : 12 }}
-                style={{ marginTop: "10px" }}
-              />
-            ) : (
-              <Table
-                style={{
-                  width: "100%",
-                  // height: "calc(100vh - 300px)",
-                  height: isMobile
-                    ? "calc(100vh - 180px)"
-                    : "calc(100vh - 280px)",
-                  // minHeight: '100%',
-                  // tableLayout: "fixed",
-                }}
-                // style={{
-                //   width: "100%",
-                //   tableLayout: "fixed",
-                // }}
-                className={`custom-dark-table ${theme === "dark"
-                  ? "dark-mode-pagination"
-                  : "light-mode-pagination"
-                  }`}
-                columns={columnsformultipleadsets}
-                rowSelection={{
-                  columnWidth: 30,
-                  type: "checkbox",
-                  selectedRowKeys: checkedRowIds,
-                  onChange: (rowIds, rowRecords) => {
-                    setCheckedRowIds(rowIds);
-                    setCheckedRowRecords(rowRecords);
-                  },
-                  columnTitle: (checkboxNode) => (
-                    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                      {checkboxNode} {/* ✅ Select-all checkbox */}
+            <Tabs.TabPane key="2">
+              {loadingForMultipleAdsets ? (
+                <Skeleton
+                  active
+                  paragraph={{ rows: isMobile ? 20 : 12 }}
+                  style={{ marginTop: "10px" }}
+                />
+              ) : (
+                <Table
+                  style={{
+                    width: "100%",
+                    // height: "calc(100vh - 300px)",
+                    height: isMobile
+                      ? "calc(100vh - 180px)"
+                      : "calc(100vh - 280px)",
+                    // minHeight: '100%',
+                    // tableLayout: "fixed",
+                  }}
+                  // style={{
+                  //   width: "100%",
+                  //   tableLayout: "fixed",
+                  // }}
+                  className={`custom-dark-table ${theme === "dark"
+                    ? "dark-mode-pagination"
+                    : "light-mode-pagination"
+                    }`}
+                  columns={columnsformultipleadsets}
+                  rowSelection={{
+                    columnWidth: 30,
+                    type: "checkbox",
+                    selectedRowKeys: checkedRowIds,
+                    onChange: (rowIds, rowRecords) => {
+                      setCheckedRowIds(rowIds);
+                      setCheckedRowRecords(rowRecords);
+                    },
+                    columnTitle: (checkboxNode) => (
+                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        {checkboxNode} {/* ✅ Select-all checkbox */}
 
-                      {/* <IoMdCreate
+                        {/* <IoMdCreate
                         style={{ cursor: "pointer", }}
                         onClick={(e) => {
                           e.stopPropagation(); // ⛔ prevent select-all toggle
@@ -5390,97 +5954,99 @@ const App = () => {
                           setIsModalVisiblesForBulkComments(true)
                         }}
                       /> */}
-                      <IoMdCreate
-                        style={{
-                          cursor: hasData ? "pointer" : "not-allowed",
-                          opacity: hasData ? 1 : 0.4,
-                          pointerEvents: hasData ? "auto" : "none", // 🔒 fully disable
-                        }}
-                        onClick={(e) => {
-                          if (!hasData) return;
+                        <IoMdCreate
+                          style={{
+                            cursor: hasData ? "pointer" : "not-allowed",
+                            opacity: hasData ? 1 : 0.4,
+                            pointerEvents: hasData ? "auto" : "none", // 🔒 fully disable
+                          }}
+                          onClick={(e) => {
+                            if (!hasData) return;
 
-                          e.stopPropagation(); // ⛔ prevent select-all toggle
-                          setIsModalVisiblesForBulkComments(true);
-                        }}
-                      />
-                    </div>
-                  ),
-                }}
-                // dataSource={filteredMultipleAdsetCampaigns
-                //   .map((item, index) => ({
-                //     ...item,
-                //     key: index,
-                //   }))
-                //   .reverse()}
-                dataSource={[...filteredMultipleAdsetCampaigns].reverse()}
-                rowKey={(record) => record.identifier}
-                // pagination={{ pageSize: paginationSize }}
-                pagination={{
-                  pageSize: paginationSize,
-                  showSizeChanger: true,
-                  onChange: (page, pageSize) => {
-                    setPaginationSize(pageSize);
-                  }
-                }}
-                // scroll={{
-                //   x: "auto",
-                //   y: "calc(63vh)",
-                // }}
-                // scroll={{
-                //   x: "max-content",
-                //   y: isMobile ? "50vh" : "63vh",
-                // }}
-                scroll={{
-                  x: "auto",
-                  y: isMobile
-                    ? "calc(100vh - 40px)"
-                    : "calc(100vh - 240px)",
-                }}
-                expandable={{
-                  expandedRowRender: (record) => (
-                    <ExpandedAdsetsContent
-                      record={record}
-                      changeRRefrst={changeRRefrst}
-                      network={selectedKey}
-                    />
-                  ),
-                  rowExpandable: (record) => !!record,
-                }}
-                // expandable={{
-                //   expandedRowRender: renderExpandedRow,
-                //   rowExpandable: (record) => !!record,
-                // }}
-                rowClassName={() => "custom-row"}
-                // rowKey="key"
-                components={{
-                  body: {
-                    row: (props) => (
-                      <tr
-                        {...props}
-                        style={{
-                          ...props.style,
-                          height: "32px",
-                        }}
+                            e.stopPropagation(); // ⛔ prevent select-all toggle
+                            setIsModalVisiblesForBulkComments(true);
+                          }}
+                        />
+                      </div>
+                    ),
+                  }}
+                  // dataSource={filteredMultipleAdsetCampaigns
+                  //   .map((item, index) => ({
+                  //     ...item,
+                  //     key: index,
+                  //   }))
+                  //   .reverse()}
+                  dataSource={[...filteredMultipleAdsetCampaigns].reverse()}
+                  rowKey={(record) => record.identifier}
+                  // pagination={{ pageSize: paginationSize }}
+                  pagination={{
+                    pageSize: paginationSize,
+                    showSizeChanger: true,
+                    onChange: (page, pageSize) => {
+                      setPaginationSize(pageSize);
+                    }
+                  }}
+                  // scroll={{
+                  //   x: "auto",
+                  //   y: "calc(63vh)",
+                  // }}
+                  // scroll={{
+                  //   x: "max-content",
+                  //   y: isMobile ? "50vh" : "63vh",
+                  // }}
+                  scroll={{
+                    x: "auto",
+                    y: isMobile
+                      ? "calc(100vh - 40px)"
+                      : "calc(100vh - 240px)",
+                  }}
+                  expandable={{
+                    expandedRowRender: (record) => (
+                      <ExpandedAdsetsContent
+                        record={record}
+                        changeRRefrst={changeRRefrst}
+                        network={selectedKey}
                       />
                     ),
-                    cell: (props) => (
-                      <td
-                        {...props}
-                        style={{
-                          ...props.style,
-                          paddingTop: "6px",
-                          paddingBottom: "6px",
-                          fontSize: "13px",
-                        }}
-                      />
-                    ),
-                  },
-                }}
-              />
-            )}
-          </Tabs.TabPane>
-        </Tabs>
-      </div>
+                    rowExpandable: (record) => !!record,
+                  }}
+                  // expandable={{
+                  //   expandedRowRender: renderExpandedRow,
+                  //   rowExpandable: (record) => !!record,
+                  // }}
+                  rowClassName={() => "custom-row"}
+                  // rowKey="key"
+                  components={{
+                    body: {
+                      row: (props) => (
+                        <tr
+                          {...props}
+                          style={{
+                            ...props.style,
+                            height: "32px",
+                          }}
+                        />
+                      ),
+                      cell: (props) => (
+                        <td
+                          {...props}
+                          style={{
+                            ...props.style,
+                            paddingTop: "6px",
+                            paddingBottom: "6px",
+                            fontSize: "13px",
+                          }}
+                        />
+                      ),
+                    },
+                  }}
+                />
+              )}
+            </Tabs.TabPane>
+          </Tabs>
+        </div>
+      )}
+
 
       {!restrictedEmails.includes(userdetails.email) && (
         <Drawer
