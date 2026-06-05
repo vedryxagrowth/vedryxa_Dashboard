@@ -208,8 +208,10 @@ const App = () => {
   const [typeFilter, setTypeFilter] = useState('All');
   const [adIds, setAdIds] = useState("");
   const [showTaboolaStatus, setShowTaboolaStatus] = useState(false);
-  const [platform, setPlatform] = useState(1);
+  const [showPredictoadStatus, setShowPredictoadStatus] = useState(false);
+  const [platform, setPlatform] = useState(2);
   const [tableData, setTableData] = useState([]);
+  const [predictoAdStatusData, setPredictoAdStatusData] = useState([]);
   const [searchAdId, setSearchAdId] = useState("");
   const [appliedSearch, setAppliedSearch] = useState("");
   // console.log(checkedRowRecords);
@@ -925,6 +927,8 @@ const App = () => {
   const handleKeyChange = (key) => {
     setSelectedKey(key);
     setSelectedValue([]);
+    setShowPredictoadStatus(false);
+    setShowTaboolaStatus(false);
   };
 
   const handleValueChange = (value) => {
@@ -2545,6 +2549,83 @@ const App = () => {
       title: "Reason",
       dataIndex: "scoringReasoning",
       key: "scoringReasoning",
+      width: 200,
+      render: (text) => (
+        <Tooltip
+          placement="right"
+          overlayInnerStyle={{
+            backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+            color: theme === "dark" ? "#ffffff" : "#000000",
+          }}
+          title={
+            <div
+              style={{
+                maxWidth: "500px",
+              }}
+            >
+              {text}
+            </div>
+          }
+        >
+          <span
+            style={{
+              display: "inline-block",
+              width: "200px",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {text}
+          </span>
+        </Tooltip>
+      ),
+    }
+
+  ];
+  const columnsforPredictoadStatus = [
+    {
+      title: "Account ID",
+      dataIndex: "ad_account_id",
+      key: "accountId",
+    },
+    {
+      title: "Campaign ID",
+      dataIndex: "campaign_id",
+      key: "campaignId",
+    },
+    {
+      title: "Adset ID",
+      dataIndex: "adset_id",
+      key: "adsetId",
+    },
+    {
+      title: "Ad ID",
+      dataIndex: "ad_id",
+      key: "adId",
+    },
+
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+    },
+    {
+      title: "Created At",
+      dataIndex: "created_at",
+      key: "created_at",
+      render: (value) => value.split("T")[0],
+    },
+    {
+      title: "Updated At",
+      dataIndex: "updated_at",
+      key: "updated_at",
+      render: (value) => value.split("T")[0],
+    },
+    {
+      title: "Reason",
+      dataIndex: "reason",
+      key: "reason",
       width: 200,
       render: (text) => (
         <Tooltip
@@ -4458,6 +4539,25 @@ const App = () => {
     }
   };
 
+  const fetchInitialDataForPredictoAdStatus = async () => {
+    try {
+      const response = await axios.get(
+        "https://fblaunching.vyaktimetrics.com/open/predicto/ad-status/list",
+        {
+          headers: {
+            Authorization: token,
+          },
+        }
+      );
+
+      if (response.data?.ok) {
+        setPredictoAdStatusData(response.data.data || []);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const handleCheckStatus = async () => {
     try {
       setLoading(true);
@@ -4517,17 +4617,90 @@ const App = () => {
       setLoading(false);
     }
   };
+  const handleCheckPredictoAdStatus = async () => {
+    try {
+      setLoading(true);
+
+      const ids = adIds
+        .split(",")
+        .map((id) => id.trim())
+        .filter(Boolean);
+
+      const response = await axios.post(
+        "https://fblaunching.vyaktimetrics.com/open/predicto/ad-status",
+        {
+          adIds: ids,
+          adNetwork: platform
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // const { sessionId, results } = response.data;
+
+      // const tableRows = results.map((item) => ({
+      //   ...item,
+      //   sessionId,
+      // }));
+
+      // setTableData(tableRows);
+      const { sessionId, results } = response.data;
+
+      setPredictoAdStatusData(prev => {
+        const existing = new Map(
+          prev.map(item => [item.ad_id, item])
+        );
+
+        results.forEach(item => {
+          existing.set(item.ad_id, {
+            ...existing.get(item.ad_id),
+            ...item,
+          });
+        });
+
+        return [...existing.values()];
+      });
+
+      message.success("Ad status fetched successfully");
+    } catch (error) {
+      console.error(error);
+      message.error(
+        error?.response?.data?.message ||
+        "Failed to fetch ad status"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
   const handleToggleTaboolaStatus = async () => {
     if (!showTaboolaStatus) {
       await fetchInitialData();
     }
     setShowTaboolaStatus(!showTaboolaStatus);
   };
+
+  const handleTogglePredictoAdStatus = async () => {
+    if (!showPredictoadStatus) {
+      await fetchInitialDataForPredictoAdStatus();
+    }
+    setShowPredictoadStatus(!showPredictoadStatus);
+  }
+
   const filteredTableData = appliedSearch
     ? tableData.filter((item) =>
       item.adId?.toString().includes(appliedSearch.trim())
     )
     : tableData;
+
+  const filteredPredictoAdStatusData = appliedSearch
+    ? predictoAdStatusData.filter((item) =>
+      item.ad_id?.toString().includes(appliedSearch.trim())
+    )
+    : predictoAdStatusData;
+
   const renderExpandedRow = useCallback(
     (record) => (
       <ExpandedAdsetsContent
@@ -4994,7 +5167,27 @@ const App = () => {
                   transition: "all 0.15s ease-in-out",
                 }}
               >
-                {showTaboolaStatus ? "Hide" : "Show"}
+                {showTaboolaStatus ? "Launching" : "Ad Policies"}
+              </Button>
+            )}
+            {(selectedKey === "FB_Predicto" &&
+              <Button
+                type="primary"
+                // onMouseEnter={() => setHovered(true)}
+                // onMouseLeave={() => setHovered(false)}
+                // onClick={() => setShowTaboolaStatus(!showTaboolaStatus)}
+                onClick={handleTogglePredictoAdStatus}
+                style={{
+                  backgroundColor: "#91C25F",
+                  border: "1px solid #4CAF50",
+                  borderRadius: "8px",
+                  color: theme === "dark" ? "#ffffff" : "#000000",
+                  height: "32px",
+                  padding: "0 8px",
+                  transition: "all 0.15s ease-in-out",
+                }}
+              >
+                {showPredictoadStatus ? "Launching" : "Ad Policies"}
               </Button>
             )}
             {isMobile && filteredMultipleAdsetCampaigns.length > 0 && (
@@ -5463,7 +5656,7 @@ const App = () => {
         </div>
         // </div>
       )} */}
-      {showTaboolaStatus && (
+      {showTaboolaStatus && !showPredictoadStatus && (
         <div>
           <div style={{ display: "flex", justifyContent: "space-between" }}>
             <div
@@ -5480,14 +5673,18 @@ const App = () => {
                 rows={2}
                 value={adIds}
                 style={{
-                  minWidth: "350px",
+                  minWidth: "450px",
+                  backgroundColor: theme === "dark" ? "#313131" : "#ffffff",
+                  color: theme === "dark" ? "#ffffff" : "#000000",
+                  borderColor: theme === "dark" ? "#434343" : "#d9d9d9",
                 }}
                 onChange={(e) => setAdIds(e.target.value)}
                 placeholder="Enter Ad IDs separated by commas"
               />
               <Select
                 value={platform}
-                onChange={setPlatform}
+                onChange={value => setPlatform(value)}
+                dropdownClassName={theme === "dark" && "custom-dropdown"}
                 style={{ width: 170 }}
                 options={[
                   { label: "Facebook", value: 1 },
@@ -5500,6 +5697,7 @@ const App = () => {
                 style={{
                   backgroundColor: "#91c25f",
                   border: "1px solid #91c25f",
+                  width: "100px",
                 }}
                 type="primary"
                 onClick={handleCheckStatus}
@@ -5508,6 +5706,7 @@ const App = () => {
               </Button>
             </div>
             <div>
+
               <Input
                 placeholder="Search Ad ID..."
                 value={searchAdId}
@@ -5517,7 +5716,7 @@ const App = () => {
                   theme === "dark" ? "custom-input-dark" : "custom-input-light"
                 }
                 style={{
-                  width: "150px",
+                  width: "180px",
                   border: "1px solid #4caf50",
                   margin: "10px",
                 }}
@@ -5543,7 +5742,93 @@ const App = () => {
           />
         </div>
       )}
-      {!showTaboolaStatus && (
+      {showPredictoadStatus && !showTaboolaStatus && (
+        <div>
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <div
+              style={{
+                display: "flex",
+                gap: "10px",
+                alignItems: "center",
+                marginBottom: "5px",
+                padding: "3px",
+
+              }}
+            >
+              <Input.TextArea
+                rows={2}
+                value={adIds}
+                style={{
+                  minWidth: "450px",
+                  backgroundColor: theme === "dark" ? "#313131" : "#ffffff",
+                  color: theme === "dark" ? "#ffffff" : "#000000",
+                  borderColor: theme === "dark" ? "#434343" : "#d9d9d9",
+                }}
+                onChange={(e) => setAdIds(e.target.value)}
+                placeholder="Enter Ad IDs separated by commas"
+              />
+              <Button
+                loading={loading}
+                disabled={loading}
+                style={{
+                  backgroundColor: "#91c25f",
+                  border: "1px solid #91c25f",
+                  width: "100px",
+                }}
+                type="primary"
+                onClick={handleCheckPredictoAdStatus}
+              >
+                {loading ? "Fetching..." : "Check Status"}
+              </Button>
+              <Button
+                type="primary"
+                onClick={fetchInitialDataForPredictoAdStatus}
+                icon={<ReloadOutlined className="black-icon" />}
+                style={{
+                  backgroundColor: "#91C25F",
+                  color: "#000",
+                  border: "none",
+                  width: "50px",
+                }}
+              />
+            </div>
+            <div>
+              <Input
+                placeholder="Search Ad ID..."
+                value={searchAdId}
+                onChange={(e) => setSearchAdId(e.target.value)}
+                onPressEnter={() => setAppliedSearch(searchAdId)}
+                className={
+                  theme === "dark" ? "custom-input-dark" : "custom-input-light"
+                }
+                style={{
+                  width: "250px",
+                  border: "1px solid #4caf50",
+                  margin: "10px",
+                }}
+              />
+            </div>
+          </div>
+          <Table
+            columns={columnsforPredictoadStatus}
+            className={`custom-dark-table ${theme === "dark"
+              ? "dark-mode-pagination"
+              : "light-mode-pagination"
+              }`}
+            // dataSource={tableData}
+            dataSource={filteredPredictoAdStatusData}
+            rowKey="adId"
+            pagination={{
+              pageSize: paginationSize,
+              showSizeChanger: true,
+              onChange: (page, pageSize) => {
+                setPaginationSize(pageSize);
+              }
+            }}
+          />
+        </div>
+      )}
+      {!showTaboolaStatus && !showPredictoadStatus && (
         <div>
           <Tabs
             activeKey={activeTab}
