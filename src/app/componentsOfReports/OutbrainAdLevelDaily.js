@@ -77,7 +77,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
 
     const [insideInput, setInsideInput] = useState("");
 
-    console.log(insideInput);
+    // console.log(insideInput);
 
     const [dailyFixedFooter, setDailyFixedFooter] = useState([]);
 
@@ -318,7 +318,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
             }
         });
 
-        apiClient.post('/UserExportActivities/', { Details }).catch(console.error);
+        apiClient.post('/reports/commonapis/userexportactivities', { Details }).catch(console.error);
     };
 
     useEffect(() => {
@@ -377,7 +377,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
 
         // ✅ Store clean, unique campaigns
         setLeafCampaigns(uniqueLeafCampaigns);
-        console.log("Selected unique Ads:", uniqueLeafCampaigns);
+        // console.log("Selected unique Ads:", uniqueLeafCampaigns);
     };
 
     const handleBulkSmartPinAd = async (action) => {
@@ -418,8 +418,8 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
 
         const apiUrl =
             action === "pin"
-                ? "/SmartPinBulkWithHitory"
-                : "/SmartUnpinBulkWithHistory";
+                ? "/reports/bulkactions/pin"
+                : "/reports/bulkactions/unpin";
 
         const res = await apiClient.post(apiUrl, { items: data });
 
@@ -569,7 +569,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
             };
 
             const resp = await apiClient.post(
-                '/Comments/bulkdeleteWithHistory',
+                '/reports/bulkactions/comments/delete',
                 body
             );
 
@@ -656,7 +656,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
             }));
 
             const resp = await apiClient.post(
-                '/Comments/upsertBulkNewWithHistory',
+                '/reports/bulkactions/comments',
                 { items, usercommit: userdetails?.email, }
             );
 
@@ -856,7 +856,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
             }
 
             const resp = await apiClient.post(
-                "/Outbrain/Ad/Status/Bulk",
+                "/reports/bulkactions/outbrain/adstatus",
                 { items: filteredItems },
                 { headers: { Authorization: token } }
             );
@@ -1140,7 +1140,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
             message.loading({ content: "Updating category...", key: "bulkCategory" });
 
             await apiClient.post(
-                "/BulkUpdateCategoryNewWithHistory",
+                "/reports/bulkactions/category",
                 { items, category: bulkCategory },
                 { headers: { Authorization: token } }
             );
@@ -1526,7 +1526,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                             updateDetail: `From ${desired ? "Inactive" : "Active"} to ${desired ? "Active" : "Inactive"}`,
                         }
                         const newResponse = await apiClient.post(
-                            `/Outbrain/Ad/Status`,
+                            `/reports/singleactions/outbrain/adstatus`,
                             {
                                 status: desired,
                                 ad_id: adid,
@@ -1808,7 +1808,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                     }
                     try {
                         if (next) {
-                            const newResponse = await apiClient.post('/NewPinBulkWithHistory', {
+                            const newResponse = await apiClient.post('/reports/singleactions/pin', {
                                 accountNumber: rowAccount,
                                 campaignname: campaignName,
                                 campaignid,
@@ -1852,7 +1852,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                                 });
                             }
                         } else {
-                            const newResponse = await apiClient.post('/NewUnpinBulkWithHistory', {
+                            const newResponse = await apiClient.post('/reports/singleactions/unpin', {
                                 accountNumber: rowAccount,
                                 campaignname: campaignName,
                                 campaignid,
@@ -2019,7 +2019,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                             // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
                         }
                         const newResponse = await apiClient.post(
-                            '/Comments/upsert/History',
+                            '/reports/singleactions/comments',
                             {
                                 accountNumber: rowAccount,
                                 campaignname: adName,
@@ -2101,7 +2101,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                                 level: "ad",
                             }));
 
-                            console.log("Sending AD items:", items);
+                            // console.log("Sending AD items:", items);
 
                             // Call bulk API
                             const resp = await apiClient.post(
@@ -2185,7 +2185,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                             updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
                             // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
                         }
-                        const newResponse = await apiClient.post('/New/Comments/delete/History', {
+                        const newResponse = await apiClient.post('/reports/singleactions/comments/delete', {
                             accountNumber: rowAccount,
                             campaignname: adName,
                             campaignid,
@@ -3096,7 +3096,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
             const campaigns = selectedCampaigns.length > 0
                 ? [...new Set(selectedCampaigns.map(campaign => campaign.campaignid))]
                 : [];
-            console.log(adsets, "adsets");
+            // console.log(adsets, "adsets");
             const collectionName = newRevenuePratner === "FB_DomainActive" ? "Facebook_DActive_Names" : newtworkCollections[newRevenuePratner];
             // const fetchData = await apiClient.get(`/${api}?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}`);
             // const fetchData = await apiClient.post(`/AdLevel?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&status=Daily&network=Facebook_Mnet_AD`, { adsetids : adsets, campaignids : campaigns });
@@ -3126,7 +3126,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
 
             // ✅ call the new multi-account endpoint
             const fetchData = await apiClient.post(
-                newRevenuePratner === "FB_Mnet" || newRevenuePratner === "FB_CodeFuel" || newRevenuePratner === "FB_MnetBing" ? `/AdLevelAccountsNew` : "/AdLevelAccounts",
+                newRevenuePratner === "FB_Mnet" || newRevenuePratner === "FB_CodeFuel" || newRevenuePratner === "FB_MnetBing" ? `/reports/data/adsdaily` : "/reports/data/ads",
                 {
                     dateStart: startDate,
                     dateEnd: endDate,
@@ -3139,8 +3139,8 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                     campaignids: campaigns
                 }
             );
-            const mainData = fetchData.data;
-            console.log("MainData:", mainData);
+            const mainData = fetchData.data.data;
+            // console.log("MainData:", mainData);
 
             const campaignsByAccount = {};
             mainData.forEach(item => {
@@ -3201,7 +3201,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                 };
             });
 
-            console.log(mergedData);
+            // console.log(mergedData);
 
             // 
 
@@ -3318,9 +3318,6 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
             // }));
 
 
-
-
-            console.log("hi");
             let totalSpend = 0;
             let totalRevenue = 0;
             let totalProfit = 0;
@@ -3331,7 +3328,6 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
             let totalImpressions = 0;
             let totalConversions = 0;
             const specifiedTimeZone = selectTimezone[newtime];
-            // console.log(mainData[0], "one");
             const totalRow = mainData && mainData.length > 0 ?
                 mainData.map((eachData) => {
                     const Revenue = eachData.estimated_revenue !== undefined ? (eachData.estimated_revenue) : 0;
@@ -3427,7 +3423,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                     )
                 }) : null;
 
-            console.log("returnedData:", filteredData);
+            // console.log("returnedData:", filteredData);
 
             const getValidField = (field) => {
                 for (const item of mainData) {
@@ -3544,7 +3540,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
 
             newDailyData.current = fullData;
             fetchData.status === 200 && setApiStatus(false);
-            fetchData.status === 200 && console.log("Success");
+            // fetchData.status === 200 && console.log("Success");
             // setTrue(false);
             setLoading1(false);
         } catch (error) {
@@ -3552,14 +3548,14 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
             // if(error.response.status === 500){
             //     apiStatus.current = true;
             // }
-            console.log(error);
+            // console.log(error);
             setApiStatus(true);
             setLoading1(false);
         }
     }
-    useEffect(() => {
-        console.log(campaignIds, "campaignIds updated");
-    }, [campaignIds]);
+    // useEffect(() => {
+    //     console.log(campaignIds, "campaignIds updated");
+    // }, [campaignIds]);
     //   useEffect(() => {
     //     if (!campaignIds || Object.keys(campaignIds).length === 0) return;
 
@@ -3795,7 +3791,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
 
             // ✅ Copy text to clipboard
             navigator.clipboard.writeText(copiedText).then(() => {
-                console.log("Copied to clipboard:", copiedText);
+                // console.log("Copied to clipboard:", copiedText);
             }).catch((err) => {
                 console.error("Clipboard copy failed:", err);
             });
@@ -4000,7 +3996,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
 
     useEffect(() => {
         // functionCall1();
-        console.log(campaignStatusFilter, "campaignStatusFilter");
+        // console.log(campaignStatusFilter, "campaignStatusFilter");
         if (campaignStatusFilter !== "All") {
             // Filter grid rows by adset status
             const adsetStatusMap = new Map(
@@ -4412,7 +4408,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                                                     <div style={{ maxHeight: 240, overflowY: "auto", paddingRight: 4 }}>
                                                         {ids.map((id, i) => {
                                                             const acc = accountsAccess.find(a => a.accountNumber === id);
-                                                            console.log("timezones:", accountsAccess);
+                                                            // console.log("timezones:", accountsAccess);
                                                             const tz = acc?.timeZone ?? "-";
                                                             return (
                                                                 <div

@@ -180,7 +180,7 @@ const MyTablePage = () => {
     ];
 
     const storedData = localStorage.getItem("storedData") && localStorage.getItem("storedData") !== "undefined" && localStorage.getItem("storedData") !== "null" ? JSON.parse(localStorage.getItem("storedData")) : null;
-    console.log(storedData, "storedData");
+    // console.log(storedData, "storedData");
 
     const defaultDates = [dayjs((startDateFromDashboard ? startDateFromDashboard : (storedData ? storedData?.startDate : yesterday))), dayjs((endDateFromDashboard ? endDateFromDashboard : (storedData ? storedData?.endDate : yesterday)))];
 
@@ -248,13 +248,13 @@ const MyTablePage = () => {
     const [historyOpen, setHistoryOpen] = useState(false);
     const [selectedCampaignIdForHistory, setSelectedCampaignIdForHistory] = useState(null);
     const [selectedAccountForHistory, setSelectedAccountForHistory] = useState(null);
-  
 
+    // console.log(campaignComments, "test");
 
     useEffect(() => {
         const fetchNetworksData = async () => {
             try {
-                const res = await axios.get('https://prodapis.adsgoat.in/get/networksData/', {
+                const res = await apiClient.get('/reports/commonapis/networkdata', {
                     headers: {
                         Authorization: token,
 
@@ -267,7 +267,7 @@ const MyTablePage = () => {
         };
         fetchNetworksData();
     }, []);
-   
+
 
     const handleStatusFilterChange = (key) => {
         if (key === 'active') {
@@ -398,12 +398,12 @@ const MyTablePage = () => {
     const [newaccount, setNewAccount] = useState((accountNumberFromDashboard ? [String(accountNumberFromDashboard)] : (storedData?.account ? storedData?.account : [String(accountsForAccess[0].accountNumber)])));
 
 
-    console.log(newaccount)
+    // console.log(newaccount)
 
     const [accountName, setAccountName] = useState(accountNameFromDashboard ? accountNameFromDashboard?.replace(/\+/g, " ") : (storedData ? storedData?.accountName : (accountsForAccess[0]?.accountName)));
 
     const [newAccountName, setnewAccountName] = useState(accountNameFromDashboard ? accountNameFromDashboard : (storedData ? storedData?.accountName : (accountsForAccess[0]?.accountName)));
-    console.log(newAccountName);
+    // console.log(newAccountName);
     const [newtime, setNewTime] = useState(
         timeFromDashboard
             ? timeFromDashboard
@@ -478,7 +478,7 @@ const MyTablePage = () => {
 
 
 
-    console.log('All campaignData:', allCampaignData);
+    // console.log('All campaignData:', allCampaignData);
     const [campaignRefreshTrigger, setCampaignRefreshTrigger] = useState(0);
     const [hovered, setHovered] = useState(false);
     const [Rhovered, setRHovered] = useState(false);
@@ -499,7 +499,7 @@ const MyTablePage = () => {
     const initialOne = deriveInitial(accountNumberFromDashboard, storedData, networksData);
 
 
-    console.log(initialOne, "initialData");
+    // console.log(initialOne, "initialData");
 
     // track if the user already changed selection
     const userPickedRef = useRef(false);
@@ -1656,6 +1656,7 @@ const MyTablePage = () => {
         });
         return map;
     }, [campaignComments]);
+
     const columnDefsObjectOfAdID = {
         M_tq: {
             headerName: 'M_TQ',
@@ -2043,7 +2044,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryAndStoreHistory",
+                        "/reports/singleactions/category",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -2086,11 +2087,13 @@ const MyTablePage = () => {
                         //     {props.value}
                         // </span>
                         <Tooltip title={props.value}
-                            overlayInnerStyle={{
-                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                color: theme === 'dark' ? '#fff' : '#000',
-                                border: '1px solid #ccc',
-                                borderRadius: 6,
+                            styles={{
+                                body: {
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                    border: '1px solid #ccc',
+                                    borderRadius: 6,
+                                }
                                 // fontWeight: 500,
                             }}>
                             <span
@@ -2371,112 +2374,112 @@ const MyTablePage = () => {
             menuTabs: [],
             hide: !isYesterday(),
             cellRenderer: (params) => {
-                const [isModalVisible, setIsModalVisible] = useState(false);
-                const [groupedData, setGroupedData] = useState([]);
-                const [newgroupedData, setNewGroupedData] = useState([]);
-                const [changeBudget, onChangeBudget] = useState();
-                const [campaignStatus, setCampaignStatus] = useState(true);
-                const [campaignActualSpend, setCampaignActualSpend] = useState({});
+                // const [isModalVisible, setIsModalVisible] = useState(false);
+                // const [groupedData, setGroupedData] = useState([]);
+                // const [newgroupedData, setNewGroupedData] = useState([]);
+                // const [changeBudget, onChangeBudget] = useState();
+                // const [campaignStatus, setCampaignStatus] = useState(true);
+                // const [campaignActualSpend, setCampaignActualSpend] = useState({});
 
-                const onChangeSpendAndStatus = async () => {
-                    if (params?.node?.rowPinned === 'bottom') {
-                        return ""; // Return empty string to remove "...
-                    }
-                    if (params?.node?.footer) {
-                        return ""; // Prevent modal from opening for group footer rows
-                    }
-                    const allLeafChildren = params.node?.allLeafChildren || [];
+                // const onChangeSpendAndStatus = async () => {
+                //     if (params?.node?.rowPinned === 'bottom') {
+                //         return ""; // Return empty string to remove "...
+                //     }
+                //     if (params?.node?.footer) {
+                //         return ""; // Prevent modal from opening for group footer rows
+                //     }
+                //     const allLeafChildren = params.node?.allLeafChildren || [];
 
-                    // Fetch all the rows under the current group
-                    const groupedData = allLeafChildren.map(node => node.data) || [];
-                    // console.log(groupedData, "groupedData");
-                    setNewGroupedData(groupedData);
-                    const campaignId = groupedData[0]?.campaignid;
+                //     // Fetch all the rows under the current group
+                //     const groupedData = allLeafChildren.map(node => node.data) || [];
+                //     // console.log(groupedData, "groupedData");
+                //     setNewGroupedData(groupedData);
+                //     const campaignId = groupedData[0]?.campaignid;
 
-                    // Only show the modal if there is data (groupedData length is greater than 0)
-                    if (groupedData.length > 0) {
-                        const getCampaignResponse = await apiClient.get(`/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`);
-                        const getCampaignActualSpend = await apiClient.get(`/get/ActualCampaginSpend?campaignId=${campaignId}`);
-                        if (getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0) {
-                            setGroupedData(getCampaignResponse.data);
-                            setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
-                            onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
-                        }
-                        if (getCampaignActualSpend.status === 200) {
-                            // console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
-                            setCampaignActualSpend(getCampaignActualSpend.data);
-                        }
-                        else {
-                            setGroupedData(groupedData);
-                        }
-                        // Set the grouped data for the modal
-                        setIsModalVisible(true); // Show the modal for non-footer rows
-                    }
-                };
+                //     // Only show the modal if there is data (groupedData length is greater than 0)
+                //     if (groupedData.length > 0) {
+                //         const getCampaignResponse = await apiClient.get(`/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`);
+                //         const getCampaignActualSpend = await apiClient.get(`/get/ActualCampaginSpend?campaignId=${campaignId}`);
+                //         if (getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0) {
+                //             setGroupedData(getCampaignResponse.data);
+                //             setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
+                //             onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
+                //         }
+                //         if (getCampaignActualSpend.status === 200) {
+                //             // console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
+                //             setCampaignActualSpend(getCampaignActualSpend.data);
+                //         }
+                //         else {
+                //             setGroupedData(groupedData);
+                //         }
+                //         // Set the grouped data for the modal
+                //         setIsModalVisible(true); // Show the modal for non-footer rows
+                //     }
+                // };
 
-                const handleOk = async () => {
-                    setIsModalVisible(false); // Close the modal
-                    const object = {
-                        campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname : groupedData[0]?.campaignname,
-                        adsetid: !Array.isArray(groupedData) ? groupedData?.adsetid : groupedData[0]?.adsetid,
-                        campaignid: !Array.isArray(groupedData) ? groupedData?.campaignid : groupedData[0]?.campaignid,
-                        usercommit: userdetails?.email,
-                        accountNumber: newaccount,
-                        budget: changeBudget * 100,
-                        status: campaignStatus
-                    };
-                    // console.log(object);
-                    const requestResponse = await apiClient.post('/Comments/accountNumber/campaign', { formattedData: object });
-                    const responseData = requestResponse.data;
-                    // console.log(responseData, "response");
-                    message.success("Budget and Status Updated");
-                    changeRRefrst();
-                };
+                // const handleOk = async () => {
+                //     setIsModalVisible(false); // Close the modal
+                //     const object = {
+                //         campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname : groupedData[0]?.campaignname,
+                //         adsetid: !Array.isArray(groupedData) ? groupedData?.adsetid : groupedData[0]?.adsetid,
+                //         campaignid: !Array.isArray(groupedData) ? groupedData?.campaignid : groupedData[0]?.campaignid,
+                //         usercommit: userdetails?.email,
+                //         accountNumber: newaccount,
+                //         budget: changeBudget * 100,
+                //         status: campaignStatus
+                //     };
+                //     // console.log(object);
+                //     const requestResponse = await apiClient.post('/Comments/accountNumber/campaign', { formattedData: object });
+                //     const responseData = requestResponse.data;
+                //     // console.log(responseData, "response");
+                //     message.success("Budget and Status Updated");
+                //     changeRRefrst();
+                // };
 
-                const handleCancel = () => {
-                    setIsModalVisible(false);
-                    // console.log(changeBudget); // Close the modal
-                };
+                // const handleCancel = () => {
+                //     setIsModalVisible(false);
+                //     // console.log(changeBudget); // Close the modal
+                // };
 
-                const getTotalSpend = (data) => {
-                    if (!data || data.length === 0) return 0;
-                    const total = data.reduce((total, item) => {
-                        return total + (parseFloat(item?.spend) || 0);
-                    }, 0);
-                    return Math.round(total * 100) / 100; // Round to 2 decimal places
-                };
+                // const getTotalSpend = (data) => {
+                //     if (!data || data.length === 0) return 0;
+                //     const total = data.reduce((total, item) => {
+                //         return total + (parseFloat(item?.spend) || 0);
+                //     }, 0);
+                //     return Math.round(total * 100) / 100; // Round to 2 decimal places
+                // };
 
-                const onChangeBudgetValue = event => {
-                    onChangeBudget(event.target.value)
-                }
+                // const onChangeBudgetValue = event => {
+                //     onChangeBudget(event.target.value)
+                // }
 
-                const onChangeCampaignStatus = async () => {
-                    const apiEndpoint = campaignStatus
-                        ? '/campaignStatusPause/' // Pause campaign
-                        : '/campaignStatusActive/'; // Activate campaign
+                // const onChangeCampaignStatus = async () => {
+                //     const apiEndpoint = campaignStatus
+                //         ? '/campaignStatusPause/' // Pause campaign
+                //         : '/campaignStatusActive/'; // Activate campaign
 
-                    try {
-                        const response = await apiClient.post(apiEndpoint,
-                            { campaignId: groupedData[0]?.campaignid }
-                        );
-                        if (response.status === 200) {
-                            message.success(`Campaign ${groupedData[0]?.campaignid} status updated to ${campaignStatus ? 'Paused' : 'Active'}`);
-                            setCampaignStatus((prev) => !prev); // Toggle the status
-                        } else {
-                            message.error('Failed to update campaign status.');
-                        }
-                    } catch (error) {
-                        console.error('Error updating campaign status:', error);
-                        message.error('Error updating campaign status.');
-                    }
-                };
+                //     try {
+                //         const response = await apiClient.post(apiEndpoint,
+                //             { campaignId: groupedData[0]?.campaignid }
+                //         );
+                //         if (response.status === 200) {
+                //             message.success(`Campaign ${groupedData[0]?.campaignid} status updated to ${campaignStatus ? 'Paused' : 'Active'}`);
+                //             setCampaignStatus((prev) => !prev); // Toggle the status
+                //         } else {
+                //             message.error('Failed to update campaign status.');
+                //         }
+                //     } catch (error) {
+                //         console.error('Error updating campaign status:', error);
+                //         message.error('Error updating campaign status.');
+                //     }
+                // };
 
                 return (
                     <div>
-                        <div onClick={onChangeSpendAndStatus}>
+                        <div>
                             <span>{params.value || "..."}</span>
                         </div>
-                        {isModalVisible && (
+                        {/* {isModalVisible && (
                             <Modal
                                 title={groupedData?.length > 0 && groupedData?.length !== 1 ? groupedData[0]?.campaignname : groupedData?.campaignname}
                                 visible={isModalVisible}
@@ -2503,7 +2506,7 @@ const MyTablePage = () => {
                                     </div>
                                 </div>
                             </Modal>
-                        )}
+                        )} */}
                     </div>
                 );
             },
@@ -3064,113 +3067,113 @@ const MyTablePage = () => {
             suppressMenu: true,
             hide: !isYesterday(),
             cellRenderer: (params) => {
-                const [isModalVisible, setIsModalVisible] = useState(false);
-                const [newgroupedData, setNewGroupedData] = useState([]);
-                const [groupedData, setGroupedData] = useState([]);
-                const [changeBudget, onChangeBudget] = useState();
-                const [campaignStatus, setCampaignStatus] = useState(true);
-                const [campaignActualSpend, setCampaignActualSpend] = useState({});
+                // const [isModalVisible, setIsModalVisible] = useState(false);
+                // const [newgroupedData, setNewGroupedData] = useState([]);
+                // const [groupedData, setGroupedData] = useState([]);
+                // const [changeBudget, onChangeBudget] = useState();
+                // const [campaignStatus, setCampaignStatus] = useState(true);
+                // const [campaignActualSpend, setCampaignActualSpend] = useState({});
 
-                const onChangeSpendAndStatus = async () => {
-                    // Check if it's a group footer row (for groupIncludeFooter)
-                    if (params?.node?.footer) {
-                        // console.log("This is a groupIncludeFooter row. Modal will not open.");
-                        return; // Prevent modal from opening for group footer rows
-                    }
+                // const onChangeSpendAndStatus = async () => {
+                //     // Check if it's a group footer row (for groupIncludeFooter)
+                //     if (params?.node?.footer) {
+                //         // console.log("This is a groupIncludeFooter row. Modal will not open.");
+                //         return; // Prevent modal from opening for group footer rows
+                //     }
 
-                    // Ensure allLeafChildren exists and is an array before proceeding
-                    const allLeafChildren = params.node?.allLeafChildren || [];
-                    setNewGroupedData(groupedData);
-                    // Fetch all the rows under the current group
-                    const groupedData = allLeafChildren.map(node => node.data) || [];
-                    const campaignId = groupedData[0]?.campaignid;
+                //     // Ensure allLeafChildren exists and is an array before proceeding
+                //     const allLeafChildren = params.node?.allLeafChildren || [];
+                //     setNewGroupedData(groupedData);
+                //     // Fetch all the rows under the current group
+                //     const groupedData = allLeafChildren.map(node => node.data) || [];
+                //     const campaignId = groupedData[0]?.campaignid;
 
-                    // Only show the modal if there is data (groupedData length is greater than 0)
-                    if (groupedData.length > 0) {
-                        const getCampaignResponse = await apiClient.get(`/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`);
-                        const getCampaignActualSpend = await apiClient.get(`/get/ActualCampaginSpend?campaignId=${campaignId}`);
-                        if (getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0) {
-                            setGroupedData(getCampaignResponse.data);
-                            setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
-                            onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
-                        }
-                        if (getCampaignActualSpend.status === 200) {
-                            // console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
-                            setCampaignActualSpend(getCampaignActualSpend.data);
-                        }
-                        else {
-                            setGroupedData(groupedData);
-                            // console.log("dailyadd");
-                        }
-                        // Set the grouped data for the modal
-                        setIsModalVisible(true); // Show the modal for non-footer rows
-                    }
-                };
+                //     // Only show the modal if there is data (groupedData length is greater than 0)
+                //     if (groupedData.length > 0) {
+                //         const getCampaignResponse = await apiClient.get(`/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`);
+                //         const getCampaignActualSpend = await apiClient.get(`/get/ActualCampaginSpend?campaignId=${campaignId}`);
+                //         if (getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0) {
+                //             setGroupedData(getCampaignResponse.data);
+                //             setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
+                //             onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
+                //         }
+                //         if (getCampaignActualSpend.status === 200) {
+                //             // console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
+                //             setCampaignActualSpend(getCampaignActualSpend.data);
+                //         }
+                //         else {
+                //             setGroupedData(groupedData);
+                //             // console.log("dailyadd");
+                //         }
+                //         // Set the grouped data for the modal
+                //         setIsModalVisible(true); // Show the modal for non-footer rows
+                //     }
+                // };
 
-                const handleOk = async () => {
-                    setIsModalVisible(false); // Close the modal
-                    const object = {
-                        campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname : groupedData[0]?.campaignname,
-                        adsetid: !Array.isArray(groupedData) ? groupedData?.adsetid : groupedData[0]?.adsetid,
-                        campaignid: !Array.isArray(groupedData) ? groupedData?.campaignid : groupedData[0]?.campaignid,
-                        usercommit: userdetails?.email,
-                        accountNumber: newaccount,
-                        budget: changeBudget * 100,
-                        status: campaignStatus
-                    };
-                    // console.log(object);
-                    const requestResponse = await apiClient.post('/Comments/accountNumber/campaign', { formattedData: object });
-                    const responseData = requestResponse.data;
-                    // console.log(responseData, "response");
-                    message.success("Budget and Status Updated");
-                    changeRRefrst();
-                };
+                // const handleOk = async () => {
+                //     setIsModalVisible(false); // Close the modal
+                //     const object = {
+                //         campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname : groupedData[0]?.campaignname,
+                //         adsetid: !Array.isArray(groupedData) ? groupedData?.adsetid : groupedData[0]?.adsetid,
+                //         campaignid: !Array.isArray(groupedData) ? groupedData?.campaignid : groupedData[0]?.campaignid,
+                //         usercommit: userdetails?.email,
+                //         accountNumber: newaccount,
+                //         budget: changeBudget * 100,
+                //         status: campaignStatus
+                //     };
+                //     // console.log(object);
+                //     const requestResponse = await apiClient.post('/Comments/accountNumber/campaign', { formattedData: object });
+                //     const responseData = requestResponse.data;
+                //     // console.log(responseData, "response");
+                //     message.success("Budget and Status Updated");
+                //     changeRRefrst();
+                // };
 
-                const handleCancel = () => {
-                    setIsModalVisible(false);
-                    // console.log(changeBudget); // Close the modal
-                };
+                // const handleCancel = () => {
+                //     setIsModalVisible(false);
+                //     // console.log(changeBudget); // Close the modal
+                // };
 
-                const getTotalSpend = (data) => {
-                    if (!data || data.length === 0) return 0;
-                    const total = data.reduce((total, item) => {
-                        return total + (parseFloat(item?.spend) || 0);
-                    }, 0);
-                    return Math.round(total * 100) / 100; // Round to 2 decimal places
-                };
+                // const getTotalSpend = (data) => {
+                //     if (!data || data.length === 0) return 0;
+                //     const total = data.reduce((total, item) => {
+                //         return total + (parseFloat(item?.spend) || 0);
+                //     }, 0);
+                //     return Math.round(total * 100) / 100; // Round to 2 decimal places
+                // };
 
-                const onChangeBudgetValue = event => {
-                    onChangeBudget(event.target.value)
-                }
-                const onChangeCampaignStatus = async () => {
-                    const apiEndpoint = campaignStatus
-                        ? 'https://prodapis.adsgoat.in/campaignStatusPause/' // Pause campaign
-                        : 'https://prodapis.adsgoat.in/campaignStatusActive/'; // Activate campaign
+                // const onChangeBudgetValue = event => {
+                //     onChangeBudget(event.target.value)
+                // }
+                // const onChangeCampaignStatus = async () => {
+                //     const apiEndpoint = campaignStatus
+                //         ? 'https://prodapis.adsgoat.in/campaignStatusPause/' // Pause campaign
+                //         : 'https://prodapis.adsgoat.in/campaignStatusActive/'; // Activate campaign
 
-                    try {
-                        const response = await axios.post(apiEndpoint,
-                            { campaignId: groupedData[0]?.campaignid },
-                            { headers: { Authorization: token } }
-                        );
-                        if (response.status === 200) {
-                            message.success(`Campaign ${groupedData[0]?.campaignid} status updated to ${campaignStatus ? 'Paused' : 'Active'}`);
-                            setCampaignStatus((prev) => !prev); // Toggle the status
-                        } else {
-                            message.error('Failed to update campaign status.');
-                        }
-                    } catch (error) {
-                        console.error('Error updating campaign status:', error);
-                        message.error('Error updating campaign status.');
-                    }
-                };
+                //     try {
+                //         const response = await axios.post(apiEndpoint,
+                //             { campaignId: groupedData[0]?.campaignid },
+                //             { headers: { Authorization: token } }
+                //         );
+                //         if (response.status === 200) {
+                //             message.success(`Campaign ${groupedData[0]?.campaignid} status updated to ${campaignStatus ? 'Paused' : 'Active'}`);
+                //             setCampaignStatus((prev) => !prev); // Toggle the status
+                //         } else {
+                //             message.error('Failed to update campaign status.');
+                //         }
+                //     } catch (error) {
+                //         console.error('Error updating campaign status:', error);
+                //         message.error('Error updating campaign status.');
+                //     }
+                // };
 
                 return (
                     <div>
-                        <div onClick={onChangeSpendAndStatus}>
+                        <div>
                             <span>{params.value || "..."}</span> {/* Fallback to '...' if status is not available */}
                         </div>
                         {/* Modal should only be shown for non-footer rows and when groupedData length is greater than 0 */}
-                        {isModalVisible && (
+                        {/* {isModalVisible && (
                             <Modal
                                 title={groupedData?.length > 0 && groupedData?.length !== 0 ? groupedData[0]?.campaignname : groupedData?.campaignname}
                                 visible={isModalVisible}
@@ -3187,20 +3190,17 @@ const MyTablePage = () => {
                                         <Switch checked={campaignStatus} style={{ backgroundColor: campaignStatus && "#91C25F" }} onChange={onChangeCampaignStatus} />
                                     </div>
 
-                                    {/* Input Field */}
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <Typography.Text strong style={{ marginBottom: '10px' }}>Budget: <span style={{ fontWeight: 'normal' }}>{campaignActualSpend.daily_budget ? "Daily" : campaignActualSpend.lifetime_budget ? "Lifetime" : "Adset"}</span></Typography.Text>
                                         <Input placeholder="Enter your value here" defaultValue={campaignActualSpend.daily_budget ? parseFloat(campaignActualSpend.daily_budget) / 100 : campaignActualSpend.lifetime_budget ? parseFloat(campaignActualSpend.lifetime_budget) / 100 : (groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget) / 100 : getTotalSpend(newgroupedData))} onChange={onChangeBudgetValue} />
                                     </div>
-
-                                    {/* Campaign ID */}
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <Typography.Text strong style={{ color: theme === "dark" && "white" }}>Campaign ID:</Typography.Text>
                                         <p>{campaignActualSpend?.id}</p>
                                     </div>
                                 </div>
                             </Modal>
-                        )}
+                        )} */}
                     </div>
                 );
             },
@@ -3482,7 +3482,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryAndStoreHistory",
+                        "/reports/singleactions/category",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -3525,11 +3525,13 @@ const MyTablePage = () => {
                         //     {props.value}
                         // </span>
                         <Tooltip title={props.value}
-                            overlayInnerStyle={{
-                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                color: theme === 'dark' ? '#fff' : '#000',
-                                border: '1px solid #ccc',
-                                borderRadius: 6,
+                            styles={{
+                                body: {
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                    border: '1px solid #ccc',
+                                    borderRadius: 6
+                                }
                                 // fontWeight: 500,
                             }}>
                             <span
@@ -5483,7 +5485,7 @@ const MyTablePage = () => {
                     ? params?.node?.key
                     : params?.data?.campaignname;
 
-                console.log("campaignId ar:", campaignId);
+                // console.log("campaignId ar:", campaignId);
 
                 useEffect(() => {
                     if (!campaignId || !initialAdsetId || !Array.isArray(Camapignlevelstatus)) return;
@@ -5656,7 +5658,7 @@ const MyTablePage = () => {
 
                     try {
                         setConfirmLoading(true);
-                        const newResponse = await apiClient.post('/update/adset/budget/history', payload);
+                        const newResponse = await apiClient.post('/reports/singleactions/adsetbudget', payload);
                         message.success("Adset Budget and/or Bid Updated");
                         if (newResponse.status === 200 || newResponse.status === 201) {
                             setConfirmLoading(false);
@@ -6132,7 +6134,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryAndStoreHistory",
+                        "/reports/singleactions/category",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -6175,11 +6177,13 @@ const MyTablePage = () => {
                         //     {props.value}
                         // </span>
                         <Tooltip title={props.value}
-                            overlayInnerStyle={{
-                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                color: theme === 'dark' ? '#fff' : '#000',
-                                border: '1px solid #ccc',
-                                borderRadius: 6,
+                            styles={{
+                                body: {
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                    border: '1px solid #ccc',
+                                    borderRadius: 6,
+                                }
                                 // fontWeight: 500,
                             }}>
                             <span
@@ -6569,11 +6573,11 @@ const MyTablePage = () => {
                         }
                     };
 
-                    console.log("API Payload →", payload);
+                    // console.log("API Payload →", payload);
 
                     try {
-                        const res = await axios.post("https://prodapis.adsgoat.in/api/updateAdsetEndTime", payload);
-                        console.log("API Response →", res.data);
+                        const res = await apiClient.post("/reports/singleactions/adsetendtime", payload);
+                        // console.log("API Response →", res.data);
                         message.success("End date updated successfully");
                         setOpen(false);
                     } catch (err) {
@@ -6670,11 +6674,14 @@ const MyTablePage = () => {
                             {formattedDate}
 
                             {showWarning && (
-                                <Tooltip title={`Campaign will expire on ${formattedDate}`} overlayInnerStyle={{
-                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                    color: theme === 'dark' ? '#fff' : '#000',
+                                <Tooltip title={`Campaign will expire on ${formattedDate}`}
+                                    styles={{
+                                        body: {
+                                            backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                            color: theme === 'dark' ? '#fff' : '#000'
+                                        }
 
-                                }}>
+                                    }}>
                                     <span style={{ marginLeft: 3 }}>
                                         <InfoCircleOutlined className='Error-Message' />
                                     </span>
@@ -7274,122 +7281,122 @@ const MyTablePage = () => {
             menuTabs: [],
             // hide: !isYesterday(),
             cellRenderer: (params) => {
-                const [isModalVisible, setIsModalVisible] = useState(false);
-                const [groupedData, setGroupedData] = useState([]);
-                const [newgroupedData, setNewGroupedData] = useState([]);
-                const [changeBudget, onChangeBudget] = useState();
-                const [campaignStatus, setCampaignStatus] = useState(true);
-                const [campaignActualSpend, setCampaignActualSpend] = useState({});
+                // const [isModalVisible, setIsModalVisible] = useState(false);
+                // const [groupedData, setGroupedData] = useState([]);
+                // const [newgroupedData, setNewGroupedData] = useState([]);
+                // const [changeBudget, onChangeBudget] = useState();
+                // const [campaignStatus, setCampaignStatus] = useState(true);
+                // const [campaignActualSpend, setCampaignActualSpend] = useState({});
 
-                const onChangeSpendAndStatus = async () => {
-                    if (params?.node?.rowPinned === 'bottom') {
-                        return ""; // Return empty string to remove "..."
-                    }
-                    if (params?.node?.footer) {
-                        return ""; // Prevent modal from opening for group footer rows
-                    }
-                    const allLeafChildren = params.node?.allLeafChildren || [];
+                // const onChangeSpendAndStatus = async () => {
+                //     if (params?.node?.rowPinned === 'bottom') {
+                //         return ""; // Return empty string to remove "..."
+                //     }
+                //     if (params?.node?.footer) {
+                //         return ""; // Prevent modal from opening for group footer rows
+                //     }
+                //     const allLeafChildren = params.node?.allLeafChildren || [];
 
-                    // Fetch all the rows under the current group
-                    const groupedData = allLeafChildren.map(node => node.data) || [];
-                    setNewGroupedData(groupedData);
-                    const campaignId = groupedData[0]?.campaignid;
-                    // console.log(groupedData, "groupedData");
+                //     // Fetch all the rows under the current group
+                //     const groupedData = allLeafChildren.map(node => node.data) || [];
+                //     setNewGroupedData(groupedData);
+                //     const campaignId = groupedData[0]?.campaignid;
+                //     // console.log(groupedData, "groupedData");
 
-                    // Only show the modal if there is data (groupedData length is greater than 0)
-                    if (groupedData.length > 0) {
-                        const getCampaignResponse = await apiClient.get(`/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`);
-                        const getCampaignActualSpend = await apiClient.get(`/get/ActualCampaginSpend?campaignId=${campaignId}`);
-                        if (getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0) {
+                //     // Only show the modal if there is data (groupedData length is greater than 0)
+                //     if (groupedData.length > 0) {
+                //         const getCampaignResponse = await apiClient.get(`/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`);
+                //         const getCampaignActualSpend = await apiClient.get(`/get/ActualCampaginSpend?campaignId=${campaignId}`);
+                //         if (getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0) {
 
-                            setGroupedData(getCampaignResponse.data);
-                            setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
-                            onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
-                        }
-                        if (getCampaignActualSpend.status === 200) {
-                            // console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
-                            setCampaignActualSpend(getCampaignActualSpend.data);
-                        }
-                        else {
-                            setGroupedData(groupedData);
-                        }
-                        // Set the grouped data for the modal
-                        setIsModalVisible(true); // Show the modal for non-footer rows
-                    }
-                    // if(groupedData.length > 0) {
+                //             setGroupedData(getCampaignResponse.data);
+                //             setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
+                //             onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
+                //         }
+                //         if (getCampaignActualSpend.status === 200) {
+                //             // console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
+                //             setCampaignActualSpend(getCampaignActualSpend.data);
+                //         }
+                //         else {
+                //             setGroupedData(groupedData);
+                //         }
+                //         // Set the grouped data for the modal
+                //         setIsModalVisible(true); // Show the modal for non-footer rows
+                //     }
+                //     // if(groupedData.length > 0) {
 
-                    //     const getCampaignActualSpend = await apiClient.get(`/get/ActualCampaginSpend?campaignId=${campaignId}`);
-                    //     if (getCampaignActualSpend.status === 200){
-                    //         setCampaignActualSpend(getCampaignActualSpend.data);
-                    //     }
-                    // }
-                };
+                //     //     const getCampaignActualSpend = await apiClient.get(`/get/ActualCampaginSpend?campaignId=${campaignId}`);
+                //     //     if (getCampaignActualSpend.status === 200){
+                //     //         setCampaignActualSpend(getCampaignActualSpend.data);
+                //     //     }
+                //     // }
+                // };
 
-                const handleOk = async () => {
-                    setIsModalVisible(false); // Close the modal
-                    const object = {
-                        campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname : groupedData[0]?.campaignname,
-                        adsetid: !Array.isArray(groupedData) ? groupedData?.adsetid : groupedData[0]?.adsetid,
-                        campaignid: !Array.isArray(groupedData) ? groupedData?.campaignid : groupedData[0]?.campaignid,
-                        usercommit: userdetails?.email,
-                        accountNumber: newaccount,
-                        budget: changeBudget * 100,
-                        status: campaignStatus
-                    };
-                    // console.log(object);
-                    const requestResponse = await apiClient.post('/Comments/accountNumber/campaign', { formattedData: object });
-                    const responseData = requestResponse.data;
-                    // console.log(responseData, "response");
-                    message.success("Budget and Status Updated");
-                    changeRRefrst();
-                };
+                // const handleOk = async () => {
+                //     setIsModalVisible(false); // Close the modal
+                //     const object = {
+                //         campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname : groupedData[0]?.campaignname,
+                //         adsetid: !Array.isArray(groupedData) ? groupedData?.adsetid : groupedData[0]?.adsetid,
+                //         campaignid: !Array.isArray(groupedData) ? groupedData?.campaignid : groupedData[0]?.campaignid,
+                //         usercommit: userdetails?.email,
+                //         accountNumber: newaccount,
+                //         budget: changeBudget * 100,
+                //         status: campaignStatus
+                //     };
+                //     // console.log(object);
+                //     const requestResponse = await apiClient.post('/Comments/accountNumber/campaign', { formattedData: object });
+                //     const responseData = requestResponse.data;
+                //     // console.log(responseData, "response");
+                //     message.success("Budget and Status Updated");
+                //     changeRRefrst();
+                // };
 
-                const handleCancel = () => {
-                    setIsModalVisible(false);
-                    // console.log(changeBudget); // Close the modal
-                };
+                // const handleCancel = () => {
+                //     setIsModalVisible(false);
+                //     // console.log(changeBudget); // Close the modal
+                // };
 
-                const getTotalSpend = (data) => {
-                    if (!data || data.length === 0) return 0;
-                    const total = data.reduce((total, item) => {
-                        return total + (parseFloat(item?.spend) || 0);
-                    }, 0);
-                    // console.log(total, "total");
-                    return Math.round(total * 100) / 100; // Round to 2 decimal places
-                };
+                // const getTotalSpend = (data) => {
+                //     if (!data || data.length === 0) return 0;
+                //     const total = data.reduce((total, item) => {
+                //         return total + (parseFloat(item?.spend) || 0);
+                //     }, 0);
+                //     // console.log(total, "total");
+                //     return Math.round(total * 100) / 100; // Round to 2 decimal places
+                // };
 
-                const onChangeBudgetValue = event => {
-                    onChangeBudget(event.target.value)
-                }
+                // const onChangeBudgetValue = event => {
+                //     onChangeBudget(event.target.value)
+                // }
 
-                const onChangeCampaignStatus = async () => {
-                    const apiEndpoint = campaignStatus
-                        ? '/campaignStatusPause/' // Pause campaign
-                        : '/campaignStatusActive/'; // Activate campaign
+                // const onChangeCampaignStatus = async () => {
+                //     const apiEndpoint = campaignStatus
+                //         ? '/campaignStatusPause/' // Pause campaign
+                //         : '/campaignStatusActive/'; // Activate campaign
 
-                    try {
-                        const response = await apiClient.post(apiEndpoint,
-                            { campaignId: groupedData[0]?.campaignid }
-                        );
-                        if (response.status === 200) {
-                            message.success(`Campaign ${groupedData[0]?.campaignid} status updated to ${campaignStatus ? 'Paused' : 'Active'}`);
-                            setCampaignStatus((prev) => !prev); // Toggle the status
-                        } else {
-                            message.error('Failed to update campaign status.');
-                        }
-                    } catch (error) {
-                        console.error('Error updating campaign status:', error);
-                        message.error('Error updating campaign status.');
-                    }
-                };
+                //     try {
+                //         const response = await apiClient.post(apiEndpoint,
+                //             { campaignId: groupedData[0]?.campaignid }
+                //         );
+                //         if (response.status === 200) {
+                //             message.success(`Campaign ${groupedData[0]?.campaignid} status updated to ${campaignStatus ? 'Paused' : 'Active'}`);
+                //             setCampaignStatus((prev) => !prev); // Toggle the status
+                //         } else {
+                //             message.error('Failed to update campaign status.');
+                //         }
+                //     } catch (error) {
+                //         console.error('Error updating campaign status:', error);
+                //         message.error('Error updating campaign status.');
+                //     }
+                // };
                 // console.log()
 
                 return (
                     <div>
-                        <div onClick={onChangeSpendAndStatus}>
+                        <div>
                             <span>{params.value || "..."}</span>
                         </div>
-                        {isModalVisible && (
+                        {/* {isModalVisible && (
                             <Modal
                                 title={groupedData?.length > 0 && groupedData?.length !== 1 ? groupedData[0]?.campaignname : groupedData?.campaignname}
                                 visible={isModalVisible}
@@ -7416,7 +7423,7 @@ const MyTablePage = () => {
                                     </div>
                                 </div>
                             </Modal>
-                        )}
+                        )} */}
                     </div>
                 );
             },
@@ -7714,7 +7721,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryAndStoreHistory",
+                        "/reports/singleactions/category",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -7757,11 +7764,13 @@ const MyTablePage = () => {
                         //     {props.value}
                         // </span>
                         <Tooltip title={props.value}
-                            overlayInnerStyle={{
-                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                color: theme === 'dark' ? '#fff' : '#000',
-                                border: '1px solid #ccc',
-                                borderRadius: 6,
+                            styles={{
+                                body: {
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                    border: '1px solid #ccc',
+                                    borderRadius: 6
+                                }
                                 // fontWeight: 500,
                             }}>
                             <span
@@ -8215,11 +8224,11 @@ const MyTablePage = () => {
                         }
                     };
 
-                    console.log("API Payload →", payload);
+                    // console.log("API Payload →", payload);
 
                     try {
-                        const res = await axios.post("https://prodapis.adsgoat.in/api/updateAdsetEndTime", payload);
-                        console.log("API Response →", res.data);
+                        const res = await apiClient.post("/reports/singleactions/adsetendtime", payload);
+                        // console.log("API Response →", res.data);
                         message.success("End date updated successfully");
                         setOpen(false);
                     } catch (err) {
@@ -8316,11 +8325,14 @@ const MyTablePage = () => {
                             {formattedDate}
 
                             {showWarning && (
-                                <Tooltip title={`Campaign will expire on ${formattedDate}`} overlayInnerStyle={{
-                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                    color: theme === 'dark' ? '#fff' : '#000',
+                                <Tooltip title={`Campaign will expire on ${formattedDate}`}
+                                    styles={{
+                                        body: {
+                                            backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                            color: theme === 'dark' ? '#fff' : '#000',
+                                        }
 
-                                }}>
+                                    }}>
                                     <span style={{ marginLeft: 3 }}>
                                         <InfoCircleOutlined className='Error-Message' />
                                     </span>
@@ -9163,7 +9175,7 @@ const MyTablePage = () => {
                     }
 
                     try {
-                        await apiClient.post('/update/campaign/budget/history', payload);
+                        await apiClient.post('/reports/singleactions/campaignbudget', payload);
                         message.success("Budget Updated Successfully");
                         setCamapignlevelstatus(prev => {
                             const updated = prev.map(item => {
@@ -9601,7 +9613,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryAndStoreHistory",
+                        "/reports/singleactions/category",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -9645,11 +9657,13 @@ const MyTablePage = () => {
                         //     {props.value}
                         // </span>
                         <Tooltip title={props.value}
-                            overlayInnerStyle={{
-                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                color: theme === 'dark' ? '#fff' : '#000',
-                                border: '1px solid #ccc',
-                                borderRadius: 6,
+                            styles={{
+                                body: {
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                    border: '1px solid #ccc',
+                                    borderRadius: 6,
+                                }
                                 // fontWeight: 500,
                             }}>
                             <span
@@ -11302,7 +11316,7 @@ const MyTablePage = () => {
                     ? params?.node?.key
                     : params?.data?.campaignname;
 
-                console.log("campaignId ar:", campaignId);
+                // console.log("campaignId ar:", campaignId);
 
                 useEffect(() => {
                     if (!campaignId || !initialAdsetId || !Array.isArray(Camapignlevelstatus)) return;
@@ -11391,7 +11405,7 @@ const MyTablePage = () => {
                     const campaignname = groupedData?.[0]?.campaignname;
                     const adsetname = groupedData?.[0]?.adsetname;
 
-                    console.log("Submitting budget change:", groupedData);
+                    // console.log("Submitting budget change:", groupedData);
 
                     const campaignActualSpend = Camapignlevelstatus
                         .find(item =>
@@ -11488,7 +11502,7 @@ const MyTablePage = () => {
 
                         // changeRRefrst();
                         setConfirmLoading(true);
-                        const newResponse = await apiClient.post('/update/adset/budget/history', payload);
+                        const newResponse = await apiClient.post('/reports/singleactions/adsetbudget', payload);
                         message.success("Adset Budget and/or Bid Updated");
                         if (newResponse.status === 200 || newResponse.status === 201) {
                             setConfirmLoading(false);
@@ -11962,7 +11976,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryAndStoreHistory",
+                        "/reports/singleactions/category",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -12005,11 +12019,13 @@ const MyTablePage = () => {
                         //     {props.value}
                         // </span>
                         <Tooltip title={props.value}
-                            overlayInnerStyle={{
-                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                color: theme === 'dark' ? '#fff' : '#000',
-                                border: '1px solid #ccc',
-                                borderRadius: 6,
+                            styles={{
+                                body: {
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                    border: '1px solid #ccc',
+                                    borderRadius: 6,
+                                }
                                 // fontWeight: 500,
                             }}>
                             <span
@@ -12402,11 +12418,11 @@ const MyTablePage = () => {
                         }
                     };
 
-                    console.log("API Payload →", payload);
+                    // console.log("API Payload →", payload);
 
                     try {
-                        const res = await axios.post("https://prodapis.adsgoat.in/api/updateAdsetEndTime", payload);
-                        console.log("API Response →", res.data);
+                        const res = await apiClient.post("/reports/singleactions/adsetendtime", payload);
+                        // console.log("API Response →", res.data);
                         message.success("End date updated successfully");
                         setOpen(false);
                     } catch (err) {
@@ -12503,11 +12519,14 @@ const MyTablePage = () => {
                             {formattedDate}
 
                             {showWarning && (
-                                <Tooltip title={`Campaign will expire on ${formattedDate}`} overlayInnerStyle={{
-                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                    color: theme === 'dark' ? '#fff' : '#000',
+                                <Tooltip title={`Campaign will expire on ${formattedDate}`}
+                                    styles={{
+                                        body: {
+                                            backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                            color: theme === 'dark' ? '#fff' : '#000',
+                                        }
 
-                                }}>
+                                    }}>
                                     <span style={{ marginLeft: 3 }}>
                                         <InfoCircleOutlined className='Error-Message' />
                                     </span>
@@ -13840,7 +13859,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryAndStoreHistory",
+                        "/reports/singleactions/category",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -13883,11 +13902,13 @@ const MyTablePage = () => {
                         //     {props.value}
                         // </span>
                         <Tooltip title={props.value}
-                            overlayInnerStyle={{
-                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                color: theme === 'dark' ? '#fff' : '#000',
-                                border: '1px solid #ccc',
-                                borderRadius: 6,
+                            styles={{
+                                body: {
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                    border: '1px solid #ccc',
+                                    borderRadius: 6,
+                                }
                                 // fontWeight: 500,
                             }}>
                             <span
@@ -14280,11 +14301,11 @@ const MyTablePage = () => {
                         }
                     };
 
-                    console.log("API Payload →", payload);
+                    // console.log("API Payload →", payload);
 
                     try {
-                        const res = await axios.post("https://prodapis.adsgoat.in/api/updateAdsetEndTime", payload);
-                        console.log("API Response →", res.data);
+                        const res = await apiClient.post("/reports/singleactions/adsetendtime", payload);
+                        // console.log("API Response →", res.data);
                         message.success("End date updated successfully");
                         setOpen(false);
                     } catch (err) {
@@ -14381,11 +14402,14 @@ const MyTablePage = () => {
                             {formattedDate}
 
                             {showWarning && (
-                                <Tooltip title={`Campaign will expire on ${formattedDate}`} overlayInnerStyle={{
-                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                    color: theme === 'dark' ? '#fff' : '#000',
+                                <Tooltip title={`Campaign will expire on ${formattedDate}`}
+                                    styles={{
+                                        body: {
+                                            backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                            color: theme === 'dark' ? '#fff' : '#000',
+                                        }
 
-                                }}>
+                                    }}>
                                     <span style={{ marginLeft: 3 }}>
                                         <InfoCircleOutlined className='Error-Message' />
                                     </span>
@@ -14873,115 +14897,115 @@ const MyTablePage = () => {
             suppressMenu: true,
             // hide: !isYesterday(),
             cellRenderer: (params) => {
-                const [isModalVisible, setIsModalVisible] = useState(false);
-                const [newgroupedData, setNewGroupedData] = useState([]);
-                const [groupedData, setGroupedData] = useState([]);
-                const [changeBudget, onChangeBudget] = useState();
-                const [campaignStatus, setCampaignStatus] = useState(true);
-                const [campaignActualSpend, setCampaignActualSpend] = useState({});
+                // const [isModalVisible, setIsModalVisible] = useState(false);
+                // const [newgroupedData, setNewGroupedData] = useState([]);
+                // const [groupedData, setGroupedData] = useState([]);
+                // const [changeBudget, onChangeBudget] = useState();
+                // const [campaignStatus, setCampaignStatus] = useState(true);
+                // const [campaignActualSpend, setCampaignActualSpend] = useState({});
 
-                const onChangeSpendAndStatus = async () => {
-                    // Check if it's a group footer row (for groupIncludeFooter)
-                    if (params?.node?.footer) {
-                        // console.log("This is a groupIncludeFooter row. Modal will not open.");
-                        return; // Prevent modal from opening for group footer rows
-                    }
+                // const onChangeSpendAndStatus = async () => {
+                //     // Check if it's a group footer row (for groupIncludeFooter)
+                //     if (params?.node?.footer) {
+                //         // console.log("This is a groupIncludeFooter row. Modal will not open.");
+                //         return; // Prevent modal from opening for group footer rows
+                //     }
 
-                    // Ensure allLeafChildren exists and is an array before proceeding
-                    const allLeafChildren = params.node?.allLeafChildren || [];
-                    setNewGroupedData(groupedData);
+                //     // Ensure allLeafChildren exists and is an array before proceeding
+                //     const allLeafChildren = params.node?.allLeafChildren || [];
+                //     setNewGroupedData(groupedData);
 
-                    // Fetch all the rows under the current group
-                    const groupedData = allLeafChildren.map(node => node.data) || [];
-                    const campaignId = groupedData[0]?.campaignid;
+                //     // Fetch all the rows under the current group
+                //     const groupedData = allLeafChildren.map(node => node.data) || [];
+                //     const campaignId = groupedData[0]?.campaignid;
 
-                    // Only show the modal if there is data (groupedData length is greater than 0)
-                    if (groupedData.length > 0) {
-                        const getCampaignResponse = await apiClient.get(`/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`);
-                        const getCampaignActualSpend = await apiClient.get(`/get/ActualCampaginSpend?campaignId=${campaignId}`);
-                        if (getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0) {
-                            setGroupedData(getCampaignResponse.data);
-                            setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
-                            onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
-                        }
-                        if (getCampaignActualSpend.status === 200) {
-                            // console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
-                            setCampaignActualSpend(getCampaignActualSpend.data);
-                        }
+                //     // Only show the modal if there is data (groupedData length is greater than 0)
+                //     if (groupedData.length > 0) {
+                //         const getCampaignResponse = await apiClient.get(`/Comments/accountNumber/campaign/data?accountNumber=${newaccount}&campaignname=${groupedData[0]?.campaignname}`);
+                //         const getCampaignActualSpend = await apiClient.get(`/get/ActualCampaginSpend?campaignId=${campaignId}`);
+                //         if (getCampaignResponse.status === 200 && getCampaignResponse.data.length !== 0) {
+                //             setGroupedData(getCampaignResponse.data);
+                //             setCampaignStatus(getCampaignResponse.data.status === null ? false : getCampaignResponse.data.status);
+                //             onChangeBudget(getCampaignResponse.data.budget === null ? null : getCampaignResponse.data.budget / 100)
+                //         }
+                //         if (getCampaignActualSpend.status === 200) {
+                //             // console.log(getCampaignActualSpend.data, "getCampaignActualSpend");
+                //             setCampaignActualSpend(getCampaignActualSpend.data);
+                //         }
 
-                        else {
-                            setGroupedData(groupedData);
-                            // console.log("dailyadd");
-                        }
-                        // Set the grouped data for the modal
-                        setIsModalVisible(true); // Show the modal for non-footer rows
-                    }
-                };
+                //         else {
+                //             setGroupedData(groupedData);
+                //             // console.log("dailyadd");
+                //         }
+                //         // Set the grouped data for the modal
+                //         setIsModalVisible(true); // Show the modal for non-footer rows
+                //     }
+                // };
 
-                const handleOk = async () => {
-                    setIsModalVisible(false); // Close the modal
-                    const object = {
-                        campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname : groupedData[0]?.campaignname,
-                        adsetid: !Array.isArray(groupedData) ? groupedData?.adsetid : groupedData[0]?.adsetid,
-                        campaignid: !Array.isArray(groupedData) ? groupedData?.campaignid : groupedData[0]?.campaignid,
-                        usercommit: userdetails?.email,
-                        accountNumber: newaccount,
-                        budget: changeBudget * 100,
-                        status: campaignStatus
-                    };
-                    // console.log(object);
-                    const requestResponse = await apiClient.post('/Comments/accountNumber/campaign', { formattedData: object });
-                    const responseData = requestResponse.data;
-                    // console.log(responseData, "response");
-                    message.success("Budget and Status Updated");
-                    changeRRefrst();
-                };
+                // const handleOk = async () => {
+                //     setIsModalVisible(false); // Close the modal
+                //     const object = {
+                //         campaignname: !Array.isArray(groupedData) ? groupedData?.campaignname : groupedData[0]?.campaignname,
+                //         adsetid: !Array.isArray(groupedData) ? groupedData?.adsetid : groupedData[0]?.adsetid,
+                //         campaignid: !Array.isArray(groupedData) ? groupedData?.campaignid : groupedData[0]?.campaignid,
+                //         usercommit: userdetails?.email,
+                //         accountNumber: newaccount,
+                //         budget: changeBudget * 100,
+                //         status: campaignStatus
+                //     };
+                //     // console.log(object);
+                //     const requestResponse = await apiClient.post('/Comments/accountNumber/campaign', { formattedData: object });
+                //     const responseData = requestResponse.data;
+                //     // console.log(responseData, "response");
+                //     message.success("Budget and Status Updated");
+                //     changeRRefrst();
+                // };
 
-                const handleCancel = () => {
-                    setIsModalVisible(false);
-                    // console.log(changeBudget); // Close the modal
-                };
+                // const handleCancel = () => {
+                //     setIsModalVisible(false);
+                //     // console.log(changeBudget); // Close the modal
+                // };
 
-                const getTotalSpend = (data) => {
-                    if (!data || data.length === 0) return 0;
-                    const total = data.reduce((total, item) => {
-                        return total + (parseFloat(item?.spend) || 0);
-                    }, 0);
-                    return Math.round(total * 100) / 100; // Round to 2 decimal places
-                };
+                // const getTotalSpend = (data) => {
+                //     if (!data || data.length === 0) return 0;
+                //     const total = data.reduce((total, item) => {
+                //         return total + (parseFloat(item?.spend) || 0);
+                //     }, 0);
+                //     return Math.round(total * 100) / 100; // Round to 2 decimal places
+                // };
 
-                const onChangeBudgetValue = event => {
-                    onChangeBudget(event.target.value)
-                }
-                const onChangeCampaignStatus = async () => {
-                    const apiEndpoint = campaignStatus
-                        ? 'https://prodapis.adsgoat.in/campaignStatusPause/' // Pause campaign
-                        : 'https://prodapis.adsgoat.in/campaignStatusActive/'; // Activate campaign
+                // const onChangeBudgetValue = event => {
+                //     onChangeBudget(event.target.value)
+                // }
+                // const onChangeCampaignStatus = async () => {
+                //     const apiEndpoint = campaignStatus
+                //         ? 'https://prodapis.adsgoat.in/campaignStatusPause/' // Pause campaign
+                //         : 'https://prodapis.adsgoat.in/campaignStatusActive/'; // Activate campaign
 
-                    try {
-                        const response = await axios.post(apiEndpoint,
-                            { campaignId: groupedData[0]?.campaignid },
-                            { headers: { Authorization: token } }
-                        );
-                        if (response.status === 200) {
-                            message.success(`Campaign ${groupedData[0]?.campaignid} status updated to ${campaignStatus ? 'Paused' : 'Active'}`);
-                            setCampaignStatus((prev) => !prev); // Toggle the status
-                        } else {
-                            message.error('Failed to update campaign status.');
-                        }
-                    } catch (error) {
-                        console.error('Error updating campaign status:', error);
-                        message.error('Error updating campaign status.');
-                    }
-                };
+                //     try {
+                //         const response = await axios.post(apiEndpoint,
+                //             { campaignId: groupedData[0]?.campaignid },
+                //             { headers: { Authorization: token } }
+                //         );
+                //         if (response.status === 200) {
+                //             message.success(`Campaign ${groupedData[0]?.campaignid} status updated to ${campaignStatus ? 'Paused' : 'Active'}`);
+                //             setCampaignStatus((prev) => !prev); // Toggle the status
+                //         } else {
+                //             message.error('Failed to update campaign status.');
+                //         }
+                //     } catch (error) {
+                //         console.error('Error updating campaign status:', error);
+                //         message.error('Error updating campaign status.');
+                //     }
+                // };
 
                 return (
                     <div>
-                        <div onClick={onChangeSpendAndStatus}>
+                        <div>
                             <span>{params.value || "..."}</span> {/* Fallback to '...' if status is not available */}
                         </div>
                         {/* Modal should only be shown for non-footer rows and when groupedData length is greater than 0 */}
-                        {isModalVisible && (
+                        {/* {isModalVisible && (
                             <Modal
                                 title={groupedData?.length > 0 && groupedData?.length !== 0 ? groupedData[0]?.campaignname : groupedData?.campaignname}
                                 visible={isModalVisible}
@@ -14997,21 +15021,17 @@ const MyTablePage = () => {
                                         <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
                                         <Switch checked={campaignStatus} style={{ backgroundColor: campaignStatus && "#91C25F" }} onChange={onChangeCampaignStatus} />
                                     </div>
-
-                                    {/* Input Field */}
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <Typography.Text strong style={{ marginBottom: '10px' }}>Budget: <span style={{ fontWeight: 'normal' }}>{campaignActualSpend.daily_budget ? "Daily" : campaignActualSpend.lifetime_budget ? "Lifetime" : "Adset"}</span></Typography.Text>
                                         <Input placeholder="Enter your value here" defaultValue={campaignActualSpend.daily_budget ? parseFloat(campaignActualSpend.daily_budget) / 100 : campaignActualSpend.lifetime_budget ? parseFloat(campaignActualSpend.lifetime_budget) / 100 : (groupedData?.length > 0 && groupedData?.length !== 1 ? getTotalSpend(groupedData) : groupedData?.budget ? (groupedData?.budget) / 100 : getTotalSpend(newgroupedData))} onChange={onChangeBudgetValue} />
                                     </div>
-
-                                    {/* Campaign ID */}
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <Typography.Text strong style={{ color: theme === "dark" && "white" }}>Campaign ID:</Typography.Text>
                                         <p>{campaignActualSpend?.id}</p>
                                     </div>
                                 </div>
                             </Modal>
-                        )}
+                        )} */}
                     </div>
                 );
             },
@@ -15359,7 +15379,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryAndStoreHistory",
+                        "/reports/singleactions/category",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -15402,11 +15422,13 @@ const MyTablePage = () => {
                         //     {props.value}
                         // </span>
                         <Tooltip title={props.value}
-                            overlayInnerStyle={{
-                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                color: theme === 'dark' ? '#fff' : '#000',
-                                border: '1px solid #ccc',
-                                borderRadius: 6,
+                            styles={{
+                                body: {
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                    border: '1px solid #ccc',
+                                    borderRadius: 6,
+                                }
                                 // fontWeight: 500,
                             }}>
                             <span
@@ -15859,11 +15881,11 @@ const MyTablePage = () => {
                         }
                     };
 
-                    console.log("API Payload →", payload);
+                    // console.log("API Payload →", payload);
 
                     try {
-                        const res = await axios.post("https://prodapis.adsgoat.in/api/updateAdsetEndTime", payload);
-                        console.log("API Response →", res.data);
+                        const res = await apiClient.post("/reports/singleactions/adsetendtime", payload);
+                        // console.log("API Response →", res.data);
                         message.success("End date updated successfully");
                         setOpen(false);
                     } catch (err) {
@@ -15960,9 +15982,11 @@ const MyTablePage = () => {
                             {formattedDate}
 
                             {showWarning && (
-                                <Tooltip title={`Campaign will expire on ${formattedDate}`} overlayInnerStyle={{
-                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                    color: theme === 'dark' ? '#fff' : '#000',
+                                <Tooltip title={`Campaign will expire on ${formattedDate}`} styles={{
+                                    body: {
+                                        backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                        color: theme === 'dark' ? '#fff' : '#000',
+                                    }
 
                                 }}>
                                     <span style={{ marginLeft: 3 }}>
@@ -16509,11 +16533,11 @@ const MyTablePage = () => {
                 }
                 const onChangeCampaignStatus = async () => {
                     const apiEndpoint = campaignStatus
-                        ? 'https://prodapis.adsgoat.in/campaignStatusPause/' // Pause campaign
-                        : 'https://prodapis.adsgoat.in/campaignStatusActive/'; // Activate campaign
+                        ? '/campaignStatusPause/' // Pause campaign https://prodapis.adsgoat.in
+                        : '/campaignStatusActive/'; // Activate campaign
 
                     try {
-                        const response = await axios.post(apiEndpoint,
+                        const response = await apiClient.post(apiEndpoint,
                             { campaignId: groupedData[0]?.campaignid },
                             { headers: { Authorization: token } }
                         );
@@ -16874,7 +16898,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryAndStoreHistory",
+                        "/reports/singleactions/category",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -16917,11 +16941,13 @@ const MyTablePage = () => {
                         //     {props.value}
                         // </span>
                         <Tooltip title={props.value}
-                            overlayInnerStyle={{
-                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                color: theme === 'dark' ? '#fff' : '#000',
-                                border: '1px solid #ccc',
-                                borderRadius: 6,
+                            styles={{
+                                body: {
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                    border: '1px solid #ccc',
+                                    borderRadius: 6,
+                                }
                                 // fontWeight: 500,
                             }}>
                             <span
@@ -18038,7 +18064,7 @@ const MyTablePage = () => {
 
 
                     try {
-                        await apiClient.post('/update/campaign/budget/history', payload);
+                        await apiClient.post('/reports/singleactions/campaignbudget', payload);
                         message.success("Budget Updated Successfully");
                         setCamapignlevelstatus(prev => {
                             const updated = prev.map(item => {
@@ -18474,7 +18500,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryAndStoreHistory",
+                        "/reports/singleactions/category",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -18517,11 +18543,13 @@ const MyTablePage = () => {
                         //     {props.value}
                         // </span>
                         <Tooltip title={props.value}
-                            overlayInnerStyle={{
-                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                color: theme === 'dark' ? '#fff' : '#000',
-                                border: '1px solid #ccc',
-                                borderRadius: 6,
+                            styles={{
+                                body: {
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                    border: '1px solid #ccc',
+                                    borderRadius: 6,
+                                }
                                 // fontWeight: 500,
                             }}>
                             <span
@@ -19529,7 +19557,7 @@ const MyTablePage = () => {
                 const onChangeSpendAndStatus = async () => {
                     // Check if it's a group footer row (for groupIncludeFooter)
                     if (params?.node?.footer) {
-                        console.log("This is a groupIncludeFooter row. Modal will not open.");
+                        // console.log("This is a groupIncludeFooter row. Modal will not open.");
                         return; // Prevent modal from opening for group footer rows
                     }
 
@@ -19956,7 +19984,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryAndStoreHistory",
+                        "/reports/singleactions/category",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -19999,11 +20027,13 @@ const MyTablePage = () => {
                         //     {props.value}
                         // </span>
                         <Tooltip title={props.value}
-                            overlayInnerStyle={{
-                                backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                color: theme === 'dark' ? '#fff' : '#000',
-                                border: '1px solid #ccc',
-                                borderRadius: 6,
+                            styles={{
+                                body: {
+                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                    color: theme === 'dark' ? '#fff' : '#000',
+                                    border: '1px solid #ccc',
+                                    borderRadius: 6,
+                                }
                                 // fontWeight: 500,
                             }}>
                             <span
@@ -20794,7 +20824,7 @@ const MyTablePage = () => {
 
     const updatingColumnsStructure = async (updateDataArray) => {
         // console.log(updateDataArray);
-        const response = await apiClient.put(`/api/updateUserData?email=${userdetails.email}`,
+        const response = await apiClient.put(`/reports/commonapis/columnStructure?email=${userdetails.email}`,
             {
                 updateDataArray
             });
@@ -20832,8 +20862,8 @@ const MyTablePage = () => {
     const functionCallForUserColumnStructure = async () => {
         try {
             setInitialLoading(true);
-            const fetchData = await apiClient.get(`/api/singleUserData?email=${userdetails.email}`);
-            const mainData = fetchData.data;
+            const fetchData = await apiClient.get(`/reports/commonapis/columnStructure?email=${userdetails.email}`);
+            const mainData = fetchData.data.data;
             setColumnStructure(mainData?.columnStructure);
             mainDataRef.current = mainData;
             // Use the existing API column structure for other grid columns
@@ -20924,8 +20954,8 @@ const MyTablePage = () => {
 
         try {
             setInitialLoading(true);
-            const { data } = await apiClient.post('/NewComment', { accountNumbers: accountOrAccounts });
-            setCampaignComments(data);     // data already includes all selected accounts’ comments
+            const response = await apiClient.post('/reports/commonapis/comments', { accountNumbers: accountOrAccounts });
+            setCampaignComments(response?.data?.data);     // data already includes all selected accounts’ comments
             setInitialLoading(false);
         } catch {
             setCampaignComments([]);
@@ -20939,17 +20969,17 @@ const MyTablePage = () => {
 
     const functionCallForCampaigns = async (accountOrAccounts) => {
         setCampaignsStatus(false);
-        console.log("accountOrAccounts", accountOrAccounts);
+        // console.log("accountOrAccounts", accountOrAccounts);
         // console.log(storedData);
 
         // const accounts = Array.isArray(accountOrAccounts) && accountOrAccounts?.length > 0 ? accountOrAccounts.map(String) : storedData?.account ? storedData?.account : [String(accountOrAccounts)];
 
         // console.log("accounts", accounts);
-        console.log(newaccount)
+        // console.log(newaccount)
         try {
             setInitialLoading(true);
-            const { data } = await apiClient.post('/Campaignstatusfb', { accountNumbers: accountOrAccounts });
-            setCamapignlevelstatus(data);
+            const response = await apiClient.post('/reports/commonapis/campaignstatusfb', { accountNumbers: accountOrAccounts });
+            setCamapignlevelstatus(response?.data?.data);
             setInitialLoading(false);
         } catch {
             setCamapignlevelstatus([]);
@@ -21077,7 +21107,7 @@ const MyTablePage = () => {
     // }, []);
 
     useEffect(() => {
-        console.log(newaccount)
+        // console.log(newaccount)
         functionCall(newaccount);  // pass the array
     }, []);
 
@@ -21107,7 +21137,7 @@ const MyTablePage = () => {
 
     // whenever network changes
     const onChangeSelectRevenue = (value) => {
-        console.log(value);
+        // console.log(value);
         // userPickedRef.current = true;
         // const accountsForAccess = adAccounts[value];
         // const accountsAccess = accountsForAccess === undefined ? [] : accountsForAccess;
@@ -21132,9 +21162,9 @@ const MyTablePage = () => {
         setSearchText("");
         setIsOpen(false);
         const accountsForAccess = adAccounts[value];
-        console.log(accountsForAccess);
+        // console.log(accountsForAccess);
         const accountsAccess = accountsForAccess === undefined ? [] : accountsForAccess;
-        console.log(accountsAccess);
+        // console.log(accountsAccess);
         setNetworksData(accountsAccess);
         setRevenuePartner(value)
         setNewAccount([String(accountsAccess[0].accountNumber)])
@@ -21201,7 +21231,7 @@ const MyTablePage = () => {
             account,
             accountName
         };
-        console.log(storedData, "storedData");
+        // console.log(storedData, "storedData");
         localStorage.setItem("storedData", JSON.stringify(storedData));
         setCampaignsStatus(false);
         setCommentsStatus(false);
@@ -21293,15 +21323,15 @@ const MyTablePage = () => {
     };
 
 
-    const fetchCampaignComments = async () => {
-        try {
+    // const fetchCampaignComments = async () => {
+    //     try {
 
-            const response = await apiClient.get(`/Comments/${account}`);
-            setCampaignComments(response.data); // Update the state with the fetched comments
-        } catch (error) {
-            console.error('Error fetching comments:', error);
-        }
-    };
+    //         const response = await apiClient.get(`/Comments/${account}`);
+    //         setCampaignComments(response.data); // Update the state with the fetched comments
+    //     } catch (error) {
+    //         console.error('Error fetching comments:', error);
+    //     }
+    // };
 
 
     // useEffect(() => {
@@ -21827,7 +21857,7 @@ const MyTablePage = () => {
         // console.log("Switched to Tab:", key); // Debugging log
         setActiveTab(key);
     };
-   
+
 
     const renderCarouselNav = () => (
         <StickyBox offsetTop={64} offsetBottom={20} style={{
@@ -22158,8 +22188,8 @@ const MyTablePage = () => {
                 setAiError(null);
 
 
-                const res = await axios.post(
-                    'https://prodapis.adsgoat.in/AiCampaignRecommendations',
+                const res = await apiClient.post(
+                    '/reports/AI/campaignrecommendations',
                     {
                         accountNumbers: accounts,
                         network: resolvedNetwork,
@@ -22525,7 +22555,12 @@ const MyTablePage = () => {
                             onChange={onChangeSelectRevenue}
                             placeholder="Select Network"
                             defaultValue={networkFromDashboard ?? storedData?.revenuePratner ?? networks[0]}
-                            dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
+                            // dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
+                            classNames={{
+                                popup: {
+                                    root: theme === 'dark' ? 'custom-dropdown' : ''
+                                }
+                            }}
                             style={{
                                 width: '160px',
                                 backgroundColor: theme === 'dark' ? '#333' : undefined,
@@ -22601,7 +22636,7 @@ const MyTablePage = () => {
                             placeholder="Select Accounts"
                             // Keep the visible state you already have
                             open={isOpen}
-                            onDropdownVisibleChange={handleDropdownVisibleChange}
+                            onOpenChange={handleDropdownVisibleChange}
 
                             // 👇 Show first account + count
                             value={
@@ -22612,7 +22647,12 @@ const MyTablePage = () => {
                                         : `${account[0]}, +${account?.length - 1} more`
                             }
 
-                            dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
+                            // dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
+                            classNames={{
+                                popup: {
+                                    root: theme === 'dark' ? 'custom-dropdown' : ''
+                                }
+                            }}
                             className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             style={{
                                 width: '290px',
@@ -22630,7 +22670,7 @@ const MyTablePage = () => {
                             // onChange={handleChange1}                    // ❌ remove
 
                             // Custom dropdown with checkboxes (no tick marks in the menu)
-                            dropdownRender={() => (
+                            popupRender={() => (
 
                                 <div style={{ maxHeight: 300, overflowY: 'auto', padding: 8 }}>
                                     {renderAccountsCheckboxes(theme)}
@@ -22665,7 +22705,12 @@ const MyTablePage = () => {
                                     border: '1px solid #4CAF50',
                                     borderRadius: '6px'
                                 }}
-                                dropdownClassName={`${theme === 'dark' ? 'dark-theme-dropdown' : 'light-theme-dropdown'}`}
+                                // dropdownClassName={`${theme === 'dark' ? 'dark-theme-dropdown' : 'light-theme-dropdown'}`}
+                                classNames={{
+                                    popup: {
+                                        root: theme === 'dark' ? 'dark-theme-dropdown' : 'light-theme-dropdown'
+                                    }
+                                }}
                             />
                         </ConfigProvider>
                     </Col>
@@ -22693,7 +22738,13 @@ const MyTablePage = () => {
                                     borderRadius: '6px'
                                 }}
                                 // dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : 'light-theme-dropdown'}
-                                dropdownClassName={`custom-single-month-picker Dashboard-Details-2${theme === 'dark' ? 'dark-theme-dropdown' : 'light-theme-dropdown'}`}
+                                // dropdownClassName={`custom-single-month-picker Dashboard-Details-2${theme === 'dark' ? 'dark-theme-dropdown' : 'light-theme-dropdown'}`}
+                                classNames={{
+                                    popup: {
+                                        root: `custom-single-month-picker Dashboard-Details-2${theme === 'dark' ? 'dark-theme-dropdown' : 'light-theme-dropdown'}`
+                                    }
+                                }}
+
                             />
                         </ConfigProvider>
                     </Col>
@@ -22704,7 +22755,12 @@ const MyTablePage = () => {
                             showSearch
                             onChange={onChangeTime}
                             placeholder="Timezone"
-                            dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
+                            // dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
+                            classNames={{
+                                popup: {
+                                    root: theme === 'dark' ? 'custom-dropdown' : ''
+                                }
+                            }}
                             style={{ width: '100px', border: '1px solid #4CAF50', borderRadius: '6px' }}
                             className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
                             optionFilterProp="label"
@@ -22818,13 +22874,17 @@ const MyTablePage = () => {
                                     transition: "all 0.15s ease-in-out",
                                 }}
                             >
-                                <Tooltip title="Revenue base report" overlayInnerStyle={{
-                                    backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                    color: theme === 'dark' ? '#fff' : '#000',
-                                    border: '1px solid #ccc',
-                                    borderRadius: 6,
-                                    // fontWeight: 500,
-                                }}>
+                                <Tooltip
+                                    title="Revenue base report"
+                                    styles={{
+                                        body: {
+                                            backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                            color: theme === 'dark' ? '#fff' : '#000',
+                                            border: '1px solid #ccc',
+                                            borderRadius: 6,
+                                        }
+                                        // fontWeight: 500,
+                                    }}>
                                     <span
                                         onClick={(e) => {
                                             // e.stopPropagation();
@@ -22929,7 +22989,7 @@ const MyTablePage = () => {
                                 </Tooltip>
                             </Col>
                     </div> */}
-                   
+
                     {activeTab === '3' && (
                         <Col>
                             <Space size={2} style={{ marginRight: '10px' }}>
@@ -22967,62 +23027,62 @@ const MyTablePage = () => {
                                 }}
                             > */}
                                 <Dropdown
-                                    overlay={
-                                        <Menu
-                                            className={theme === 'dark' ? 'custom-dropdown-menu-dark' : 'custom-dropdown-menu-light'}
-                                            onClick={({ key }) => handleStatusFilterChange(key)}
-                                            items={[
-                                                {
-                                                    key: 'all',
-                                                    label: (
-                                                        <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
-                                                            <span
-                                                                style={{
-                                                                    width: '6px',
-                                                                    height: '6px',
-                                                                    borderRadius: '50%',
-                                                                    backgroundColor: '#122F6E',
-                                                                    marginRight: '6px',
-                                                                }}
-                                                            ></span>
-                                                            All
-                                                        </span>
-                                                    ),
-                                                },
-                                                {
-                                                    key: 'active',
-                                                    label: <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                                    menu={{
+                                        // <Menu
+                                        className: theme === 'dark' ? 'custom-dropdown-menu-dark' : 'custom-dropdown-menu-light',
+                                        onClick: ({ key }) => handleStatusFilterChange(key),
+                                        items: [
+                                            {
+                                                key: 'all',
+                                                label: (
+                                                    <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
                                                         <span
                                                             style={{
                                                                 width: '6px',
                                                                 height: '6px',
                                                                 borderRadius: '50%',
-                                                                backgroundColor: 'green',
+                                                                backgroundColor: '#122F6E',
                                                                 marginRight: '6px',
                                                             }}
                                                         ></span>
-                                                        Active
-
+                                                        All
                                                     </span>
-                                                },
-                                                {
-                                                    key: 'pause', label: <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
-                                                        <span
-                                                            style={{
-                                                                width: '6px',
-                                                                height: '6px',
-                                                                borderRadius: '50%',
-                                                                backgroundColor: 'red',
-                                                                marginRight: '6px',
-                                                            }}
-                                                        ></span>
-                                                        Paused
+                                                ),
+                                            },
+                                            {
+                                                key: 'active',
+                                                label: <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                                                    <span
+                                                        style={{
+                                                            width: '6px',
+                                                            height: '6px',
+                                                            borderRadius: '50%',
+                                                            backgroundColor: 'green',
+                                                            marginRight: '6px',
+                                                        }}
+                                                    ></span>
+                                                    Active
 
-                                                    </span>
-                                                },
-                                            ]}
-                                        />
-                                    }
+                                                </span>
+                                            },
+                                            {
+                                                key: 'pause', label: <span style={{ fontSize: '13px', display: 'flex', alignItems: 'center' }}>
+                                                    <span
+                                                        style={{
+                                                            width: '6px',
+                                                            height: '6px',
+                                                            borderRadius: '50%',
+                                                            backgroundColor: 'red',
+                                                            marginRight: '6px',
+                                                        }}
+                                                    ></span>
+                                                    Paused
+
+                                                </span>
+                                            },
+                                        ]
+                                        // />
+                                    }}
                                     trigger={['click']}
                                 >
                                     <Button
@@ -23130,11 +23190,13 @@ const MyTablePage = () => {
                                 </Dropdown>
                                 <Tooltip
                                     title={`🍳 This feature is cooking—almost ready to serve 😜`}
-                                    overlayInnerStyle={{
-                                        backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                        color: theme === 'dark' ? '#fff' : '#000',
-                                        border: '1px solid #ccc',
-                                        borderRadius: 6,
+                                    styles={{
+                                        body: {
+                                            backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                            color: theme === 'dark' ? '#fff' : '#000',
+                                            border: '1px solid #ccc',
+                                            borderRadius: 6,
+                                        }
                                         // fontWeight: 500,
                                     }}
                                 >
@@ -23492,6 +23554,7 @@ const MyTablePage = () => {
                                         refreshComments={refreshComments}
                                         refreshpage={refreshContent}
                                         getMainMenuItems={getMainMenuItems}
+                                        setCampaignComments={setCampaignComments}
                                     />
                                 </Tabs.TabPane>
                             )}

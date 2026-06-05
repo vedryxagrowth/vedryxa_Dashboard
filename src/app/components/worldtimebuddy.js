@@ -45,7 +45,7 @@ export default function WorldTimeBuddy() {
     const fetchZones = async () => {
       try {
         setLoading(true);
-        const res = await fetch("https://prodapis.adsgoat.in/New/GetTimezones", {
+        const res = await fetch("https://app.vyaktimetrics.com/open/globalclock/timezones", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -346,7 +346,7 @@ export default function WorldTimeBuddy() {
                 //   return { dt, isCurrentHour, isNewDay };
                 // });
                 const hours = getAlignedHours(selectedTimezones[0], zone, displayNow);
-                console.log("markWeekends:", markWeekends);
+                // console.log("markWeekends:", markWeekends);
 
 
 

@@ -54,7 +54,20 @@ import { message, Popconfirm } from 'antd';
 import { useGlobalLoading } from "../layout";
 import { CalculateOutlined, StickyNote2Outlined } from '@mui/icons-material';
 
-const socket = io("https://prodapis.adsgoat.in");
+// const socket = io("http://localhost:4000");
+const socket = io("https://app.vyaktimetrics.com", {
+  transports: ["websocket"],
+
+  reconnection: true,
+
+  reconnectionAttempts: Infinity,
+
+  reconnectionDelay: 1000,
+
+  reconnectionDelayMax: 10000,
+
+  randomizationFactor: 0.5,
+});
 
 // const socket = io("https://prodapis.adsgoat.in");
 
@@ -130,7 +143,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
   useEffect(() => {
     const fetchNotificationSound = async () => {
       try {
-        const response = await axios.get(`https://prodapis.adsgoat.in/getNotificationSound`, {
+        const response = await apiClient.get(`/open/notifications/sound`, {
           params: { email: userdetails?.email },
         });
 
@@ -152,7 +165,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
     setIsMuted(newMuteState);
 
     try {
-      await axios.put('https://prodapis.adsgoat.in/updateNotificationSound', {
+      await apiClient.put('/open/notifications/sound', {
         email: userdetails?.email,
         isMuted: newMuteState,
       });
@@ -182,7 +195,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
   // ];
 
   const onClickNotificationView = async (item, key, email) => {
-    const notificationData = await apiClient.put('/Notifications/Deleted', { email, key, item }, {
+    const notificationData = await apiClient.put('/open/notifications/view', { email, key, item }, {
       headers: {
         Authorization: localStorage.getItem('token'),
         accept: 'application/json',
@@ -208,7 +221,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
     e.stopPropagation();
 
     try {
-      await apiClient.put('/Notifications/DeleteAll', {
+      await apiClient.put('/open/notifications/viewall', {
         email: userdetails?.email
       }, {
         headers: {
@@ -618,14 +631,14 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
     }
 
     try {
-      console.log('Marking notification as viewed:', notification._id);
+      // console.log('Marking notification as viewed:', notification._id);
       const response = await apiClient.post('/Notifications/view', {
         email: userdetails?.email,
         notificationId: notification._id,
       });
 
       if (response.status === 200) {
-        console.log('Notification marked as viewed and removed:', notification._id);
+        // console.log('Notification marked as viewed and removed:', notification._id);
         // Remove the notification from the list in the frontend
         setNotifications((prevNotifications) =>
           prevNotifications.filter((n) => n._id !== notification._id)
@@ -662,34 +675,6 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
 
   const isNotificationsFetched = useRef(true);
 
-  // Fetch notifications function
-  const fetchNotificationsWithRetry = async (retries = 3, delay = 1500) => {
-    const makeRequest = async (retryAttempt) => {
-      try {
-        // console.log(tokenForAuth);
-        let response;
-        if (isNotificationsFetched.current === false) {
-          response = await apiClient.get(`/Notifications/get?email=${userdetails?.email}`);
-        }
-        if (response.status === 200) {
-          setNotifications(response.data.notifications);
-          prevNotificationsRef.current = response.data.notifications;
-          onComplete();
-          isNotificationsFetched.current = true;
-        }
-      } catch (error) {
-        if (retryAttempt > 0 && error.response?.status === 500) {
-          // Retry after delay for 500 errors
-          await new Promise((resolve) => setTimeout(resolve, delay));
-          return makeRequest(retryAttempt - 1); // Retry
-        }
-        console.error('Error fetching notifications:', error); // Log error if no retries left or other status
-      }
-    };
-
-    // First attempt without delay
-    await makeRequest(retries);
-  };
   function getItem(label, key, icon) {
     return {
       key,
@@ -741,11 +726,6 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
     return () => window.removeEventListener("resize", updateDrawerPosition);
   }, [visible]);
 
-  // useEffect(() => {
-  //   if (userdetails?.email && status === "authenticated" && userdetails?.role !== "Revenue_Partner") {
-  //     fetchNotificationsWithRetry();
-  //   }
-  // }, [userdetails?.email]);
 
 
   const openNotificationModal = () => {
@@ -792,7 +772,6 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
         setTitle('');
         setDescription('');
         setIsAddNotificationModalVisible(false);
-        // fetchNotificationsWithRetry(); // Refetch notifications to update the list
       } else {
         message.error('Failed to add notification');
       }
@@ -1068,66 +1047,432 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
   }, [userdetails]);
 
 
-  useEffect(() => {
-    console.log("🔔 Setting up notifications...");
-    if (!userdetails?.email) return;
+  // useEffect(() => {
+  //   console.log("🔔 Setting up notifications...");
+  //   if (!userdetails?.email) return;
 
-    // Register with backend
-    socket.emit("register", userdetails.email);
+  //   // Register with backend
+  //   socket.emit("register", userdetails.email.trim().toLowerCase());
 
-    // Initial fetch to seed prev ref
-    fetchNotifications().then((initial) => {
-      console.log("🟢 Initial full notifications:", initial);
-      prevNotificationsRef.current = initial;
-    });
+  //   // Initial fetch to seed prev ref
+  //   fetchNotifications().then((initial) => {
+  //     console.log("🟢 Initial full notifications:", initial);
+  //     prevNotificationsRef.current = initial;
+  //   });
 
-    const handleUpdate = async () => {
-      const newNotifications = await fetchNotifications();
-      const old = prevNotificationsRef.current || {};
-      const newlyAdded = [];
+  //   const handleUpdate = async () => {
+  //     const newNotifications = await fetchNotifications();
+  //     const old = prevNotificationsRef.current || {};
+  //     const newlyAdded = [];
 
-      console.log("📦 New full notifications:", newNotifications);
-      console.log("📁 Previous:", old);
+  //     console.log("📦 New full notifications:", newNotifications);
+  //     console.log("📁 Previous:", old);
 
-      for (const category of Object.keys(newNotifications)) {
-        const newItems = newNotifications[category];
-        const oldItems = old[category] || [];
+  //     for (const category of Object.keys(newNotifications)) {
+  //       const newItems = newNotifications[category];
+  //       const oldItems = old[category] || [];
 
-        const newInCategory = newItems.filter((n) => {
+  //       const newInCategory = newItems.filter((n) => {
+  //         return !oldItems.some((o) => {
+  //           return n.id && o.id ? n.id === o.id : (
+  //             o.message === n.message &&
+  //             new Date(o.date).getTime() === new Date(n.date).getTime()
+  //           );
+  //         });
+  //       });
+
+  //       newInCategory.forEach((item) =>
+  //         newlyAdded.push({ ...item, _category: category })
+  //       );
+  //     }
+
+  //     console.log("🆕 Newly added:", newlyAdded);
+
+  //     if (newlyAdded.length > 0) {
+  //       console.log("theme", theme);
+  //       showAllAntdNotificationsSequentially(newlyAdded);
+  //     }
+
+  //     prevNotificationsRef.current = newNotifications;
+  //   };
+
+  //   socket.on("notifications_updated", handleUpdate);
+
+  //   return () => {
+  //     socket.off("notifications_updated", handleUpdate);
+  //   };
+  // }, [userdetails?.email]);
+
+//   useEffect(() => {
+
+//     console.log("🔔 Setting up notifications...");
+
+//     if (!userdetails?.email) return;
+
+//     /*
+//     ✅ NORMALIZE EMAIL
+//     */
+//     const normalizedEmail =
+//       userdetails.email.trim().toLowerCase();
+
+//     /*
+//     ✅ REGISTER USER
+//     */
+//     const registerUser = () => {
+
+//       console.log("📨 REGISTERING:", normalizedEmail);
+
+//       socket.emit("register", normalizedEmail);
+
+//     };
+
+//     /*
+//     ✅ INITIAL CONNECT
+//     */
+//     socket.on("connect", () => {
+
+//   console.log(
+//     "✅ SOCKET CONNECTED:",
+//     socket.id
+//   );
+
+//   /*
+//   ✅ JOIN ROOM AGAIN
+//   */
+//   registerUser();
+
+// });
+
+//     /*
+//     ✅ RECONNECT AFTER SERVER RESTART
+//     */
+//     // socket.on("reconnect", () => {
+
+//     //   console.log(
+//     //     "♻️ SOCKET RECONNECTED:",
+//     //     socket.id
+//     //   );
+
+//     //   registerUser();
+
+//     // });
+
+//     /*
+//     ✅ INITIAL FETCH
+//     */
+//     fetchNotifications().then((initial) => {
+
+//       console.log(
+//         "🟢 Initial full notifications:",
+//         initial
+//       );
+
+//       prevNotificationsRef.current =
+//         initial || {};
+
+//     });
+
+//     /*
+//     ✅ HANDLE SOCKET EVENT
+//     */
+//     const handleUpdate = async () => {
+
+//       console.log(
+//         "🔥 notifications_updated RECEIVED"
+//       );
+
+//       const newNotifications =
+//         await fetchNotifications();
+
+//       const old =
+//         prevNotificationsRef.current || {};
+
+//       const newlyAdded = [];
+
+//       console.log(
+//         "📦 New full notifications:",
+//         newNotifications
+//       );
+
+//       console.log(
+//         "📁 Previous:",
+//         old
+//       );
+
+//       for (
+//         const category of Object.keys(
+//           newNotifications || {}
+//         )
+//       ) {
+
+//         const newItems =
+//           newNotifications[category] || [];
+
+//         const oldItems =
+//           old[category] || [];
+
+//         const newInCategory =
+//           newItems.filter((n) => {
+
+//             return !oldItems.some((o) => {
+
+//               return n.id && o.id
+//                 ? n.id === o.id
+//                 : (
+//                   o.message === n.message &&
+//                   new Date(o.date).getTime() ===
+//                   new Date(n.date).getTime()
+//                 );
+
+//             });
+
+//           });
+
+//         newInCategory.forEach((item) => {
+
+//           newlyAdded.push({
+//             ...item,
+//             _category: category,
+//           });
+
+//         });
+
+//       }
+
+//       console.log(
+//         "🆕 Newly added:",
+//         newlyAdded
+//       );
+
+//       if (newlyAdded.length > 0) {
+
+//         showAllAntdNotificationsSequentially(
+//           newlyAdded
+//         );
+
+//       }
+
+//       prevNotificationsRef.current =
+//         newNotifications || {};
+
+//     };
+
+//     /*
+//     ✅ SOCKET EVENT LISTENER
+//     */
+//     socket.on(
+//       "notifications_updated",
+//       handleUpdate
+//     );
+
+//     /*
+//     ✅ CLEANUP
+//     */
+//     return () => {
+
+//       socket.off("connect");
+
+//       // socket.off("reconnect");
+
+//       socket.off(
+//         "notifications_updated",
+//         handleUpdate
+//       );
+
+//     };
+
+//   }, [userdetails?.email]);
+
+useEffect(() => {
+
+  // console.log("🔔 Setting up notifications...");
+
+  if (!userdetails?.email) return;
+
+  /*
+  ✅ NORMALIZE EMAIL
+  */
+  const normalizedEmail =
+    userdetails.email.trim().toLowerCase();
+
+  /*
+  ✅ REGISTER USER INTO ROOM
+  */
+  const registerUser = () => {
+
+    // console.log(
+    //   "📨 REGISTERING:",
+    //   normalizedEmail
+    // );
+
+    socket.emit(
+      "register",
+      normalizedEmail
+    );
+
+  };
+
+  /*
+  ✅ SOCKET ALREADY CONNECTED
+  */
+  if (socket.connected) {
+
+    // console.log(
+    //   "✅ SOCKET ALREADY CONNECTED:",
+    //   socket.id
+    // );
+
+    registerUser();
+
+  }
+
+  /*
+  ✅ CONNECT + RECONNECT
+  */
+  const handleConnect = () => {
+
+    // console.log(
+    //   "✅ SOCKET CONNECTED:",
+    //   socket.id
+    // );
+
+    registerUser();
+
+  };
+
+  socket.on("connect", handleConnect);
+
+  /*
+  ✅ INITIAL FETCH
+  */
+  fetchNotifications().then((initial) => {
+
+    // console.log(
+    //   "🟢 Initial full notifications:",
+    //   initial
+    // );
+
+    prevNotificationsRef.current =
+      initial || {};
+
+  });
+
+  /*
+  ✅ HANDLE SOCKET EVENT
+  */
+  const handleUpdate = async () => {
+
+    // console.log(
+    //   "🔥 notifications_updated RECEIVED"
+    // );
+
+    const newNotifications =
+      await fetchNotifications();
+
+    const old =
+      prevNotificationsRef.current || {};
+
+    const newlyAdded = [];
+
+    // console.log(
+    //   "📦 New full notifications:",
+    //   newNotifications
+    // );
+
+    // console.log(
+    //   "📁 Previous:",
+    //   old
+    // );
+
+    for (
+      const category of Object.keys(
+        newNotifications || {}
+      )
+    ) {
+
+      const newItems =
+        newNotifications[category] || [];
+
+      const oldItems =
+        old[category] || [];
+
+      const newInCategory =
+        newItems.filter((n) => {
+
           return !oldItems.some((o) => {
-            return n.id && o.id ? n.id === o.id : (
-              o.message === n.message &&
-              new Date(o.date).getTime() === new Date(n.date).getTime()
-            );
+
+            return n.id && o.id
+              ? n.id === o.id
+              : (
+                  o.message === n.message &&
+                  new Date(o.date).getTime() ===
+                  new Date(n.date).getTime()
+                );
+
           });
+
         });
 
-        newInCategory.forEach((item) =>
-          newlyAdded.push({ ...item, _category: category })
-        );
-      }
+      newInCategory.forEach((item) => {
 
-      console.log("🆕 Newly added:", newlyAdded);
+        newlyAdded.push({
+          ...item,
+          _category: category,
+        });
 
-      if (newlyAdded.length > 0) {
-        console.log("theme", theme);
-        showAllAntdNotificationsSequentially(newlyAdded);
-      }
+      });
 
-      prevNotificationsRef.current = newNotifications;
-    };
+    }
 
-    socket.on("notifications_updated", handleUpdate);
+    // console.log(
+    //   "🆕 Newly added:",
+    //   newlyAdded
+    // );
 
-    return () => {
-      socket.off("notifications_updated", handleUpdate);
-    };
-  }, [userdetails?.email]);
+    if (newlyAdded.length > 0) {
+
+      showAllAntdNotificationsSequentially(
+        newlyAdded
+      );
+
+    }
+
+    prevNotificationsRef.current =
+      newNotifications || {};
+
+  };
+
+  /*
+  ✅ SOCKET LISTENER
+  */
+  socket.on(
+    "notifications_updated",
+    handleUpdate
+  );
+
+  /*
+  ✅ CLEANUP
+  */
+  return () => {
+
+    socket.off(
+      "connect",
+      handleConnect
+    );
+
+    socket.off(
+      "notifications_updated",
+      handleUpdate
+    );
+
+  };
+
+}, [userdetails?.email]);
 
   // fetchNotifications always returns array
   const fetchNotifications = async () => {
     try {
-      const res = await apiClient.get(`https://prodapis.adsgoat.in/notifications/${session.user.email}`);
+      const res = await apiClient.get(`https://app.vyaktimetrics.com/open/notifications/${session.user.email}`);
       setNotifications(res.data); // Update state with fetched notifications
       onComplete();
       return res.data || {};
@@ -1143,7 +1488,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
 
   // Get the default avatar source based on gender
   const getDefaultAvatar = () => {
-    console.log('Determining default avatar...');
+    // console.log('Determining default avatar...');
     if (userdetails?.gender === 'Male') {
       return maleImoji;
     } else if (userdetails?.gender === 'Female') {
@@ -1161,8 +1506,8 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
         throw new Error('Email is required to store image URL.');
       }
 
-      const response = await axios.post(
-        'https://prodapis.adsgoat.in/UserImage',
+      const response = await apiClient.post(
+        '/open/userimage',
         { email, imageUrl },
         {
           headers: {
@@ -1184,12 +1529,12 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
     const reader = new FileReader();
     reader.onloadend = () => {
       setPreviewImage(reader.result); // Set the preview image as the file content
-      console.log("Image preview updated.");
+      // console.log("Image preview updated.");
     };
     if (file) {
       reader.readAsDataURL(file); // Read the file as a DataURL
       setImageFile(file); // Store the file temporarily
-      console.log("Image file temporarily stored:", file);
+      // console.log("Image file temporarily stored:", file);
     }
   };
 
@@ -1198,10 +1543,10 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
     if (imageFile) {
       const formData = new FormData();
       formData.append('file', imageFile);
-      console.log("FormData prepared for upload:", formData);
+      // console.log("FormData prepared for upload:", formData);
 
       // Call your API here to upload the image
-      fetch('https://www.testapi.adsgoat.in/upload', {
+      fetch('https://app.vyaktimetrics.com/creatives/userfiles/uploaduserimage', {
         method: 'POST',
         headers: {
           Authorization: localStorage.getItem('token'),
@@ -1212,7 +1557,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
         .then(async (data) => {
 
           if (data.imageUrl) {
-            console.log("Image successfully uploaded. Image URL:", data.imageUrl);
+            // console.log("Image successfully uploaded. Image URL:", data.imageUrl);
 
             // Store the image URL in the database
             const response = await storeImageUrlInDb(data.imageUrl);
@@ -1274,7 +1619,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
   const onClickWorlTime = () => {
     setOpenWorldTime(true);
   }
-  console.log("Notifications:", notifications);
+  // console.log("Notifications:", notifications);
 
   return (
     <div
@@ -1359,7 +1704,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
               {userdetails?.role !== "Revenue_Partner" && <div className="relative inline-block" ref={wrapperRef} style={{ marginRight: "0px", paddingRight: '0px' }}>
                 <div className="cursor-pointer" style={{ paddingRight: '0px' }}>
                   {/* <Bell size={20} /> */}
-                  <Dropdown overlay={menu} trigger={['click']} placement="bottomRight">
+                  <Dropdown popupRender={() => menu} trigger={['click']} placement="bottomRight">
                     <span style={{ cursor: 'pointer' }}>
                       <Bell style={{ fontSize: 24 }} />
                     </span>
@@ -1447,7 +1792,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
               {userdetails?.role !== "Revenue_Partner" && showIcons && <div className="relative inline-block" ref={wrapperRef}>
                 <div className="cursor-pointer">
                   {/* <Bell size={20} style={{marginLeft:  '5px'}}/>  onClick={openNotificationsList}*/}
-                  <Dropdown overlay={menu} trigger={['click']} placement="bottomRight">
+                  <Dropdown popupRender={() => menu} trigger={['click']} placement="bottomRight">
                     <span style={{ cursor: 'pointer' }}>
                       <Bell style={{ fontSize: 24 }} />
                     </span>
@@ -1544,7 +1889,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
       {/* View Notification Modal */}
       <Modal
         title={null}
-        visible={isViewNotificationModalVisible}
+        open={isViewNotificationModalVisible}
         onOk={closeViewNotificationModal} // Close the modal and remove the notification
         onCancel={() => setIsViewNotificationModalVisible(false)}
         // onCancel={closeViewNotificationModal}
@@ -1595,7 +1940,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
 
       {/* Add Notification Modal */}
       <Modal
-        visible={isAddNotificationModalVisible}
+        open={isAddNotificationModalVisible}
         width={`30%`}
         onCancel={onHandleAddNotificationCancel}
         onOk={handleAddNotification}
@@ -1624,7 +1969,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
 
 
       <Modal
-        visible={isModalVisible}
+        open={isModalVisible}
         width="50%"
         onCancel={onHandleCancel}
         footer={null}
@@ -1843,7 +2188,7 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
     } catch (error) {
       if (retries === 1) throw error;  // Throw error if no retries left
 
-      console.log(`Retrying... Attempts left: ${retries - 1}`);
+      // console.log(`Retrying... Attempts left: ${retries - 1}`);
 
       // Use debounce for a delay before retrying
       return new Promise((resolve, reject) => {
@@ -1854,6 +2199,7 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
 
   useEffect(() => {
     const fetchData = async () => {
+      // console.log(localStorage.getItem("token"))
       try {
         // console.log("Session Status: ", sessionStatus);
         // console.log("Session Data: ", session);
@@ -1876,13 +2222,13 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
               for (let item of MediaBuyerkeysOfAdAccounts) {
                 if (MediaBuyeradAccounts[item][0] === "All") {
                   // Retry logic for Accounts API
-                  const networkResponse = await retryFetch(() => apiClient.get(`/network/Accounts?network=${item}`));
-                  MediaBuyernewObject[item] = networkResponse.data;
+                  const networkResponse = await retryFetch(() => apiClient.get(`/open/auth/network?network=${item}`));
+                  MediaBuyernewObject[item] = networkResponse.data.data;
                 } else {
                   const response = await retryFetch(() =>
-                    apiClient.post('/getAccountNameandStatusofNetwork/', { updatedNetwork: MediaBuyeradAccounts[item] })
+                    apiClient.post('/open/auth/nameandstatusofaccounts', { updatedNetwork: MediaBuyeradAccounts[item] })
                   );
-                  MediaBuyernewObject[item] = response.data;
+                  MediaBuyernewObject[item] = response.data.data;
                 }
               }
               setuserdetails({ ...usersDataForLogin[0], adAccounts: MediaBuyernewObject });
@@ -1919,14 +2265,14 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
               for (let item of SpecialUserkeysOfAdAccounts) {
                 if (SpecialUseradAccounts[item][0] === "All") {
                   // Retry logic for Accounts API
-                  console.log(item);
-                  const networkResponse = await retryFetch(() => apiClient.get(`/network/Accounts?network=${item}`));
-                  SpecialUsernewObject[item] = networkResponse.data;
+                  // console.log(item);
+                  const networkResponse = await retryFetch(() => apiClient.get(`/open/auth/network?network=${item}`));
+                  SpecialUsernewObject[item] = networkResponse.data.data;
                 } else {
                   const response = await retryFetch(() =>
-                    apiClient.post('/getAccountNameandStatusofNetwork/', { updatedNetwork: SpecialUseradAccounts[item] })
+                    apiClient.post('/open/auth/nameandstatusofaccounts', { updatedNetwork: SpecialUseradAccounts[item] })
                   );
-                  SpecialUsernewObject[item] = response.data;
+                  SpecialUsernewObject[item] = response.data.data;
                 }
               }
               setuserdetails({ ...usersDataForLogin[0], adAccounts: SpecialUsernewObject });
@@ -1942,13 +2288,13 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
               for (let item of ManagerkeysOfAdAccounts) {
                 if (ManageradAccounts[item][0] === "All") {
                   // Retry logic for Accounts API
-                  const networkResponse = await retryFetch(() => apiClient.get(`/network/Accounts?network=${item}`));
-                  ManagernewObject[item] = networkResponse.data;
+                  const networkResponse = await retryFetch(() => apiClient.get(`/open/auth/network?network=${item}`));
+                  ManagernewObject[item] = networkResponse.data.data;
                 } else {
                   const response = await retryFetch(() =>
-                    apiClient.post('/getAccountNameandStatusofNetwork/', { updatedNetwork: ManageradAccounts[item] })
+                    apiClient.post('/open/auth/nameandstatusofaccounts', { updatedNetwork: ManageradAccounts[item] })
                   );
-                  ManagernewObject[item] = response.data;
+                  ManagernewObject[item] = response.data.data;
                 }
               }
               setuserdetails({ ...usersDataForLogin[0], adAccounts: ManagernewObject });
@@ -1963,14 +2309,14 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
               for (let item of NetworkPartnerAdAccounts) {
                 if (Network_Partner[item][0] === "All") {
                   // Retry logic for Accounts API
-                  console.log(item);
-                  const networkResponse = await retryFetch(() => apiClient.get(`/network/Accounts?network=${item}`));
-                  NetworkPartnerObject[item] = networkResponse.data;
+                  // console.log(item);
+                  const networkResponse = await retryFetch(() => apiClient.get(`/open/auth/network?network=${item}`));
+                  NetworkPartnerObject[item] = networkResponse.data.data;
                 } else {
                   const response = await retryFetch(() =>
-                    apiClient.post('/getAccountNameandStatusofNetwork/', { updatedNetwork: Network_Partner[item] })
+                    apiClient.post('/open/auth/nameandstatusofaccounts', { updatedNetwork: Network_Partner[item] })
                   );
-                  NetworkPartnerObject[item] = response.data;
+                  NetworkPartnerObject[item] = response.data.data;
                 }
               }
               setuserdetails({ ...usersDataForLogin[0], adAccounts: NetworkPartnerObject });
@@ -1979,8 +2325,8 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
             // Case Admin
             case 'Admin':
               // Retry logic for All Accounts API
-              const AllAccountsData = await retryFetch(() => apiClient.get(`/All/Accounts/`));
-              const responseData = AllAccountsData.data;
+              const AllAccountsData = await retryFetch(() => apiClient.get(`/open/auth/admin`));
+              const responseData = AllAccountsData.data.data;
               // console.log(responseData, "responseData");
               setuserdetails({ ...usersDataForLogin[0], adAccounts: responseData });
               break;

@@ -45,8 +45,8 @@ const { Option } = Select;
 const { TextArea } = Input;
 
 const Createnewads = ({ data, rerenders, onClose, network, visible, adsData, adsetKey, index }) => {
-  console.log("identifier:", data.identifier);
-  console.log("adsetKey:", adsetKey);
+  // console.log("identifier:", data.identifier);
+  // console.log("adsetKey:", adsetKey);
   const [form] = Form.useForm();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [formData, setFormData] = useState(null);
@@ -71,13 +71,13 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData, ads
   const [selectedFilesFromMedia, setSelectedFilesFromMedia] = useState([]);
   const [openCreativesDrawer, setOpenCreativesDrawer] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
-  console.log(data, "data from createads component");
-  console.log(adsData, "adsData from createads component");
-  console.log(network, "network from createads component");
+  // console.log(data, "data from createads component");
+  // console.log(adsData, "adsData from createads component");
+  // console.log(network, "network from createads component");
   const { theme, userdetails } = useTokenContext();
 
   var token = localStorage.getItem("token")
-  console.log(data, "selectedRow")
+  // console.log(data, "selectedRow")
 
   function getNextAddName(data) {
     if (!Array.isArray(data) || data.length === 0) {
@@ -119,7 +119,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData, ads
   //     return `${prefix}_${maxNumber + 1}`; // Return prefix with incremented max number
   //   }
   const [addName, setAddName] = useState(getNextAddName(adsData));
-  console.log(addName, "data");
+  // console.log(addName, "data");
 
   useEffect(() => {
     if (visible) {
@@ -147,12 +147,12 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData, ads
     form
       .validateFields()
       .then((values) => {
-        console.log('Form data:', values);
+        // console.log('Form data:', values);
         setFormData(values);
         setIsModalVisible(true);
       })
       .catch((errorInfo) => {
-        console.log('Validation failed:', errorInfo);
+        // console.log('Validation failed:', errorInfo);
       });
   };
 
@@ -194,7 +194,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData, ads
           if (file?.url) {
             if (file?.url?.endsWith('.png') || file?.url?.endsWith('.jpg') || file?.url?.endsWith(".jpeg") || file?.url?.endsWith('.mp4')) {
               const formData = new FormData();
-              const response = await fetch(`https://prodapis.adsgoat.in/s3?s3Url=${file.url}`, {
+              const response = await fetch(`https://app.vyaktimetrics.com/creatives/userfiles/s3?s3Url=${file.url}`, {
                 method: 'GET',
                 headers: {
                   'Content-Type': 'application/json',
@@ -282,7 +282,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData, ads
               const editedImage = editedImages[fileId];
               const uploadFile = editedImage ? await fetch(editedImage).then(res => res.blob()) : null;
 
-              console.log(file.originFileObj.name);
+              // console.log(file.originFileObj.name);
 
               if (uploadFile) {
                 formData.append("file", uploadFile, `blob/${uniqueId}_${file.name}`);
@@ -295,7 +295,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData, ads
 
               if (file.type.startsWith('image/')) {
                 response = await axios.post(
-                  'https://www.testapi.adsgoat.in/upload',
+                  'https://app.vyaktimetrics.com/creatives/userfiles/uploaduserimage',
                   formData,
                   {
                     headers: {
@@ -334,7 +334,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData, ads
                 }
               } else if (file.type.startsWith('video/')) {
                 response = await axios.post(
-                  'https://www.testapi.adsgoat.in/upload',
+                  'https://app.vyaktimetrics.com/creatives/userfiles/uploaduserimage',
                   formData,
                   {
                     headers: {
@@ -401,7 +401,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData, ads
 
     try {
       const mediaHashArray = uploadFilesSequentially(selectedFiles);
-      console.log("All media files uploaded successfully. Media Hash Array:", mediaHashArray);
+      // console.log("All media files uploaded successfully. Media Hash Array:", mediaHashArray);
       return mediaHashArray;
     } catch (error) {
       console.error("One or more media uploads failed:", error);
@@ -410,7 +410,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData, ads
   };
 
   const onClickCreativesDrawer = () => {
-    console.log("Creatives Drawer Opened");
+    // console.log("Creatives Drawer Opened");
     setOpenCreativesDrawer(true);
   }
 
@@ -461,7 +461,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData, ads
   // }
 
   const selectedFilesData = (data) => {
-    console.log("Selected Files Data:", data);
+    // console.log("Selected Files Data:", data);
 
     const firstFile = data[0];
     if (!firstFile) return;
@@ -560,7 +560,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData, ads
 
     if (formData) {
       const onSuccess = (status, response) => {
-        console.log("Upload success:", response);
+        // console.log("Upload success:", response);
         // Add any success handling logic here
       };
 
@@ -571,19 +571,19 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData, ads
 
       try {
         const response = await axios.get(
-          `https://www.testapi.adsgoat.in/api/hashimageidentity/${data?.Account_Number}`,
+          `https://fblaunching.vyaktimetrics.com/open/accounts/hashimageidentity/${data?.Account_Number}`,
           {
             headers: {
               Authorization: token,
             },
           }
         );
-        console.log("siddu account data", response.data);
+        // console.log("siddu account data", response.data);
         const imagehash = response.data[0];
 
         const mediaData = await customRequest(imagehash, onSuccess, onError);
-        console.log(mediaData, "mediaData from customRequest");
-        console.log(formData, "formData from UI");
+        // console.log(mediaData, "mediaData from customRequest");
+        // console.log(formData, "formData from UI");
 
         let newAddData;
         if (mediaData[0].videoid) {
@@ -606,7 +606,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData, ads
 
         delete newAddData.MediaContent
 
-        console.log(newAddData, "newAddData from UI");
+        // console.log(newAddData, "newAddData from UI");
 
         await postData(newAddData);
         rerenders();
@@ -648,14 +648,14 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData, ads
 
   const imageHashCaller = async () => {
     try {
-      const response = await axios.get(`https://www.testapi.adsgoat.in/api/hashimageidentity/${data.Account_Number}`,
+      const response = await axios.get(`https://fblaunching.vyaktimetrics.com/open/accounts/hashimageidentity/${data.Account_Number}`,
         {
           headers: {
             'Authorization': token
           }
         }
       );
-      console.log("account data", ...response?.data);
+      // console.log("account data", ...response?.data);
       setimagehash(...response?.data)
     } catch (error) {
       console.error("Error fetching campaign data:", error);
@@ -694,12 +694,11 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData, ads
         data1.thambnailurl = values.thambnailurl;
       }
       const username = userdetails?.userName;
-      console.log(data1, "from UI");
-      console.log("identifier:", data.identifier);
+      // console.log(data1, "from UI");
+      // console.log("identifier:", data.identifier);
 
-      //https://www.testapi.adsgoat.in
       const response = await fetch(
-        `https://www.testapi.adsgoat.in/api/newcreate-ad/${data.identifier}`,
+        `https://fblaunching.vyaktimetrics.com/open/ads/create-ad/${data.identifier}`,
         {
           method: "PUT",
           headers: {
@@ -712,11 +711,11 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData, ads
       );
 
       const resBody = await response.json();
-      console.log("Response status:", response.status);
-      console.log("Response body:", resBody);
+      // console.log("Response status:", response.status);
+      // console.log("Response body:", resBody);
 
       if (response.ok) {
-        console.log("Form data submitted successfully");
+        // console.log("Form data submitted successfully");
         message.success("Your ad is created successfully", 2, () => {
           setIsModalVisible(false);
         });
@@ -770,7 +769,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData, ads
   };
 
   const closeCanvasModal = () => {
-    console.log("Closing editor...");
+    // console.log("Closing editor...");
     // setIsImgEditorShown(false);
     setIsImgEditorShown(false); // Close the image editor
   };
@@ -779,7 +778,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData, ads
 
   const handleModalCancel = () => {
     setIsModalVisible(false);
-    console.log('Modal cancel clicked');
+    // console.log('Modal cancel clicked');
   };
   var initialValue = {
     // page_id: data?.addlevel[0]?.page_id,

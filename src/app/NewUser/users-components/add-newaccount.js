@@ -103,17 +103,33 @@ const Newaddaccounts = ({ visible, onClose, AccountsData }) => {
         setIsModalOpen(false);
     };
 
+    // useEffect(() => {
+    //     // Update the form field value for Website_URL whenever websiteURL changes
+    //     form.setFieldsValue({ BMName: BMName });
+    //     // Check if all required fields are complete
+    //     setIsVisibleBMId("visible");
+    // }, [newValue, form]);
     useEffect(() => {
-        // Update the form field value for Website_URL whenever websiteURL changes
-        form.setFieldsValue({ BMName: BMName });
-        // Check if all required fields are complete
-        setIsVisibleBMId("visible");
-    }, [newValue, form]);
+        if (visible) {
+            form.setFieldsValue({
+                BMName: BMName
+            });
 
+            setIsVisibleBMId("visible");
+        }
+    }, [newValue, visible]);
+
+    // useEffect(() => {
+    //     // Update the form field value for Website_URL whenever websiteURL changes
+    //     form.setFieldsValue({ BMName: BMName });
+    // }, [BMName, form]);
     useEffect(() => {
-        // Update the form field value for Website_URL whenever websiteURL changes
-        form.setFieldsValue({ BMName: BMName });
-    }, [BMName, form]);
+        if (visible) {
+            form.setFieldsValue({
+                BMName: BMName
+            });
+        }
+    }, [BMName, visible]);
 
     // const functionCallBMNames = async() =>{
     //     const fetchData = await apiClient.get(`/getBMNames/`);
@@ -164,7 +180,7 @@ const Newaddaccounts = ({ visible, onClose, AccountsData }) => {
 
         let apiList = [];
         try {
-            const res = await axios.get("https://prodapis.adsgoat.in/allaccounts", {
+            const res = await apiClient.get("/userrole/accounts", {
                 headers: { Authorization: token }
             });
             apiList = res.data || [];
@@ -250,8 +266,8 @@ const Newaddaccounts = ({ visible, onClose, AccountsData }) => {
                 timeZone: timeZoneFullNames[values.timeZone],
                 pixelId: undefined
             };
-            console.log(newValues, "newValues");
-            const response = await apiClient.post('/createNewAccount/', { newAccount: newValues });
+            // console.log(newValues, "newValues");
+            const response = await apiClient.post('/userrole/accounts', { newAccount: newValues });
             if (response.status === 200) {
                 // message.success('Account created successfully');
                 // form.resetFields();
@@ -402,10 +418,17 @@ const Newaddaccounts = ({ visible, onClose, AccountsData }) => {
 
                             className={`${theme === "dark" ? "dark-theme" : "light-theme"
                                 } green-border-select`}
-                            defaultValue="Facebook" onChange={onChangeSpendPartner}
+                            // defaultValue="Facebook"
+                             onChange={onChangeSpendPartner}
                             title=''
-                            dropdownClassName={theme === 'dark' && "custom-dropdown"}>
-                            <Option value="Facebook" title='' defaultValue>Facebook</Option>
+                            // dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                            classNames={{
+                                popup: {
+                                    root: theme === 'dark' ? 'custom-dropdown' : ''
+                                }
+                            }}
+                        >
+                            <Option value="Facebook" title=''>Facebook</Option>
                             <Option value="Google" title=''>Google</Option>
                         </Select>
                     </Form.Item>
@@ -573,7 +596,12 @@ const Newaddaccounts = ({ visible, onClose, AccountsData }) => {
                                 }}
                                 className={`${theme === "dark" ? "dark-theme" : "light-theme"
                                     } green-border-select`}
-                                dropdownClassName={theme === "dark" ? "custom-dropdown" : undefined}
+                                // dropdownClassName={theme === "dark" ? "custom-dropdown" : undefined}
+                                classNames={{
+                                    popup: {
+                                        root: theme === 'dark' ? 'custom-dropdown' : ''
+                                    }
+                                }}
                                 allowClear
                             >
                                 {options.map((option) => (
@@ -591,7 +619,7 @@ const Newaddaccounts = ({ visible, onClose, AccountsData }) => {
                         <Modal
                             title="Add new value"
                             className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
-                            visible={isModalOpen}
+                            open={isModalOpen}
                             onOk={handleAddNewValue}
                             onCancel={() => setIsModalOpen(false)}
                             okText="Add"
@@ -630,10 +658,15 @@ const Newaddaccounts = ({ visible, onClose, AccountsData }) => {
                             }}
                             placeholder="Select Timezone"
                             optionFilterProp="label"
-                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                            // dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                            classNames={{
+                                popup: {
+                                    root: theme === 'dark' ? 'custom-dropdown' : ''
+                                }
+                            }}
                             className={`${theme === "dark" ? "dark-theme" : "light-theme"
                                 } green-border-select`}
-                            defaultValue="UTC"
+                            // defaultValue="UTC"
                             options={timezones.map((item) => ({
                                 value: item,
                                 label: item,
@@ -643,7 +676,8 @@ const Newaddaccounts = ({ visible, onClose, AccountsData }) => {
                     </Form.Item>
                     <Form.Item label="Status" name="status" value={status}>
                         <Select placeholder="Select a status"
-                            defaultValue="Active" onChange={onChangeStatus}
+                            // defaultValue="Active" 
+                            onChange={onChangeStatus}
                             className={`${theme === "dark" ? "dark-theme" : "light-theme"
                                 } green-border-select`}
                             title=''
@@ -651,7 +685,13 @@ const Newaddaccounts = ({ visible, onClose, AccountsData }) => {
                                 backgroundColor: theme === 'dark' && '#333', // Background color
                                 color: theme === 'dark' && '#fff',
                             }}
-                            dropdownClassName={theme === 'dark' && "custom-dropdown"}>
+                            // dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                            classNames={{
+                                popup: {
+                                    root: theme === 'dark' ? 'custom-dropdown' : ''
+                                }
+                            }}
+                        >
                             <Option value="Active" title=''>Active</Option>
                             <Option value="InActive" title=''>Inactive</Option>
                         </Select>
@@ -670,7 +710,12 @@ const Newaddaccounts = ({ visible, onClose, AccountsData }) => {
                             placeholder="Select Revenue partner"
                             optionFilterProp="label"
                             defaultValue={uniquePartners[0]}
-                            dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                            // dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                            classNames={{
+                                popup: {
+                                    root: theme === 'dark' ? 'custom-dropdown' : ''
+                                }
+                            }}
                             options={uniquePartners.map((item) => ({
                                 value: item,
                                 label: item,

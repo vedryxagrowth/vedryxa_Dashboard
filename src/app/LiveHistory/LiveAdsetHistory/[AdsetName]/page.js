@@ -31,7 +31,7 @@ const MnetLiveAdsetHistory = ({ params }) => {
 
     const { apiClient } = useTokenContext();
 
-    console.log(userdetails, "userDetails");
+    // console.log(userdetails, "userDetails");
 
     const user = userdetails?.email;
 
@@ -50,7 +50,7 @@ const MnetLiveAdsetHistory = ({ params }) => {
 
     const [searchText, setSearchText] = useState("");
 
-    console.log(user, "user");
+    // console.log(user, "user");
 
     const { theme } = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -589,8 +589,8 @@ const MnetLiveAdsetHistory = ({ params }) => {
         // updatingColumnsStructure(newFieldOrder);
         // console.log(newFieldOrder);
         setColumnStructure(getColumnDefs(newFieldOrder));
-        console.log(newFieldOrder);
-        await apiClient.post(`/api/updateHistoryPageStructure?email=${userdetails?.email}`, { updateDataArray: newFieldOrder });
+        // console.log(newFieldOrder);
+        await apiClient.post(`/reports/historyactions/columnstructure?email=${userdetails?.email}`, { updateDataArray: newFieldOrder });
         // console.log(`Updating columns structure for grid: ${gridId}`);
     };
 
@@ -1179,8 +1179,8 @@ const MnetLiveAdsetHistory = ({ params }) => {
 
     const functionCallForCommnets = async (accountNumber) => {
         try {
-            const commentFetch = await apiClient.get(`/New/Comments/${accountNumber}/${"adsetid"}/${AdsetId}/${"adset"}`);
-            const campaignComments = commentFetch.data; // Set comments only if fetched successfully
+            const commentFetch = await apiClient.get(`/reports/historyactions/comments/${accountNumber}/${"adsetid"}/${AdsetId}/${"adset"}`);
+            const campaignComments = commentFetch.data.data; // Set comments only if fetched successfully
             setCampaignComments(campaignComments);
             if (campaignComments.length > 0) {
                 const comment = campaignComments[0];
@@ -1199,7 +1199,7 @@ const MnetLiveAdsetHistory = ({ params }) => {
         accountNumber
     ) => {
         try {
-            const response = await apiClient.post(`/getBudgetAndStatus`,
+            const response = await apiClient.post(`/reports/historyactions/campaignadsetadstatus`,
                 {
                     id,
                     level,
@@ -1208,7 +1208,7 @@ const MnetLiveAdsetHistory = ({ params }) => {
             );
 
             const data = response?.data?.data;
-            console.log(data, "budget and status");
+            // console.log(data, "budget and status");
             setBudgetAndStatusData(data);
 
         } catch (err) {
@@ -1216,12 +1216,12 @@ const MnetLiveAdsetHistory = ({ params }) => {
         }
     };
     const functionCallForUserColumnStructure = async () => {
-        const fetchData = await apiClient.get(`https://prodapis.adsgoat.in/api/singleUserData?email=${user}`);
+        const fetchData = await apiClient.get(`/reports/historyactions/columnstructure?email=${user}`);
         // const data = await fetchData.json();
-        const mainData = fetchData.data;
-        console.log(mainData.historyStructure, "historyStructure");
-        const filteredData = mainData.historyStructure.filter((each) => each !== "actions");
-        console.log(filteredData);
+        const mainData = fetchData.data.data;
+        // console.log(mainData.historyStructure, "historyStructure");
+        const filteredData = mainData.filter((each) => each !== "actions");
+        // console.log(filteredData);
         setColumnStructure(getColumnDefs(filteredData));
         // setRowStructure(mainData.rows); 
     }
@@ -1238,16 +1238,16 @@ const MnetLiveAdsetHistory = ({ params }) => {
         // let network = paramsData[3];
         setDebounc(decodedString);
 
-        console.log(decodedString, "decode");
+        // console.log(decodedString, "decode");
         // const fetchData = await fetch(`http://localhost:8000/${network}?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}`);
         // const data = await fetchData.json();
         // const mainData = await data;
-        const fetchData = await apiClient.get(`/New/LiveAdsetHistory?AdsetId=${AdsetId}&accountNumber=${accountNumber}&timezone=${timeZone}&network=${network}`);
+        const fetchData = await apiClient.get(`/reports/livehistory/adsethistory?AdsetId=${AdsetId}&accountNumber=${accountNumber}&timezone=${timeZone}&network=${network}`);
         // console.log(`https://prodapis.adsgoat.in/LiveAdsetHistory?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}&network=${network}`, "url");
         const url = `http://localhost:8000/MnetLiveCampaignHistory?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}`
 
-        const mainData = fetchData?.data?.filter(obj => !("ad_clicks" in obj));
-        console.log(mainData[0]);
+        const mainData = fetchData?.data?.data?.filter(obj => !("ad_clicks" in obj));
+        // console.log(mainData[0]);
         setAdsetName(mainData[0]?.adsetName);
         setUniqueObject(mainData.find(
             obj => obj.campaign_id && obj.adset_id
@@ -1360,7 +1360,7 @@ const MnetLiveAdsetHistory = ({ params }) => {
         const margin = result2.map(d => parseFloat(d.margin)); const hoursDate = filteredData.map(d => ({ date: d.date, hour: d.hour, margin: parseFloat(d.margin) }));
         const today = moment.tz('UTC').format('YYYY-MM-DD');
 
-        console.log(filteredData);
+        // console.log(filteredData);
         // Filter, map, sort, and slice the data
         const result = filteredData
             .filter(item => item.date === today) // Filter to only today's data
@@ -1381,7 +1381,7 @@ const MnetLiveAdsetHistory = ({ params }) => {
             }))
             .sort((a, b) => b.rpc - a.rpc) // Sort by margin in descending order
             .slice(0, 5); // Get top 5 margins
-        console.log(result, "result");
+        // console.log(result, "result");
 
         const filteredArray = filteredData
             .map(item => ({
@@ -1528,7 +1528,7 @@ const MnetLiveAdsetHistory = ({ params }) => {
 
     }, [isBudgetModalVisible]);
 
-    console.log(fetchvalue);
+    // console.log(fetchvalue);
 
     // const selectElementData = ['674038077865381', '665204411821465', '364991119488050'];
 
@@ -1589,7 +1589,7 @@ const MnetLiveAdsetHistory = ({ params }) => {
 
             // ✅ Copy text to clipboard
             navigator.clipboard.writeText(copiedText).then(() => {
-                console.log("Copied to clipboard:", copiedText);
+                // console.log("Copied to clipboard:", copiedText);
             }).catch((err) => {
                 console.error("Clipboard copy failed:", err);
             });
@@ -1617,19 +1617,32 @@ const MnetLiveAdsetHistory = ({ params }) => {
         return colorMap[value]; // Return the assigned color
     };
 
-    console.log(columnDefs);
+    // console.log(columnDefs);
 
     const sendEditedCommentToAPI = async () => {
         try {
-            console.log("comment:")
-            const response = await apiClient.post('/Comments/upsert', {
+            // console.log("comment:")
+            const payloadForActivity = {
+                editType: "Comment",
+                campaignid: uniqueObject?.campaign_id,       // cents
+                adsetid: uniqueObject?.adset_id,
+                Account: accountNumber,    // ✅ update *this* row’s account
+                campaignname: uniqueObject?.campaign_name,
+                adsetname: AdsetName,
+                updatedBy: userdetails?.userName,
+                updatedUserEmail: userdetails?.email,
+                updateType: "Adset comment updated",
+                updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+            }
+            const response = await apiClient.post('/reports/historyactions/comments/update', {
                 accountNumber: accountNumber,
                 campaignname: AdsetName,
                 campaignid: uniqueObject?.campaign_id,
                 adsetid: uniqueObject?.adset_id,
                 comment: comment,
                 usercommit: userdetails?.email,
-                level: "adset"
+                level: "adset",
+                activity: payloadForActivity
             }
             );
             if (response.status === 200 || response.status === 201) {
@@ -1717,6 +1730,18 @@ const MnetLiveAdsetHistory = ({ params }) => {
     const handleDelete = async () => {
         try {
             // Prepare the payload for the API call
+            const payloadForActivity = {
+                editType: "Comment",
+                campaignid: uniqueObject?.campaign_id,       // cents
+                adsetid: uniqueObject?.adset_id,
+                Account: accountNumber,    // ✅ update *this* row’s account
+                campaignname: uniqueObject?.campaign_name,
+                adsetname: AdsetName,
+                updatedBy: userdetails?.userName,
+                updatedUserEmail: userdetails?.email,
+                updateType: "Adset comment cleared",
+                updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
+            }
             const payload = {
                 accountNumber: accountNumber,
                 campaignname: AdsetName,
@@ -1724,12 +1749,13 @@ const MnetLiveAdsetHistory = ({ params }) => {
                 adsetid: uniqueObject?.adset_id,
                 comment: comment,
                 usercommit: userdetails?.email,
-                level: "adset"
+                level: "adset",
+                activity: payloadForActivity
             };
             // console.log(payload);
 
             // Call the backend API to delete the comment
-            const response = await apiClient.post('/Comments/delete', payload);
+            const response = await apiClient.post('/reports/historyactions/comments/delete', payload);
 
             if (response.status === 200) {
                 // Remove the comment from the local state
@@ -1802,7 +1828,7 @@ const MnetLiveAdsetHistory = ({ params }) => {
     };
     const handlePauseOk = async () => {
         const desired = nextChecked;
-        console.log(nextChecked, "nextChecked");
+        // console.log(nextChecked, "nextChecked");
         setIsCampaignModalVisibles(true);
         setConfirmLoading(true);
 
@@ -1831,7 +1857,7 @@ const MnetLiveAdsetHistory = ({ params }) => {
                 email: userdetails?.email,
                 activity: payloadForActivity
             };
-            const response = await apiClient.post(`/NewBulkAdsetStatusChangeWithHistory`, payload,
+            const response = await apiClient.post(`/reports/historyactions/adsetstatus`, payload,
                 { headers: { Authorization: token } }
             );
 
@@ -1987,7 +2013,7 @@ const MnetLiveAdsetHistory = ({ params }) => {
 
             const newResponse =
                 await apiClient.post(
-                    '/update/adset/budget/history',
+                    '/reports/historyactions/adsetbudget',
                     payload
                 );
 

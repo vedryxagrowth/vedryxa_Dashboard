@@ -47,7 +47,7 @@ const EditCampaignDrawer = ({ rowData, visible, onClose }) => {
 
                         }
                     );
-                    console.log("hello Editdata", response.data[0]);
+                    // console.log("hello Editdata", response.data[0]);
                     setEditCampaignData(response.data[0]);
                 }
             } catch (error) {
@@ -139,7 +139,7 @@ const EditCampaignDrawer = ({ rowData, visible, onClose }) => {
     };
     const onFinish = (values) => {
         setIsModalVisible(true)
-        console.log("Form values:", values);
+        // console.log("Form values:", values);
         setFormValues(values);
     };
     const postData = async (values) => {
@@ -201,7 +201,7 @@ const EditCampaignDrawer = ({ rowData, visible, onClose }) => {
             });
 
             if (response.ok) {
-                console.log('Form data submitted successfully');
+                // console.log('Form data submitted successfully');
                 onClose(); // Close the drawer or perform any other action
             } else {
                 console.error('Failed to submit form data');

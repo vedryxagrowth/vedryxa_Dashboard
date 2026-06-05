@@ -7,6 +7,7 @@ import { useTokenContext } from '../../components/parent';
 const { Option } = Select;
 
 const UploadComponent = forwardRef(({ onSubmit, isLoading = false }, ref) => {
+  const { apiClient } = useTokenContext();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -83,17 +84,35 @@ const UploadComponent = forwardRef(({ onSubmit, isLoading = false }, ref) => {
             formDataToSend.append('image', formData.image);
           }
 
-          const res = await fetch('https://prodapis.adsgoat.in/api/notifications/updatenew', {
-            method: 'POST',
-            body: formDataToSend
-          });
+          // const res = await fetch('http://localhost:4000/userrole/updates', {
+          //   method: 'POST',
+          //   body: formDataToSend
+          // });
 
-          const result = await res.json();
+          // const result = await res.json();
+          // if (result.success) {
+          //   message.success('Notification submitted successfully!');
+          //   resetForm();
+          // } else {
+          //   message.error('Something went wrong.');
+          // }
+          const res = await apiClient.post(
+            "/userrole/updates",
+            formDataToSend,
+            {
+              headers: {
+                "Content-Type": "multipart/form-data",
+              },
+            }
+          );
+
+          const result = res.data;
+
           if (result.success) {
-            message.success('Notification submitted successfully!');
+            message.success("Notification submitted successfully!");
             resetForm();
           } else {
-            message.error('Something went wrong.');
+            message.error("Something went wrong.");
           }
         } catch (err) {
           console.error('Error submitting form:', err);
@@ -187,14 +206,14 @@ const UploadComponent = forwardRef(({ onSubmit, isLoading = false }, ref) => {
   return (
     <div className="upload-form-wrapper full-screen-wrapper">
       <div className="form-container">
-        <h1 style={{color: theme === 'dark' ? '#fff' : '#333'}} className="form-title">Notification</h1>
+        <h1 style={{ color: theme === 'dark' ? '#fff' : '#333' }} className="form-title">Notification</h1>
         <form onSubmit={handleSubmit} className="form">
           <div className="form-group">
             <label htmlFor="title">Title</label>
             <input
               type="text"
               id="title"
-              style={{color: theme === 'dark' ? '#fff' : '#333'}}
+              style={{ color: theme === 'dark' ? '#fff' : '#333' }}
               value={formData.title}
               onChange={(e) => handleInputChange('title', e.target.value)}
               placeholder="Enter your title"
@@ -207,7 +226,7 @@ const UploadComponent = forwardRef(({ onSubmit, isLoading = false }, ref) => {
             <textarea
               id="description"
               value={formData.description}
-              style={{color: theme === 'dark' ? '#fff' : '#333'}}
+              style={{ color: theme === 'dark' ? '#fff' : '#333' }}
               onChange={(e) => handleInputChange('description', e.target.value)}
               placeholder="Enter your description"
             />
@@ -223,7 +242,12 @@ const UploadComponent = forwardRef(({ onSubmit, isLoading = false }, ref) => {
               placeholder="Select network"
               style={{ width: '100%' }}
               className={theme === 'dark' ? 'custom-select-dark' : ''}
-              dropdownClassName={theme === 'dark' ? 'custom-dropdown' : ''}
+              // dropdownClassName={theme === 'dark' ? 'custom-dropdown' : ''}
+              classNames={{
+                popup: {
+                  root: theme === 'dark' ? 'custom-dropdown' : ''
+                }
+              }}
               title={''}
               mode="multiple"
             >

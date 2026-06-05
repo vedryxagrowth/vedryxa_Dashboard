@@ -21,7 +21,7 @@ const ExpandedRowContent = ({ record, changeRRefrst, network}) => {
     const [newadsDrawerVisible, setnewadsDrawerVisible] = useState(false);
     const [imagehash, setimagehash] = useState('')
 
-    console.log(userdetails, "userdetails")
+    // console.log(userdetails, "userdetails")
     
     const { theme } = useTokenContext();
     // console.log(record);
@@ -45,7 +45,7 @@ const ExpandedRowContent = ({ record, changeRRefrst, network}) => {
                   }
               }
           );
-          console.log("account data", ...response?.data);
+        //   console.log("account data", ...response?.data);
           setimagehash(...response?.data)
         } catch (error) {
             console.error("Error fetching campaign data:", error);
@@ -103,7 +103,7 @@ const ExpandedRowContent = ({ record, changeRRefrst, network}) => {
                 }
             );
             if (response.status === 200) {
-                console.log('Approved');
+                // console.log('Approved');
                 changeRRefrst && changeRRefrst();
             }
         } catch (error) {
@@ -135,7 +135,7 @@ const ExpandedRowContent = ({ record, changeRRefrst, network}) => {
                 }
             );
             if (response.status === 200) {
-                console.log('Rejected:', currentItem.id);
+                // console.log('Rejected:', currentItem.id);
                 changeRRefrst && changeRRefrst();
             }
         } catch (error) {

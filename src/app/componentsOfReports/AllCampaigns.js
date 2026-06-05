@@ -189,7 +189,7 @@ const AllCampaigns = ({ campaignStatusFilter, handleChangeInput, handleBlur, onC
             console.error("Grid reference is null");
         }
         const updateDetails = async () => {
-            await apiClient.post('/UserExportActivities/', { Details });
+            await apiClient.post('/reports/commonapis/userexportactivities', { Details });
         }
         updateDetails();
     };
@@ -321,7 +321,7 @@ const AllCampaigns = ({ campaignStatusFilter, handleChangeInput, handleBlur, onC
                         const response = await apiClient.post('/Comments', {
                             commentsdatas: logData,
                         });
-                        console.log('Response from server:', response.data);
+                        // console.log('Response from server:', response.data);
                     } catch (error) {
                         console.error('Error sending data to server:', error);
                     }
@@ -337,7 +337,7 @@ const AllCampaigns = ({ campaignStatusFilter, handleChangeInput, handleBlur, onC
                             campaignid: logData.campaignid,
                             status: true
                         });
-                        console.log('Response from server (edited comment):', response.data);
+                        // console.log('Response from server (edited comment):', response.data);
                         return response.data;
                     } catch (error) {
                         console.error('Error sending edited comment to server:', error);
@@ -1151,7 +1151,7 @@ const AllCampaigns = ({ campaignStatusFilter, handleChangeInput, handleBlur, onC
 
             // ✅ Copy text to clipboard
             navigator.clipboard.writeText(copiedText).then(() => {
-                console.log("Copied to clipboard:", copiedText);
+                // console.log("Copied to clipboard:", copiedText);
             }).catch((err) => {
                 console.error("Clipboard copy failed:", err);
             });

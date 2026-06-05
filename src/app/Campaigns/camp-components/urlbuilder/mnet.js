@@ -24,6 +24,7 @@ const MnetUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessage, 
   const [pixelId, setPixelId] = useState('PixelId');
   const pixelIds = ['PixelId', 'None'];
   const { theme } = useTokenContext();
+  const token = localStorage.getItem("token")
 
 
   // const MnetDomains = [
@@ -184,13 +185,21 @@ const MnetUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessage, 
   // ];
 
   const getUrlBuilderData = async () => {
-    const response = await apiClient.get(`/get/urlbuilderdata?network=Mnet`);
+    // const response = await apiClient.get(`/get/urlbuilderdata?network=Mnet`);
+    const response = await fetch(
+      `https://fblaunching.vyaktimetrics.com/open/get/urlbuilderdata?network=Mnet`,
+      {
+        method: "GET",
+        headers: { Authorization: token },
+      },
+    )
+    const json = await response.json();
     if (response?.status === 200) {
-      setNetworkData(response?.data)
+      setNetworkData(json)
       if (indexValueForAccount) {
         // console.log(defaultValues);
         // console.log(defaultValues.split("//")[1].split("/")[0]);
-        const DomainUrls = response?.data?.Domains
+        const DomainUrls = json?.Domains
           .filter(item => item.url.includes(indexValueForAccount?.split("//")[1]?.split("/")[0]))
           .map(item => item.url);
         // console.log(DomainUrls);
@@ -200,7 +209,7 @@ const MnetUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessage, 
         const result = text.replace(/\+/g, " ");
         // console.log(result);
         setKeyWords(result);
-        console.log(indexValueForAccount.split("//")[1]?.split("/")[4]?.split("&")[0]?.split("?")[1]);
+        // console.log(indexValueForAccount.split("//")[1]?.split("/")[4]?.split("&")[0]?.split("?")[1]);
         setChannel(indexValueForAccount.split("//")[1]?.split("/")[4]?.split("&")[0]?.split("?")[1]);
         setMembetId(indexValueForAccount?.split("//")[1]?.split("/")[4]?.split("&")[1]?.split("=")[1]?.split("_")[0]);
         setSource(indexValueForAccount?.split("//")[1]?.split("/")[4]?.split("&")[1]?.split("=")[1]?.split("_")[1]);
@@ -211,9 +220,9 @@ const MnetUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessage, 
         // const domainData = response 
       } else {
         if (defaultValues) {
-          console.log(defaultValues);
+          // console.log(defaultValues);
           // console.log(defaultValues.split("//")[1].split("/")[0]);
-          const DomainUrls = response?.data?.Domains
+          const DomainUrls = json?.Domains
             .filter(item => item.url.includes(defaultValues?.split("//")[1]?.split("/")[0]))
             .map(item => item.url);
           // console.log(DomainUrls);
@@ -221,9 +230,9 @@ const MnetUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessage, 
 
           const text = defaultValues?.split("//")[1]?.split("/")[3];
           const result = text?.replace(/\+/g, " ");
-          console.log(result);
+          // console.log(result);
           setKeyWords("");
-          console.log(defaultValues.split("//")[1]?.split("/")[4]?.split("&")[0]?.split("?")[1]);
+          // console.log(defaultValues.split("//")[1]?.split("/")[4]?.split("&")[0]?.split("?")[1]);
           setChannel(defaultValues.split("//")[1]?.split("/")[4]?.split("&")[0]?.split("?")[1]);
           setMembetId(defaultValues?.split("//")[1]?.split("/")[4]?.split("&")[1]?.split("=")[1]?.split("_")[0]);
           setSource(defaultValues?.split("//")[1]?.split("/")[4]?.split("&")[1]?.split("=")[1]?.split("_")[1]);
@@ -268,7 +277,7 @@ const MnetUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessage, 
     setErrorMessage('');
     setPixelId('PixelId');
   }
-  console.log(showSubmitButton);
+  // console.log(showSubmitButton);
 
   const onClickSubmit = () => {
 

@@ -109,7 +109,7 @@ export default function ChatWidget() {
                 // Send the POST request
                 const response = await axios.post('https://www.testapi.adsgoat.in/send-to-slack', payload, { headers });
 
-                console.log("Message sent successfully to Slack:", response.data);
+                // console.log("Message sent successfully to Slack:", response.data);
             } catch (error) {
                 console.error("Error sending message to Slack:", error);
             }
@@ -284,7 +284,7 @@ export default function ChatWidget() {
 
             <Modal
                 title="Choose Attachment"
-                visible={isAttachmentModalVisible}
+                open={isAttachmentModalVisible}
                 onCancel={() => setIsAttachmentModalVisible(false)}
                 footer={null}
             >

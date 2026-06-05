@@ -62,10 +62,10 @@ const selectTimezone = {
 };
 
 const HourlyCampaignLevelReports = ({ functionCallForCommnets, context, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, showCampaignLevel, removeSelectedCampaigns, moveToNextTab, accountsAccess, commentsMap }) => {
-    console.log(columnDefs, "columnDefs");
-    console.log("campaign acconts:", newaccount);
-    console.log('accountAccess:', accountsAccess);
-    console.log(campaignComments);
+    // console.log(columnDefs, "columnDefs");
+    // console.log("campaign acconts:", newaccount);
+    // console.log('accountAccess:', accountsAccess);
+    // console.log(campaignComments);
     const { theme, apiClient } = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
     const getRowStyleTheme = theme === 'dark' ? { backgroundColor: '#1e1e1f', color: '#ffffff' } : { backgroundColor: '#ffffff', color: '#000000' };
@@ -82,7 +82,7 @@ const HourlyCampaignLevelReports = ({ functionCallForCommnets, context, function
 
     const [apiStatus, setApiStatus] = useState(false);
 
-    console.log(apiStatus, "apiStatus");
+    // console.log(apiStatus, "apiStatus");
 
 
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -93,7 +93,7 @@ const HourlyCampaignLevelReports = ({ functionCallForCommnets, context, function
 
     const timezone = useRef();
 
-    console.log("timzones:", timezone);
+    // console.log("timzones:", timezone);
 
     const cronStatus = useRef();
 
@@ -194,9 +194,9 @@ const HourlyCampaignLevelReports = ({ functionCallForCommnets, context, function
     }, [inputValue, selectedCampaigns, rowData]);
 
 
-    console.log(memorizedColumnDef, "memorizedColumnDef");
-    console.log(memorizedRowData, "memorizedRowData");
-    console.log(rowData, "rowData");
+    // console.log(memorizedColumnDef, "memorizedColumnDef");
+    // console.log(memorizedRowData, "memorizedRowData");
+    // console.log(rowData, "rowData");
 
     useEffect(() => {
         setLiveFixedFooter([
@@ -224,7 +224,7 @@ const HourlyCampaignLevelReports = ({ functionCallForCommnets, context, function
         ])
     }, [memorizedRowData]);
     const onBtExport1 = async () => {
-        console.log(gridRef.current.api, "in");
+        // console.log(gridRef.current.api, "in");
         const Details = {
             network: newRevenuePratner,
             account: newaccount,
@@ -256,7 +256,7 @@ const HourlyCampaignLevelReports = ({ functionCallForCommnets, context, function
             }
         });
         try {
-            await apiClient.post('/UserExportActivities/', { Details });
+            await apiClient.post('/reports/commonapis/userexportactivities', { Details });
         } catch (err) {
             console.error("Export activity logging failed", err);
         }
@@ -419,7 +419,7 @@ const HourlyCampaignLevelReports = ({ functionCallForCommnets, context, function
         },
         processCellForClipboard: (params) => {
             if (params.node.group) {
-                console.log("Processing group column for copy..."); // Debugging log
+                // console.log("Processing group column for copy..."); // Debugging log
 
                 // ✅ Fix: Ensure `params.node.parent` exists before accessing its properties
                 if (!params.node.parent || !params.node.parent.childrenAfterGroup) {
@@ -491,7 +491,7 @@ const HourlyCampaignLevelReports = ({ functionCallForCommnets, context, function
         try {
 
             const resp = await apiClient.post(
-                'https://prodapis.adsgoat.in/LatestHour',
+                '/reports/data/latesthour',
                 {
                     dateStart: startDate,
                     dateEnd: endDate,
@@ -530,7 +530,7 @@ const HourlyCampaignLevelReports = ({ functionCallForCommnets, context, function
             accountsParam.forEach(acc => params.append("accountNumbers", acc));
 
             //   const resp = await apiClient.post(`/CampaignLevelAccounts?${params.toString()}`);
-            const resp = await apiClient.post('/CampaignLevelAccountsHourly', {
+            const resp = await apiClient.post('/reports/data/campaignhourly', {
                 dateStart: startDate,
                 dateEnd: endDate,
                 timezone: newtime,
@@ -540,7 +540,7 @@ const HourlyCampaignLevelReports = ({ functionCallForCommnets, context, function
             });
 
 
-            const mainData1 = resp.data;
+            const mainData1 = resp.data.data;
 
             const campaignsByAccount = {};
 
@@ -655,7 +655,7 @@ const HourlyCampaignLevelReports = ({ functionCallForCommnets, context, function
 
             if (mainData.length > 1) {
                 const findRevenueObject = mainData.find(item => item.estimated_revenue >= 0);
-                console.log(findRevenueObject, findRevenueObject.accountTimezone, "testing  ")
+                // console.log(findRevenueObject, findRevenueObject.accountTimezone, "testing  ")
                 timezone.current = findRevenueObject.accountTimezone;
                 accountStatus.current = findRevenueObject.accountStatus;
                 cronStatus.current = mainData[0].cronStatus;
@@ -735,9 +735,9 @@ const HourlyCampaignLevelReports = ({ functionCallForCommnets, context, function
         }
     };
 
-    useEffect(() => {
-        console.log(campaignIds, "campaignIds updated");
-    }, [campaignIds]);
+    // useEffect(() => {
+    //     console.log(campaignIds, "campaignIds updated");
+    // }, [campaignIds]);
     // useEffect(() => {
     //     if (!campaignIds || Object.keys(campaignIds).length === 0) return;
 
@@ -770,7 +770,7 @@ const HourlyCampaignLevelReports = ({ functionCallForCommnets, context, function
         );
 
         const resp = await apiClient.post(
-            "https://prodapis.adsgoat.in/Creatives/get",
+            "/reports/data/creatives",
             { items },
             {
                 headers: {
@@ -888,8 +888,8 @@ const HourlyCampaignLevelReports = ({ functionCallForCommnets, context, function
 
     useEffect(() => {
         // functionCall1();
-        console.log(campaignStatusFilter, "campaignStatusFilter");
-        console.log(campaignStatusFilter?.toUpperCase())
+        // console.log(campaignStatusFilter, "campaignStatusFilter");
+        // console.log(campaignStatusFilter?.toUpperCase())
         if (campaignStatusFilter !== "All") {
 
             // Filter grid rows by campaign status
@@ -918,7 +918,7 @@ const HourlyCampaignLevelReports = ({ functionCallForCommnets, context, function
 
     useEffect(() => {
         if (refreshpage === "Refresh11") {
-            console.log("test2");
+            // console.log("test2");
             handleReFetchData();
             showCampaignLevel([]);
         }
@@ -943,7 +943,7 @@ const HourlyCampaignLevelReports = ({ functionCallForCommnets, context, function
     };
 
     const handleTabChange = (key) => {
-        console.log("Switched to Tab:", key); // Debugging log
+        // console.log("Switched to Tab:", key); // Debugging log
         setActiveTab(key);
     };
 
@@ -1028,7 +1028,7 @@ const HourlyCampaignLevelReports = ({ functionCallForCommnets, context, function
 
         setLeafCampaigns(uniqueLeafCampaigns);
 
-        console.log(" Selected unique campaigns:", uniqueLeafCampaigns);
+        // console.log(" Selected unique campaigns:", uniqueLeafCampaigns);
     };
 
 
@@ -1350,7 +1350,7 @@ const HourlyCampaignLevelReports = ({ functionCallForCommnets, context, function
                                                 <div style={{ maxHeight: 240, overflowY: "auto", paddingRight: 4 }}>
                                                     {ids.map((id, i) => {
                                                         const acc = accountsAccess.find(a => a.accountNumber === id);
-                                                        console.log("timezones:", accountsAccess);
+                                                        // console.log("timezones:", accountsAccess);
                                                         const tz = acc?.timeZone ?? "-";
                                                         return (
                                                             <div

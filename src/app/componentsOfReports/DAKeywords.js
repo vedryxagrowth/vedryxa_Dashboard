@@ -120,7 +120,7 @@ const DAKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner,
             console.error("Grid reference is null");
         }
         const updateDetails = async()=>{
-            await apiClient.post('/UserExportActivities/', { Details });
+            await apiClient.post('/reports/commonapis/userexportactivities', { Details });
         }
         updateDetails();
     };
@@ -582,7 +582,7 @@ const DAKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner,
     const functionCall4 = async () => {
         try {
             setLoading3(true);
-            const fetchData = await apiClient.get(`/DAKeywords?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}`);
+            const fetchData = await apiClient.get(`/reports/data/domainactivekeyword?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}`);
             const mainData = fetchData.data;
             timezone.current = mainData[0].accountTimezone;
             // console.log(mainData, "mainData of functionCall4");
@@ -883,7 +883,7 @@ const DAKeywords = ({startDate, endDate, newaccount, newtime, newRevenuePratner,
     
             // ✅ Copy text to clipboard
             navigator.clipboard.writeText(copiedText).then(() => {
-                console.log("Copied to clipboard:", copiedText);
+                // console.log("Copied to clipboard:", copiedText);
             }).catch((err) => {
                 console.error("Clipboard copy failed:", err);
             });

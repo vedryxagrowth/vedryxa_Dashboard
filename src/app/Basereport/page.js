@@ -147,7 +147,7 @@ const MyTablePage = () => {
     ];
 
     const storedData = localStorage.getItem("storedData") && localStorage.getItem("storedData") !== "undefined" && localStorage.getItem("storedData") !== "null" ? JSON.parse(localStorage.getItem("storedData")) : null;
-    console.log(storedData, "storedData");
+    // console.log(storedData, "storedData");
 
     const defaultDates = [dayjs((startDateFromDashboard ? startDateFromDashboard : (storedData ? storedData?.startDate : yesterday))), dayjs((endDateFromDashboard ? endDateFromDashboard : (storedData ? storedData?.endDate : yesterday)))];
 
@@ -219,7 +219,7 @@ const MyTablePage = () => {
     useEffect(() => {
         const fetchNetworksData = async () => {
             try {
-                const res = await axios.get('https://prodapis.adsgoat.in/get/networksData/', {
+                const res = await apiClient.get('/reports/commonapis/networkdata', {
                     headers: {
                         Authorization: token,
 
@@ -358,12 +358,12 @@ const MyTablePage = () => {
     const [newaccount, setNewAccount] = useState((accountNumberFromDashboard ? [String(accountNumberFromDashboard)] : (storedData?.account ? storedData?.account : [String(accountsForAccess[0].accountNumber)])));
 
 
-    console.log(newaccount)
+    // console.log(newaccount)
 
     const [accountName, setAccountName] = useState(accountNameFromDashboard ? accountNameFromDashboard?.replace(/\+/g, " ") : (storedData ? storedData?.accountName : (accountsForAccess[0]?.accountName)));
 
     const [newAccountName, setnewAccountName] = useState(accountNameFromDashboard ? accountNameFromDashboard : (storedData ? storedData?.accountName : (accountsForAccess[0]?.accountName)));
-    console.log(newAccountName);
+    // console.log(newAccountName);
     const [newtime, setNewTime] = useState((timeFromDashboard ? timeFromDashboard : (storedData ? storedData?.time : (revenuePratner === "FB_DomainActive" || revenuePratner === "FB_Tonic1") ? "PDT" : "UTC")));
 
     const [pageSize, setPageSize] = useState(1);
@@ -432,7 +432,7 @@ const MyTablePage = () => {
 
 
 
-    console.log('All campaignData:', allCampaignData);
+    // console.log('All campaignData:', allCampaignData);
     const [campaignRefreshTrigger, setCampaignRefreshTrigger] = useState(0);
     const [hovered, setHovered] = useState(false);
     const [Rhovered, setRHovered] = useState(false);
@@ -453,7 +453,7 @@ const MyTablePage = () => {
     const initialOne = deriveInitial(accountNumberFromDashboard, storedData, networksData);
 
 
-    console.log(initialOne, "initialData");
+    // console.log(initialOne, "initialData");
 
     // track if the user already changed selection
     const userPickedRef = useRef(false);
@@ -1876,7 +1876,7 @@ const MyTablePage = () => {
                         const token = localStorage.getItem("token");
 
                         await apiClient.post(
-                            "/UpdateCategoryNew",
+                            "/reports/singleactions/category",
                             payload,
                             { headers: { Authorization: token } }
                         );
@@ -2983,7 +2983,7 @@ const MyTablePage = () => {
                         const token = localStorage.getItem("token");
 
                         await apiClient.post(
-                            "/UpdateCategoryNew",
+                            "/reports/singleactions/category",
                             payload,
                             { headers: { Authorization: token } }
                         );
@@ -5080,7 +5080,7 @@ const MyTablePage = () => {
                     ? params?.node?.key
                     : params?.data?.campaignname;
 
-                console.log("campaignId ar:", campaignId);
+                // console.log("campaignId ar:", campaignId);
 
                 useEffect(() => {
                     if (!campaignId || !initialAdsetId || !Array.isArray(Camapignlevelstatus)) return;
@@ -5252,7 +5252,7 @@ const MyTablePage = () => {
 
                     try {
                         setConfirmLoading(true);
-                        const newResponse = await apiClient.post('/update/adset/budget/history', payload);
+                        const newResponse = await apiClient.post('/reports/singleactions/adsetbudget', payload);
                         message.success("Adset Budget and/or Bid Updated");
                         if (newResponse.status === 200 || newResponse.status === 201) {
                             setConfirmLoading(false);
@@ -6213,7 +6213,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryAndStoreHistory",
+                        "/reports/singleactions/category",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -6500,11 +6500,11 @@ const MyTablePage = () => {
                         }
                     };
 
-                    console.log("API Payload →", payload);
+                    // console.log("API Payload →", payload);
 
                     try {
-                        const res = await axios.post("https://prodapis.adsgoat.in/api/updateAdsetEndTime", payload);
-                        console.log("API Response →", res.data);
+                        const res = await apiClient.post("/reports/singleactions/adsetendtime", payload);
+                        // console.log("API Response →", res.data);
                         message.success("End date updated successfully");
                         setOpen(false);
                     } catch (err) {
@@ -8132,7 +8132,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryAndStoreHistory",
+                        "/reports/singleactions/category",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -8419,11 +8419,11 @@ const MyTablePage = () => {
                         }
                     };
 
-                    console.log("API Payload →", payload);
+                    // console.log("API Payload →", payload);
 
                     try {
-                        const res = await axios.post("https://prodapis.adsgoat.in/api/updateAdsetEndTime", payload);
-                        console.log("API Response →", res.data);
+                        const res = await apiClient.post("/reports/singleactions/adsetendtime", payload);
+                        // console.log("API Response →", res.data);
                         message.success("End date updated successfully");
                         setOpen(false);
                     } catch (err) {
@@ -9709,7 +9709,7 @@ const MyTablePage = () => {
                     }
 
                     try {
-                        await apiClient.post('/update/campaign/budget/history', payload);
+                        await apiClient.post('/reports/singleactions/campaignbudget', payload);
                         message.success("Budget Updated Successfully");
                         setCamapignlevelstatus(prev => {
                             const updated = prev.map(item => {
@@ -10532,7 +10532,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryAndStoreHistory",
+                        "/reports/singleactions/category",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -11599,7 +11599,7 @@ const MyTablePage = () => {
                     ? params?.node?.key
                     : params?.data?.campaignname;
 
-                console.log("campaignId ar:", campaignId);
+                // console.log("campaignId ar:", campaignId);
 
                 useEffect(() => {
                     if (!campaignId || !initialAdsetId || !Array.isArray(Camapignlevelstatus)) return;
@@ -11671,7 +11671,7 @@ const MyTablePage = () => {
                     // setIsModalVisible(false);
                     const campaignname = groupedData?.[0]?.campaignname;
 
-                    console.log("Submitting budget change:", groupedData);
+                    // console.log("Submitting budget change:", groupedData);
 
                     const campaignActualSpend = Camapignlevelstatus
                         .find(item =>
@@ -11726,7 +11726,7 @@ const MyTablePage = () => {
 
                         // changeRRefrst();
                         setConfirmLoading(true);
-                        const newResponse = await apiClient.post('/new/update/adset/budget', payload);
+                        const newResponse = await apiClient.post('/reports/singleactions/adsetbudget', payload);
                         message.success("Adset Budget and/or Bid Updated");
                         if (newResponse.status === 200 || newResponse.status === 201) {
                             setConfirmLoading(false);
@@ -12191,7 +12191,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryNew",
+                        "/reports/singleactions/category",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -12501,11 +12501,11 @@ const MyTablePage = () => {
                         }
                     };
 
-                    console.log("API Payload →", payload);
+                    // console.log("API Payload →", payload);
 
                     try {
-                        const res = await axios.post("https://prodapis.adsgoat.in/api/updateAdsetEndTime", payload);
-                        console.log("API Response →", res.data);
+                        const res = await apiClient.post("/reports/singleactions/adsetendtime", payload);
+                        // console.log("API Response →", res.data);
                         message.success("End date updated successfully");
                         setOpen(false);
                     } catch (err) {
@@ -13524,7 +13524,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryNew",
+                        "/reports/singleactions/category",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -13898,11 +13898,11 @@ const MyTablePage = () => {
                         }
                     };
 
-                    console.log("API Payload →", payload);
+                    // console.log("API Payload →", payload);
 
                     try {
-                        const res = await axios.post("https://prodapis.adsgoat.in/api/updateAdsetEndTime", payload);
-                        console.log("API Response →", res.data);
+                        const res = await apiClient.post("/reports/singleactions/adsetendtime", payload);
+                        // console.log("API Response →", res.data);
                         message.success("End date updated successfully");
                         setOpen(false);
                     } catch (err) {
@@ -14860,7 +14860,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryNew",
+                        "/reports/singleactions/category",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -16010,7 +16010,7 @@ const MyTablePage = () => {
 
 
                     try {
-                        await apiClient.post('/new/update/campaign/budget', payload);
+                        await apiClient.post('/reports/singleactions/campaignbudget', payload);
                         message.success("Budget Updated Successfully");
                         setCamapignlevelstatus(prev => {
                             const updated = prev.map(item => {
@@ -16413,7 +16413,7 @@ const MyTablePage = () => {
                     const token = localStorage.getItem("token");
 
                     await apiClient.post(
-                        "/UpdateCategoryNew",
+                        "/reports/singleactions/category",
                         payload,
                         { headers: { Authorization: token } }
                     );
@@ -17462,7 +17462,7 @@ const MyTablePage = () => {
                 const onChangeSpendAndStatus = async () => {
                     // Check if it's a group footer row (for groupIncludeFooter)
                     if (params?.node?.footer) {
-                        console.log("This is a groupIncludeFooter row. Modal will not open.");
+                        // console.log("This is a groupIncludeFooter row. Modal will not open.");
                         return; // Prevent modal from opening for group footer rows
                     }
 
@@ -17774,7 +17774,7 @@ const MyTablePage = () => {
                         const token = localStorage.getItem("token");
 
                         await apiClient.post(
-                            "/UpdateCategoryNew",
+                            "/reports/singleactions/category",
                             payload,
                             { headers: { Authorization: token } }
                         );
@@ -18420,8 +18420,8 @@ const MyTablePage = () => {
     const functionCallForUserColumnStructure = async () => {
         try {
             setInitialLoading(true);
-            const fetchData = await apiClient.get(`/api/singleUserData?email=${userdetails.email}`);
-            const mainData = fetchData.data;
+            const fetchData = await apiClient.get(`/reports/commonapis/columnStructure?email=${userdetails.email}`);
+            const mainData = fetchData.data.data;
             setColumnStructure(mainData?.columnStructure);
             mainDataRef.current = mainData;
             // Use the existing API column structure for other grid columns
@@ -18510,8 +18510,8 @@ const MyTablePage = () => {
 
         try {
             setInitialLoading(true);
-            const { data } = await apiClient.post('/NewComment', { accountNumbers: accountOrAccounts });
-            setCampaignComments(data);     // data already includes all selected accounts’ comments
+            const { data } = await apiClient.post('/reports/commonapis/comments', { accountNumbers: accountOrAccounts });
+            setCampaignComments(data.data);     // data already includes all selected accounts’ comments
             setInitialLoading(false);
         } catch {
             setCampaignComments([]);
@@ -18525,17 +18525,17 @@ const MyTablePage = () => {
 
     const functionCallForCampaigns = async (accountOrAccounts) => {
         setCampaignsStatus(false);
-        console.log("accountOrAccounts", accountOrAccounts);
+        // console.log("accountOrAccounts", accountOrAccounts);
         // console.log(storedData);
 
         // const accounts = Array.isArray(accountOrAccounts) && accountOrAccounts?.length > 0 ? accountOrAccounts.map(String) : storedData?.account ? storedData?.account : [String(accountOrAccounts)];
 
         // console.log("accounts", accounts);
-        console.log(newaccount)
+        // console.log(newaccount)
         try {
             setInitialLoading(true);
-            const { data } = await apiClient.post('/Campaignstatusfb', { accountNumbers: accountOrAccounts });
-            setCamapignlevelstatus(data);
+            const { data } = await apiClient.post('/reports/commonapis/campaignstatusfb', { accountNumbers: accountOrAccounts });
+            setCamapignlevelstatus(data.data);
             setInitialLoading(false);
         } catch {
             setCamapignlevelstatus([]);
@@ -18645,13 +18645,13 @@ const MyTablePage = () => {
     // }, [accountNumberFromDashboard, storedData?.account, networksData]);
 
     useEffect(() => {
-        if (campaignsStatus && commentsStatus && columnStructureStatus && allCampaignsStatus) {
+        if (campaignsStatus && commentsStatus && columnStructureStatus) {
             setMoveForward(true);
         }
-    }, [campaignsStatus, commentsStatus, columnStructureStatus, allCampaignsStatus]);
+    }, [campaignsStatus, commentsStatus, columnStructureStatus]);
 
     const functionCall = async (account) => {
-        await functionCallForAllCampaignsData();
+        // await functionCallForAllCampaignsData();
         await functionCallForCampaigns(account);
         await functionCallForCommnets(account);
         await functionCallForUserColumnStructure();
@@ -18663,7 +18663,7 @@ const MyTablePage = () => {
     // }, []);
 
     useEffect(() => {
-        console.log(newaccount)
+        // console.log(newaccount)
         functionCall(newaccount);  // pass the array
     }, []);
 
@@ -18693,7 +18693,7 @@ const MyTablePage = () => {
 
     // whenever network changes
     const onChangeSelectRevenue = (value) => {
-        console.log(value);
+        // console.log(value);
         // userPickedRef.current = true;
         // const accountsForAccess = adAccounts[value];
         // const accountsAccess = accountsForAccess === undefined ? [] : accountsForAccess;
@@ -18718,9 +18718,9 @@ const MyTablePage = () => {
         setSearchText("");
         setIsOpen(false);
         const accountsForAccess = adAccounts[value];
-        console.log(accountsForAccess);
+        // console.log(accountsForAccess);
         const accountsAccess = accountsForAccess === undefined ? [] : accountsForAccess;
-        console.log(accountsAccess);
+        // console.log(accountsAccess);
         setNetworksData(accountsAccess);
         setRevenuePartner(value)
         setNewAccount([String(accountsAccess[0].accountNumber)])
@@ -18774,7 +18774,7 @@ const MyTablePage = () => {
             account,
             accountName
         };
-        console.log(storedData, "storedData");
+        // console.log(storedData, "storedData");
         localStorage.setItem("storedData", JSON.stringify(storedData));
         setCampaignsStatus(false);
         setCommentsStatus(false);
@@ -19502,8 +19502,8 @@ const MyTablePage = () => {
                 setAiError(null);
 
 
-                const res = await axios.post(
-                    'https://prodapis.adsgoat.in/AiCampaignRecommendations',
+                const res = await apiClient.post(
+                    '/reports/AI/campaignrecommendations',
                     {
                         accountNumbers: accounts,
                         network: resolvedNetwork,

@@ -364,7 +364,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
             }
         });
 
-        apiClient.post('/UserExportActivities/', { Details }).catch(console.error);
+        apiClient.post('/reports/commonapis/userexportactivities', { Details }).catch(console.error);
     };
 
     const uniqueByAdsetId = (arr) => {
@@ -387,7 +387,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
 
         // Keep your existing functionality
         showAdsetLevel(selectedData);
-        console.log(selectedData, "selectedData")
+        // console.log(selectedData, "selectedData")
 
         const leafCampaignsData = selectedNodes
             .filter(node => !node.group && node.data)
@@ -411,7 +411,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
 
 
         setLeafCampaigns(uniqueLeafCampaigns);
-        console.log(" Selected unique Adsets:", uniqueLeafCampaigns);
+        // console.log(" Selected unique Adsets:", uniqueLeafCampaigns);
     };
     const handleBulkSmartPinAdset = async (action) => {
         if (!leafCampaigns || leafCampaigns.length === 0) {
@@ -447,8 +447,8 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
 
         const apiUrl =
             action === "pin"
-                ? "/SmartPinBulkWithHitory"
-                : "/SmartUnpinBulkWithHistory";
+                ? "/reports/bulkactions/pin"
+                : "/reports/bulkactions/unpin";
 
         const res = await apiClient.post(apiUrl, { items: data });
 
@@ -506,17 +506,17 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
 
             const items = leafCampaigns.map(item => ({
                 campaignid: item.campaignid,
-                adsetid: item.adsetid,
+                // adsetid: item.adsetid,
                 activity: {
                     editType: "Comment",
                     campaignid: item.campaignid,       // cents
-                    adsetid: item.adsetid,
+                    // adsetid: item.adsetid,
                     Account: item.accountNumber,    // ✅ update *this* row’s account
                     campaignname: item.campaignname,
-                    adsetname: item.adsetname,
+                    // adsetname: item.adsetname,
                     updatedBy: userdetails?.userName,
                     updatedUserEmail: userdetails?.email,
-                    updateType: "Adset comment cleared",
+                    updateType: "Campaign comment cleared",
                     updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
                     // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
                 }
@@ -529,7 +529,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
             };
 
             const resp = await apiClient.post(
-                '/Comments/bulkdeleteWithHistory',
+                '/reports/bulkactions/comments/delete',
                 body
             );
 
@@ -589,18 +589,18 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
             const items = leafCampaigns.map(item => ({
                 accountNumber: item.accountNumber,
                 campaignid: item.campaignid,
-                adsetid: item.adsetid,
+                // adsetid: item.adsetid,
                 campaignname: item.adsetname,
                 comment,
                 usercommit: userdetails?.email,
-                level: "adset",
+                level: "campaign",
                 activity: {
                     editType: "Comment",
                     campaignid: item.campaignid,       // cents
-                    adsetid: item.adsetid,
+                    // adsetid: item.adsetid,
                     Account: item.accountNumber,    // ✅ update *this* row’s account
                     campaignname: item.campaignname,
-                    adsetname: item.adsetname,
+                    // adsetname: item.adsetname,
                     updatedBy: userdetails?.userName,
                     updatedUserEmail: userdetails?.email,
                     updateType: "Adset pin updated",
@@ -610,7 +610,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
             }));
 
             const resp = await apiClient.post(
-                '/Comments/upsertBulkNewWithHistory',
+                '/reports/bulkactions/comments',
                 { items, usercommit: userdetails?.email }
             );
 
@@ -674,37 +674,32 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
 
             const token = localStorage.getItem("token");
 
-
             // const filteredItems = leafCampaigns.filter(item =>
-            //     bulkStatusAction === "ACTIVE"
-            //         ? item.fbStatus === "PAUSED"
-            //         : item.fbStatus === "ACTIVE"
+            //   bulkStatusAction === "ACTIVE"
+            //     ? item.fbStatus === "PAUSED"
+            //     : item.fbStatus === "ACTIVE"
             // )
-            //     .map(item => ({
-            //         status: bulkStatusAction,
-            //         campaign_id: item.campaignid,
-            //         adset_id: item.adsetid,
-            //         accountNumber: String(item.accountNumber),
-            //         name: item.adsetname,
-            //         email: userdetails?.email
-            //     }));
+            //   .map(item => ({
+            //     status: bulkStatusAction,
+            //     campaign_id: item.campaignid,
+            //     accountNumber: String(item.accountNumber),
+            //     name: item.campaignname,
+            //     email: userdetails?.email,
+            //   }));
 
-            // Build adset status lookup
-            const adsetStatusMap = new Map(
-                Camapignlevelstatus.flatMap(campaign =>
-                    (campaign.adsets || []).map(adset => [
-                        String(adset.adset_id),
-                        adset.status?.toUpperCase()
-                    ])
-                )
+            const campaignStatusMap = new Map(
+                Camapignlevelstatus.map(item => [
+                    String(item.campaign_id),
+                    item.status?.toUpperCase()
+                ])
             );
 
-            // Filter leaf adsets that actually need status change
+            // Filter leaf campaigns that actually need status change
             const filteredItems = leafCampaigns
                 .filter(item => {
-                    const adsetId = String(item.adsetid);
+                    const campaignId = String(item.campaignid);
                     const currentStatus =
-                        adsetStatusMap.get(adsetId) || "ACTIVE";
+                        campaignStatusMap.get(campaignId) || "ACTIVE";
 
                     return bulkStatusAction === "ACTIVE"
                         ? currentStatus === "PAUSED"
@@ -713,109 +708,96 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                 .map(item => ({
                     status: bulkStatusAction,
                     campaign_id: item.campaignid,
-                    adset_id: item.adsetid,
                     accountNumber: String(item.accountNumber),
-                    name: item.adsetname,
+                    name: item.campaignname,
                     email: userdetails?.email,
                     activity: {
                         editType: "Status",
-                        campaignid: item.campaignid,       // cents
-                        adsetid: item.adsetid,
+                        campaignid: item.campaignid,
                         Account: String(item.accountNumber),    // ✅ update *this* row’s account
                         campaignname: item.campaignname,
-                        adsetname: item.adsetname,
                         updatedBy: userdetails?.userName,
                         updatedUserEmail: userdetails?.email,
-                        updateType: "Adset status updated",
+                        updateType: "Campaign status updated",
                         updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
                         updateDetail: `From ${bulkStatusAction === "ACTIVE" ? "Inactive" : "Active"} to ${bulkStatusAction === "ACTIVE" ? "Active" : "Inactive"}`,
                     }
                 }));
 
-
             if (filteredItems.length === 0) {
-                message.info("No adsets need updating.");
+                message.info("No campaigns need updating.");
                 setIsBulkStatusModalVisible(false);
                 setConfirmBulkLoading(false);
                 return;
             }
 
+
             const resp = await apiClient.post(
-                "/BulkAdsetStatusChangeManyWithHistory",
+                "/reports/bulkactions/outbrain/campaignstatus",
                 { items: filteredItems },
                 { headers: { Authorization: token } }
             );
 
+
             if (resp.status === 200 || resp.status === 201) {
                 const updatedCampaignLevelStatus = (() => {
-                    let arr = Array.isArray(Camapignlevelstatus)
+                    const arr = Array.isArray(Camapignlevelstatus)
                         ? [...Camapignlevelstatus]
                         : [];
 
                     filteredItems.forEach(update => {
-                        const { campaign_id, adset_id, accountNumber, status } = update;
-
-                        arr = arr.map(item =>
-                            String(item.campaign_id) === String(campaign_id) &&
-                                String(item.accountNumber) === String(accountNumber)
-                                ? {
-                                    ...item,
-                                    adsets: (item.adsets || []).map(adset =>
-                                        String(adset.adset_id) === String(adset_id)
-                                            ? { ...adset, status }
-                                            : adset
-                                    )
-                                }
-                                : item
+                        const idx = arr.findIndex(
+                            c =>
+                                String(c.campaign_id) === String(update.campaign_id) &&
+                                String(c.accountNumber) === String(update.accountNumber)
                         );
+
+                        if (idx !== -1) {
+                            arr[idx] = {
+                                ...arr[idx],
+                                status: bulkStatusAction
+                            };
+                        }
                     });
 
                     return arr;
                 })();
                 setCamapignlevelstatus(updatedCampaignLevelStatus);
                 // if (campaignStatusFilter !== "All") {
-                //     const adsetStatusMap = new Map(
-                //         updatedCampaignLevelStatus.flatMap(campaign =>
-                //             (campaign.adsets || []).map(adset => [
-                //                 String(adset.adset_id),
-                //                 adset.status?.toUpperCase()
-                //             ])
-                //         )
-                //     );
+                //   const campaignStatusMap = new Map(
+                //     updatedCampaignLevelStatus.map(item => [
+                //       String(item.campaign_id),
+                //       item.status?.toUpperCase()
+                //     ])
+                //   );
 
-                //     const filteredRowObjects = newRowDataForFilter.current.filter(row =>
-                //         adsetStatusMap.get(String(row.adsetid)) ===
-                //         campaignStatusFilter?.toUpperCase()
-                //     );
+                //   const filteredRowObjects = newRowDataForFilter.current.filter(row =>
+                //     campaignStatusMap.get(String(row.campaignid)) ===
+                //     campaignStatusFilter?.toUpperCase()
+                //   );
 
-                //     setdailyData(filteredRowObjects);
+                //   setRowData(filteredRowObjects);
                 // }
                 // setCamapignlevelstatus(prev => {
-                //     let arr = [...prev];
+                //   const arr = [...prev];
 
-                //     filteredItems.forEach(update => {
-                //         const { campaign_id, adset_id, accountNumber, status } = update;
+                //   filteredItems.forEach(update => {
+                //     const idx = arr.findIndex(
+                //       c =>
+                //         String(c.campaign_id) === String(update.campaign_id) &&
+                //         String(c.accountNumber) === String(update.accountNumber)
+                //     );
 
-                //         arr = arr.map(item =>
-                //             String(item.campaign_id) === String(campaign_id) &&
-                //                 String(item.accountNumber) === String(accountNumber)
-                //                 ? {
-                //                     ...item,
-                //                     adsets: (item.adsets || []).map(adset =>
-                //                         String(adset.adset_id) === String(adset_id)
-                //                             ? { ...adset, status }
-                //                             : adset
-                //                     )
-                //                 }
-                //                 : item
-                //         );
-                //     });
+                //     if (idx !== -1) {
+                //       arr[idx] = { ...arr[idx], status: bulkStatusAction };
+                //     }
+                //   });
 
-                //     return arr;
+                //   return arr;
                 // });
 
                 message.success(
-                    `${filteredItems.length} adset(s) updated to ${bulkStatusAction.toLowerCase()}`
+                    `${filteredItems.length} campaign(s) updated to ${bulkStatusAction.toLowerCase()}`
                 );
             }
 
@@ -950,7 +932,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
             message.loading({ content: "Updating category...", key: "bulkCategory" });
 
             await apiClient.post(
-                "/BulkUpdateCategoryNewWithHistory",
+                "/reports/bulkactions/category",
                 { items, category: bulkCategory },
                 { headers: { Authorization: token } }
             );
@@ -1273,7 +1255,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                         };
 
                         const response = await apiClient.post(
-                            `/BulkCampaignStatusChangeWithHistory`,
+                            `/reports/singleactions/outbrain/campaignstatus`,
                             payload,
                             { headers: { Authorization: token } }
                         );
@@ -1440,12 +1422,12 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                         campaignname: campaignName,
                         updatedBy: userdetails?.userName,
                         updatedUserEmail: userdetails?.email,
-                        updateType: "Campaign pin updated",
+                        updateType: "Campaign comment updated",
                         updateAt: moment().tz("Asia/Kolkata").format("DD-MM-YYYY hh:mm A"),
                         // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
                     }
                     const newResponse = await apiClient.post(
-                        '/Comments/upsert/History',
+                        '/reports/singleactions/comments',
                         {
                             accountNumber: rowAccount,
                             campaignname: campaignName,
@@ -1506,7 +1488,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                             // updateDetail: `From ${updatedPinStatus ? "unpin" : "pin"} to ${updatedPinStatus ? "pin" : "unpin"}`,
                         }
                         const newResponse = await apiClient.post(
-                            '/New/Comments/delete/History',
+                            '/reports/singleactions/comments/delete',
                             {
                                 accountNumber: rowAccount,
                                 campaignname: campaignName,
@@ -1587,7 +1569,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                                 usercommit: userdetails?.email,
                                 level: item.level,
                             }));
-                            console.log('Sending items:', items);
+                            // console.log('Sending items:', items);
 
                             const resp = await apiClient.post(
                                 '/Comments/upsertBulk',
@@ -1661,7 +1643,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                         }
                         if (updatedPinStatus) {
                             const resp = await apiClient.post(
-                                '/NewPinBulkWithHistory',
+                                '/reports/singleactions/pin',
                                 {
                                     accountNumber: rowAccount,
                                     campaignname: campaignName,
@@ -1713,7 +1695,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                             }
                         } else {
                             const resp = await apiClient.post(
-                                '/NewUnpinBulkWithHistory',
+                                '/reports/singleactions/unpin',
                                 {
                                     accountNumber: rowAccount,
                                     campaignname: campaignName,
@@ -2507,7 +2489,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
         },
         processCellForClipboard: (params) => {
             if (params.node.group) {
-                console.log("Processing group column for copy..."); // Debugging log
+                // console.log("Processing group column for copy..."); // Debugging log
 
                 // ✅ Fix: Ensure `params.node.parent` exists before accessing its properties
                 if (!params.node.parent || !params.node.parent.childrenAfterGroup) {
@@ -2569,7 +2551,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                 : [String(newaccount)];
 
             // ✅ call multi-account endpoint (Daily)
-            const resp = await apiClient.post("/Outbrain/TonicRsoc/Sections", {
+            const resp = await apiClient.post("/reports/data/OutbrainTonicRsocSections", {
                 dateStart: startDate,
                 dateEnd: endDate,
                 timezone: newtime,
@@ -2831,7 +2813,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
 
             newDailyData.current = fullData;
             fetchData.status === 200 && setApiStatus(false);
-            fetchData.status === 200 && console.log("Success");
+            // fetchData.status === 200 && console.log("Success");
             // setTrue(false);
             setLoading1(false);
         } catch (error) {
@@ -2839,14 +2821,14 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
             // if(error.response.status === 500){
             //     apiStatus.current = true;
             // }
-            console.log(error);
+            // console.log(error);
             setApiStatus(true);
             setLoading1(false);
         }
     }
-    useEffect(() => {
-        console.log(campaignIds, "campaignIds updated");
-    }, [campaignIds]);
+    // useEffect(() => {
+    //     console.log(campaignIds, "campaignIds updated");
+    // }, [campaignIds]);
     // useEffect(() => {
     //     if (!campaignIds || Object.keys(campaignIds).length === 0) return;
 
@@ -3081,7 +3063,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
 
             // ✅ Copy text to clipboard
             navigator.clipboard.writeText(copiedText).then(() => {
-                console.log("Copied to clipboard:", copiedText);
+                // console.log("Copied to clipboard:", copiedText);
             }).catch((err) => {
                 console.error("Clipboard copy failed:", err);
             });
@@ -3255,7 +3237,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
 
     useEffect(() => {
         // functionCall1();
-        console.log(campaignStatusFilter, "campaignStatusFilter");
+        // console.log(campaignStatusFilter, "campaignStatusFilter");
         if (campaignStatusFilter !== "All") {
             // const filteredByStatus = newRowDataForFilter.current.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
             // const filteredByStatus = memorizedDailyData.filter(item => item.fbStatus?.toUpperCase() === campaignStatusFilter?.toUpperCase());
@@ -3671,7 +3653,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                                                 <div style={{ maxHeight: 240, overflowY: "auto", paddingRight: 4 }}>
                                                     {ids.map((id, i) => {
                                                         const acc = accountsAccess.find(a => a.accountNumber === id);
-                                                        console.log("timezones:", accountsAccess);
+                                                        // console.log("timezones:", accountsAccess);
                                                         const tz = acc?.timeZone ?? "-";
                                                         return (
                                                             <div
