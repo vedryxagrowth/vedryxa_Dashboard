@@ -13174,7 +13174,7 @@ const EditMultipleAdsetCampaignDrawer = ({
                 video_id: name.video_id,
                 thambnailurl: name.thambnailurl,
               } : {}),
-            AddName: `${adsetObj.AdsetName}_Copy_${itemIndex + 1}_${i + 1}`,
+            // AddName: `${adsetObj.AdsetName}_Copy_${itemIndex + 1}_${i + 1}`,
             ...(
               adsetObj?.Adsetid &&
                 adsetObj?.is_dynamic_creative === true
