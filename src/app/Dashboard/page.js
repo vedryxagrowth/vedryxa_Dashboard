@@ -38,7 +38,8 @@ const revenuePartnerNames = {
     "Predicto": "FB_Predicto",
     "Affinity": "FB_Affinity",
     "Botup": "FB_Botup",
-    "Outbrain_Tonic_Rsoc": "Outbrain_TonicRsoc"
+    "Outbrain_Tonic_Rsoc": "Outbrain_TonicRsoc",
+    "MWG": "FB_MWG"
 };
 
 
@@ -61,7 +62,8 @@ const newtworkCollections = {
     "FB_Predicto": "Facebook_Predicto_Daily",
     "FB_Affinity": "Facebook_Affinity_Daily",
     "FB_Botup": "Facebook_Botup_Daily",
-    "Outbrain_TonicRsoc": "Outbrain_TonicRsoc"
+    "Outbrain_TonicRsoc": "Outbrain_TonicRsoc",
+    "FB_MWG": "Facebook_Mwg_Daily"
 }
 
 const NetworkDefaultTimezones = {
@@ -83,7 +85,8 @@ const NetworkDefaultTimezones = {
     "FB_Predicto": "EDT",
     "FB_Affinity": "PDT",
     "FB_Botup": "EDT",
-    "Outbrain_TonicRsoc": "EDT"
+    "Outbrain_TonicRsoc": "EDT",
+    "FB_MWG": "UTC"
 }
 
 import { DatePicker, Space, ConfigProvider, Flex, Spin, Skeleton } from 'antd';
@@ -1685,6 +1688,8 @@ const Dashboard = () => {
                     newKey = "Facebook_Botup_Daily"
                 } else if (key === "Outbrain_TonicRsoc") {
                     newKey = "Outbrain_TonicRsoc"
+                } else if (key === "FB_MWG") {
+                    newKey = "Facebook_Mwg_Daily"
                 }
                 else { newKey = "Facebook_" + splitKey[1]; }
 
@@ -6735,9 +6740,9 @@ const Dashboard = () => {
                                     <div className="metrics-container">
                                         <div className="metrics-grid">
                                             {metrics.map((m, i) => (
-                                                <Card className="metric-card" key={i} 
-                                                // bordered={false}
-                                                variant="borderless"
+                                                <Card className="metric-card" key={i}
+                                                    // bordered={false}
+                                                    variant="borderless"
                                                     style={{
                                                         backgroundColor: theme === "dark" ? "#2F2F2F" : "white"
                                                     }}>
