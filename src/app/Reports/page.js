@@ -64,7 +64,8 @@ const networkCollectionsForAiAssistant = {
     FB_CodeFuel: 'Facebook_CodeFuel_Daily',
     FB_Predicto: 'Facebook_Predicto_Daily',
     FB_Affinity: 'Facebook_Affinity_Daily',
-    FB_Botup: "Facebook_Botup_Daily"
+    FB_Botup: "Facebook_Botup_Daily",
+    FB_MWG: "Facebook_Mwg_Daily"
 };
 
 const NetworkDefaultTimezones = {
@@ -86,7 +87,8 @@ const NetworkDefaultTimezones = {
     "FB_Predicto": "EDT",
     "FB_Affinity": "PDT",
     "FB_Botup": "EDT",
-    "Outbrain_TonicRsoc": "EDT"
+    "Outbrain_TonicRsoc": "EDT",
+    "FB_MWG": "UTC"
 }
 
 
@@ -21817,7 +21819,7 @@ const MyTablePage = () => {
         { key: '2', label: 'Daily', content: 'Content for Daily data' },
         // { key: '3', label: 'Campaigns', content: 'Content for Campaign data' },
         { key: '4', label: 'Agency', content: 'Content for BMName data' },
-        ...(newRevenuePratner === "FB_Mnet" ? [{ key: '5', label: 'Domain', content: 'Content for Domain data' }] : []),
+        ...(newRevenuePratner === "FB_Mnet" || newRevenuePratner === "FB_MWG" ? [{ key: '5', label: 'Domain', content: 'Content for Domain data' }] : []),
         ...(newRevenuePratner === "FB_Mnet" ? [{ key: '6', label: 'Hourly', content: 'Content for hour wise break down' }] : []),
         ...(newRevenuePratner === "FB_DomainActive" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : []),
         // ...(newRevenuePratner === "FB_Mnet" ? [{ key: '7', label: 'Hour', content: 'Content for Hour data' }] : []),
@@ -23467,7 +23469,7 @@ const MyTablePage = () => {
                                 />
                             </Tabs.TabPane>
 
-                            {newRevenuePratner === "FB_Mnet" && (
+                            {newRevenuePratner === "FB_Mnet"  || newRevenuePratner === "FB_MWG"  && (
                                 <Tabs.TabPane key="5">
                                     <MnetDomainReports
                                         startDate={newStartDate}
