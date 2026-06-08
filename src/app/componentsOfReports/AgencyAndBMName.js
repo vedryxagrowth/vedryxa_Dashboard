@@ -35,7 +35,8 @@ const newtworkCollections = {
     "FB_Sedo": "Facebook_Sedo",
     "FB_Inmobi": "Facebook_Inmobi",
     "FB_TonicRsoc":"Facebook_TonicRsoc",
-    "FB_InuvoPrism": "Facebook_InuvoPrism"
+    "FB_InuvoPrism": "Facebook_InuvoPrism",
+    "FB_MWG": "Facebook_Mwg_Daily"
 }
 
 const AgencyAndBMNameReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, userdetails, refreshComments, refreshpage}) => {
