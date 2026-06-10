@@ -83,6 +83,7 @@ const CampaignHistoryModal = React.lazy(() => import('../Campaigns/camp-componen
 
 import { Token } from "aws-sdk";
 import { AccountBalance } from "@mui/icons-material";
+import { render } from "react-dom";
 const { RangePicker } = DatePicker;
 // import { redirect } from 'next/navigation';
 
@@ -209,11 +210,23 @@ const App = () => {
   const [adIds, setAdIds] = useState("");
   const [showTaboolaStatus, setShowTaboolaStatus] = useState(false);
   const [showPredictoadStatus, setShowPredictoadStatus] = useState(false);
+  const [showPredictoKeywordStatus, setShowPredictoKeywordStatus] = useState(false);
   const [platform, setPlatform] = useState(2);
   const [tableData, setTableData] = useState([]);
   const [predictoAdStatusData, setPredictoAdStatusData] = useState([]);
+  const [predictoKeywordStatusData, setPredictoKeywordStatusData] = useState([]);
+  const [predictoKeywordArticleStatusData, setPredictoKeywordArticleStatusData] = useState([]);
   const [searchAdId, setSearchAdId] = useState("");
+  const [keywordSearch, setKeywordSearch] = useState("");
   const [appliedSearch, setAppliedSearch] = useState("");
+  const keywordStatusDataRef = useRef([]);
+  const [languageSearch, setLanguageSearch] = useState("all");
+  const [statusSearch, setStatusSearch] = useState("all");
+  const [verticleSearch, setVerticleSearch] = useState("all");
+  const filtersList = useRef({ languageList: [], statusList: [], verticleList: [] })
+  const [loadingKeyword, setLoadingKeyword] = useState(true);
+  const [loadingArticleForKeyword, setLoadingArticleForKeyword] = useState([]);
+  const lastUpdatedDateandTime = useRef("");
   // console.log(checkedRowRecords);
   // console.log(multipleAdsetCampaignData);
   // const [isOpen, setIsOpen] = useState(false);
@@ -929,6 +942,7 @@ const App = () => {
     setSelectedValue([]);
     setShowPredictoadStatus(false);
     setShowTaboolaStatus(false);
+    setShowPredictoKeywordStatus(false);
   };
 
   const handleValueChange = (value) => {
@@ -2658,6 +2672,409 @@ const App = () => {
         </Tooltip>
       ),
     }
+
+  ];
+  const columnsforPredictoKeywordStatus = [
+    {
+      title: "Keyword",
+      dataIndex: "keyword",
+      key: "keyword",
+      render: (_, record) => {
+        const status = record.status?.toLowerCase();
+
+        const statusConfig = {
+          approved: {
+            color: "#52c41a",
+            text: "Approved",
+          },
+          disapproved: {
+            color: "#ff4d4f",
+            text: "Denied",
+          },
+          error: {
+            color: "#fa8c16",
+            text: "Error",
+          },
+          processing: {
+            color: "#8c8c8c",
+            text: "Processing",
+          }
+        };
+
+        const config = statusConfig[status] || {
+          color: "#8c8c8c",
+          text: "Unknown",
+        };
+
+        return (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+            }}
+          >
+            <Tooltip overlayInnerStyle={{
+              backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+              color: theme === "dark" ? "#ffffff" : "#000000",
+            }} title={config.text}>
+              <span
+                style={{
+                  width: 10,
+                  height: 10,
+                  minWidth: 10,
+                  minHeight: 10,
+                  flexShrink: 0,
+                  borderRadius: "50%",
+                  backgroundColor: config.color,
+                  display: "inline-block",
+                  cursor: "pointer",
+                }}
+              />
+            </Tooltip>
+
+            <div style={{ display: "flex", flexDirection: "column", minWidth: 0, }}>
+              <strong style={{ fontSize: "12px" }}>{record.keyword}</strong>
+              <span style={{ fontWeight: 300, fontSize: "12px" }}>ID {record.id}</span>
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      title: "Native Keyword",
+      dataIndex: "native_keyword",
+      key: "native_keyword",
+    },
+    {
+      title: "Lauguage",
+      dataIndex: "language",
+      key: "language",
+    },
+    {
+      title: "Vertical",
+      dataIndex: "vertical",
+      key: "vertical",
+    },
+
+    {
+      title: "Title",
+      dataIndex: "article_headline",
+      key: "article_headline",
+      render: (text) => {
+        if (!text) {
+          return (
+            <div
+              style={{
+                textAlign: "center",
+                width: "100%",
+              }}
+            >
+              -
+            </div>
+          );
+        }
+
+        return (
+          <Tooltip
+            placement="right"
+            overlayInnerStyle={{
+              backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+              color: theme === "dark" ? "#ffffff" : "#000000",
+            }}
+            title={
+              <div
+                style={{
+                  maxWidth: "500px",
+                }}
+              >
+                {text}
+              </div>
+            }
+          >
+            <span
+              style={{
+                display: "inline-block",
+                width: "150px",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {text}
+            </span>
+          </Tooltip>
+        );
+      },
+    },
+    {
+      title: "Link",
+      dataIndex: "link",
+      key: "link",
+      render: (_, record) => {
+        const article = predictoKeywordArticleStatusData.find(
+          (item) => item.keyword_id === record.id
+        );
+
+        // No object found
+        // if (!article) {
+        //   const isProcessing = record.status?.toLowerCase() === "processing";
+
+        //   return (
+        //     <Tooltip
+        //       title={isProcessing ? "Article generation is in progress" : "Click to get Article"}
+        //       overlayInnerStyle={{
+        //         backgroundColor:
+        //           theme === "dark" ? "#2b2b2b" : "#ffffff",
+        //         color: theme === "dark" ? "#ffffff" : "#000000",
+        //       }}
+        //     >
+        //       <ReloadOutlined
+        //         style={{
+        //           cursor: isProcessing ? "not-allowed" : "pointer",
+        //           color: isProcessing ? "#bfbfbf" : "#1890ff",
+        //           fontSize: "16px",
+        //           opacity: isProcessing ? 0.5 : 1,
+        //         }}
+        //         onClick={
+        //           () => fetchPredictoArticleForKeyword(record)
+        //         }
+        //       />
+        //     </Tooltip>
+        //   );
+        // }
+        if (!article) {
+          const isProcessing = record.status?.toLowerCase() === "processing";
+          const isLoading = loadingArticleForKeyword.includes(record.id);
+
+          return (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                width: "100%",
+                minHeight: "40px",
+              }}
+            >
+              {isLoading ? (
+                <Spin size="small" />
+              ) : (
+                <Tooltip
+                  title={
+                    isProcessing
+                      ? "Article generation is in progress"
+                      : "Click to get Article"
+                  }
+                  overlayInnerStyle={{
+                    backgroundColor:
+                      theme === "dark" ? "#2b2b2b" : "#ffffff",
+                    color: theme === "dark" ? "#ffffff" : "#000000",
+                  }}
+                >
+                  <ReloadOutlined
+                    style={{
+                      cursor: isProcessing ? "not-allowed" : "pointer",
+                      color: isProcessing ? "#bfbfbf" : "#1890ff",
+                      fontSize: "16px",
+                      opacity: isProcessing ? 0.5 : 1,
+                    }}
+                    onClick={() => {
+                      if (!isProcessing) {
+                        fetchPredictoArticleForKeyword(record);
+                      }
+                    }}
+                  />
+                </Tooltip>
+              )}
+            </div>
+          );
+        }
+
+        // Object found but URL missing
+        if (!article.url) {
+          return <div style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100%",
+            width: "100%",
+          }}>
+            -
+          </div>;
+        }
+
+        return (
+          <div>
+            <div>
+              <strong>Article ID:</strong> {article.article_id}
+            </div>
+
+            <Tooltip
+              placement="right"
+              overlayInnerStyle={{
+                backgroundColor:
+                  theme === "dark" ? "#2b2b2b" : "#ffffff",
+                color: theme === "dark" ? "#ffffff" : "#000000",
+              }}
+              title={
+                <div
+                  style={{
+                    maxWidth: "500px",
+                    wordBreak: "break-word",
+                  }}
+                >
+                  {article.url}
+                </div>
+              }
+            >
+              <a
+                href={article.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: "inline-block",
+                  width: "160px",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  color: "#1890ff",
+                }}
+              >
+                {article.url}
+              </a>
+            </Tooltip>
+          </div>
+        );
+      },
+    },
+    {
+      title: "Suggested Keywords",
+      dataIndex: "suggested_keywords",
+      key: "suggested_keywords",
+      width: 250,
+      render: (value) => {
+        let keywords = [];
+
+        try {
+          keywords = JSON.parse(value || "[]");
+        } catch (err) {
+          return "-";
+        }
+
+        const visibleKeywords = keywords.slice(0, 2);
+        const hiddenKeywords = keywords.slice(2);
+
+        return (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+            {visibleKeywords.map((keyword, index) => (
+              <Tag key={index}
+                style={
+                  {
+                    ...(theme === "dark"
+                      ? {
+                        background: "#3a3a3a",
+                        color: "#fff",
+                        border: "1px solid #555",
+                      }
+                      : {}),
+                    whiteSpace: "normal",
+                    lineHeight: "16px"
+                    // wordBreak: "break-word",
+                    // height: "auto",
+                    // lineHeight: "18px",
+                  }
+                }
+              >{keyword}</Tag>
+            ))}
+
+            {hiddenKeywords.length > 0 && (
+              <Tooltip
+                dropdownClassName={theme === 'dark' ? "custom-dropdown" : ""}
+                className={theme === 'dark' ? 'dark-theme' : 'light-theme'}
+                overlayInnerStyle={{
+                  backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                  color: theme === "dark" ? "#ffffff" : "#000000",
+                }}
+                title={
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 4,
+                    }}
+                  >
+                    {hiddenKeywords.map((keyword, index) => (
+                      <div key={index}>{keyword}</div>
+                    ))}
+                  </div>
+                }
+              >
+                <Tag
+                  style={
+                    theme === "dark"
+                      ? {
+                        cursor: "pointer",
+                        background: "#3a3a3a",
+                        color: "#fff",
+                        border: "1px solid #555",
+                      }
+                      : {
+                        cursor: "pointer",
+                      }
+                  }
+                >
+                  +{hiddenKeywords.length} more
+                </Tag>
+              </Tooltip>
+            )}
+          </div>
+        );
+      },
+    },
+    {
+      title: "Reason",
+      dataIndex: "reason",
+      key: "reason",
+      width: 150,
+      render: (text) => (
+        <Tooltip
+          placement="right"
+          overlayInnerStyle={{
+            backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+            color: theme === "dark" ? "#ffffff" : "#000000",
+          }}
+          title={
+            <div
+              style={{
+                maxWidth: "500px",
+              }}
+            >
+              {text}
+            </div>
+          }
+        >
+          <span
+            style={{
+              display: "inline-block",
+              width: "150px",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {text}
+          </span>
+        </Tooltip>
+      ),
+    },
+    {
+      title: "Created At",
+      dataIndex: "created_at",
+      key: "created_at",
+      width: 100,
+      render: (value) => value.split("T")[0],
+    },
 
   ];
   const columnsformultipleadsets = [
@@ -4558,6 +4975,117 @@ const App = () => {
     }
   };
 
+  const fetchInitialDataForPredictoKeywordStatus = async () => {
+    setLoadingKeyword(true);
+    try {
+
+      const response = await axios.get(
+        "https://fblaunching.vyaktimetrics.com/open/predicto/keyword/keyword-status/list",
+        {
+          headers: {
+            Authorization: token,
+          },
+        }
+      );
+
+      if (response.data?.ok) {
+        setPredictoKeywordStatusData(response.data.data || []);
+        const statusList = [...new Set(response.data.data.map(item => item.status))];
+        const languageList = [...new Set(response.data.data.map(item => item.language))];
+        const verticleList = [...new Set(response.data.data.map(item => item.vertical))];
+        keywordStatusDataRef.current = response.data.data || [];
+        filtersList.current = response.data.data.length ? ({ languageList: languageList, statusList: statusList, verticleList: verticleList }) : { languageList: [], statusList: [], verticleList: [] }
+        setPredictoKeywordArticleStatusData(response.data.article);
+        lastUpdatedDateandTime.current = `Last updated ${response.data.data[0].last_updated}`
+        setLoadingKeyword(false);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoadingKeyword(false);
+    }
+  };
+
+  const fetchPredictoArticleForKeyword = async (keyword) => {
+    setLoadingArticleForKeyword((prev) => [...prev, keyword.id]);
+    try {
+
+      const response = await axios.post(
+        "https://fblaunching.vyaktimetrics.com/open/predicto/keyword/article-status-single",
+        { keyword: keyword },
+        {
+          headers: {
+            Authorization: token,
+          },
+        }
+      );
+
+      if (response.data?.success) {
+        setPredictoKeywordArticleStatusData((prev) => {
+          const exists = prev.some(
+            (item) => item.keyword_id === response.data.results.keyword_id
+          );
+
+          return exists
+            ? prev.map((item) =>
+              item.keyword_id === response.data.results.keyword_id
+                ? { ...item, ...response.data.results }
+                : item
+            )
+            : [...prev, response.data.results];
+        });
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoadingArticleForKeyword((prev) =>
+        prev.filter((id) => id !== keyword.id)
+      );
+    }
+  }
+
+  // useEffect(() => {
+  //   if (keywordSearch) {
+  //     const getTheSearchResult = keywordStatusDataRef.current.filter(item => item.keyword.toLowerCase().includes(keywordSearch.toLowerCase()))
+  //     setPredictoKeywordStatusData(getTheSearchResult);
+  //     // console.log(getTheSearchResult);
+  //   }
+  //   else {
+  //     setPredictoKeywordStatusData(keywordStatusDataRef.current)
+  //   }
+  // }, [keywordSearch, verticleSearch, statusSearch, languageSearch])
+  useEffect(() => {
+    let filteredData = [...keywordStatusDataRef.current];
+
+    if (keywordSearch) {
+      filteredData = filteredData.filter((item) =>
+        item.keyword
+          ?.toLowerCase()
+          .includes(keywordSearch.toLowerCase())
+      );
+    }
+
+    if (verticleSearch && verticleSearch !== "all") {
+      filteredData = filteredData.filter(
+        (item) => item.vertical === verticleSearch
+      );
+    }
+
+    if (statusSearch && statusSearch !== "all") {
+      filteredData = filteredData.filter(
+        (item) => item.status === statusSearch
+      );
+    }
+
+    if (languageSearch && languageSearch !== "all") {
+      filteredData = filteredData.filter(
+        (item) => item.language === languageSearch
+      );
+    }
+
+    setPredictoKeywordStatusData(filteredData);
+  }, [keywordSearch, verticleSearch, statusSearch, languageSearch]);
+
   const handleCheckStatus = async () => {
     try {
       setLoading(true);
@@ -4675,6 +5203,55 @@ const App = () => {
       setLoading(false);
     }
   };
+  const handleCheckPredictoKeywordStatus = async () => {
+    try {
+      setLoading(true);
+      setLoadingKeyword(true);
+
+      const response = await axios.get(
+        "https://fblaunching.vyaktimetrics.com/open/predicto/keyword/keyword-status",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // const { sessionId, results } = response.data;
+
+      // const tableRows = results.map((item) => ({
+      //   ...item,
+      //   sessionId,
+      // }));
+
+      // setTableData(tableRows);
+      const { results } = response.data;
+
+      if (response.data?.success) {
+        const descOrderByCreatedDate = results.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+        setPredictoKeywordStatusData(descOrderByCreatedDate || []);
+        const statusList = [...new Set(results.map(item => item.status))];
+        const languageList = [...new Set(results.map(item => item.language))];
+        const verticleList = [...new Set(results.map(item => item.vertical))];
+        keywordStatusDataRef.current = descOrderByCreatedDate || [];
+        filtersList.current = results.length ? ({ languageList: languageList, statusList: statusList, verticleList: verticleList }) : { languageList: [], statusList: [], verticleList: [] }
+        // setPredictoKeywordArticleStatusData(response.data.article);
+        lastUpdatedDateandTime.current = `Last updated ${results[0].last_updated}`
+        setLoadingKeyword(false);
+      }
+
+      message.success("Keyword status fetched successfully");
+    } catch (error) {
+      console.error(error);
+      message.error(
+        error?.response?.data?.message ||
+        "Failed to fetch ad status"
+      );
+    } finally {
+      setLoading(false);
+      setLoadingKeyword(false);
+    }
+  };
   const handleToggleTaboolaStatus = async () => {
     if (!showTaboolaStatus) {
       await fetchInitialData();
@@ -4687,6 +5264,24 @@ const App = () => {
       await fetchInitialDataForPredictoAdStatus();
     }
     setShowPredictoadStatus(!showPredictoadStatus);
+    setShowPredictoKeywordStatus(false)
+  }
+
+  const handleTogglePredictoKeywordStatus = async () => {
+    // if (!showPredictoKeywordStatus) {
+    //   setLoadingKeyword(true);
+    //   await fetchInitialDataForPredictoKeywordStatus();
+    // }
+    // setShowPredictoKeywordStatus(!showPredictoKeywordStatus);
+    // setShowPredictoadStatus(false)
+    if (!showPredictoKeywordStatus) {
+      setShowPredictoKeywordStatus(true);
+      setShowPredictoadStatus(false);
+
+      await fetchInitialDataForPredictoKeywordStatus();
+    } else {
+      setShowPredictoKeywordStatus(false);
+    }
   }
 
   const filteredTableData = appliedSearch
@@ -5190,6 +5785,26 @@ const App = () => {
                 {showPredictoadStatus ? "Launching" : "Ad Policies"}
               </Button>
             )}
+            {(selectedKey === "FB_Predicto" &&
+              <Button
+                type="primary"
+                // onMouseEnter={() => setHovered(true)}
+                // onMouseLeave={() => setHovered(false)}
+                // onClick={() => setShowTaboolaStatus(!showTaboolaStatus)}
+                onClick={handleTogglePredictoKeywordStatus}
+                style={{
+                  backgroundColor: "#91C25F",
+                  border: "1px solid #4CAF50",
+                  borderRadius: "8px",
+                  color: theme === "dark" ? "#ffffff" : "#000000",
+                  height: "32px",
+                  padding: "0 8px",
+                  transition: "all 0.15s ease-in-out",
+                }}
+              >
+                {showPredictoKeywordStatus ? "Launching" : "Keywords"}
+              </Button>
+            )}
             {isMobile && filteredMultipleAdsetCampaigns.length > 0 && (
               <div
                 style={{
@@ -5656,7 +6271,7 @@ const App = () => {
         </div>
         // </div>
       )} */}
-      {showTaboolaStatus && !showPredictoadStatus && (
+      {showTaboolaStatus && !showPredictoadStatus && !showPredictoKeywordStatus && (
         <div>
           <div style={{ display: "flex", justifyContent: "space-between" }}>
             <div
@@ -5742,7 +6357,7 @@ const App = () => {
           />
         </div>
       )}
-      {showPredictoadStatus && !showTaboolaStatus && (
+      {showPredictoadStatus && !showTaboolaStatus && !showPredictoKeywordStatus && (
         <div>
           <div style={{ display: "flex", justifyContent: "space-between" }}>
             <div
@@ -5828,7 +6443,153 @@ const App = () => {
           />
         </div>
       )}
-      {!showTaboolaStatus && !showPredictoadStatus && (
+      {!showPredictoadStatus && !showTaboolaStatus && showPredictoKeywordStatus && (
+        <div>
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <div>
+              <Input
+                prefix={
+                  <SearchOutlined
+                    style={{
+                      color: "#8c8c8c",
+                      fontSize: "16px",
+                    }}
+                  />
+                }
+                placeholder="Search For Keywords..."
+                value={keywordSearch}
+                onChange={(e) => setKeywordSearch(e.target.value)}
+                // onPressEnter={() => setAppliedSearch(searchAdId)}
+                style={{
+                  width: "350px",
+                  // height: "32px",
+                  borderRadius: "8px",
+                  fontSize: "14px",
+                  backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                  color: theme === "dark" ? "#ffffff" : "#000000",
+                  border:
+                    theme === "dark"
+                      ? "1px solid #555"
+                      : "1px solid #d9d9d9",
+                  boxShadow: "none",
+                }}
+              />
+              <Select
+                showSearch
+                value={languageSearch}
+                onChange={value => setLanguageSearch(value)}
+                dropdownClassName={theme === "dark" && "custom-dropdown"}
+                style={{ width: 170 }}
+                options={[
+                  { label: "All", value: "all" },
+                  ...filtersList.current.languageList.map(item => ({ label: item, value: item }))
+                ]}
+              />
+              <Select
+                showSearch
+                value={statusSearch}
+                onChange={value => setStatusSearch(value)}
+                dropdownClassName={theme === "dark" && "custom-dropdown"}
+                style={{ width: 170 }}
+                options={[
+                  { label: "All", value: "all" },
+                  ...filtersList.current.statusList.map(item => ({ label: item, value: item }))
+                ]}
+              />
+              <Select
+                showSearch
+                value={verticleSearch}
+                onChange={value => setVerticleSearch(value)}
+                dropdownClassName={theme === "dark" && "custom-dropdown"}
+                style={{ width: 170 }}
+                options={[
+                  { label: "All", value: "all" },
+                  ...filtersList.current.verticleList.map(item => ({ label: item, value: item }))
+                ]}
+              />
+            </div>
+            <div
+              style={{
+                display: "flex",
+                gap: "10px",
+                alignItems: "center",
+                marginBottom: "5px",
+                padding: "3px",
+
+              }}
+            >
+              <Tooltip
+                title={
+                  lastUpdatedDateandTime.current
+                }
+                placement="top"
+                overlayInnerStyle={{
+                  backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                  color: theme === "dark" ? "#ffffff" : "#000000",
+                  borderRadius: 6,
+                  padding: "6px 10px",
+                  fontSize: "14px",
+                }}
+              >
+                <Button
+                  loading={loading}
+                  disabled={loading}
+                  style={{
+                    backgroundColor: "#91c25f",
+                    border: "1px solid #91c25f",
+                    width: "120px",
+                  }}
+                  type="primary"
+                  onClick={handleCheckPredictoKeywordStatus}
+                >
+                  {loading ? "Fetching..." : "Get Latest Data"}
+                </Button>
+              </Tooltip>
+              <Button
+                type="primary"
+                onClick={fetchInitialDataForPredictoKeywordStatus}
+                icon={<ReloadOutlined className="black-icon" />}
+                style={{
+                  backgroundColor: "#91C25F",
+                  color: "#000",
+                  border: "none",
+                  width: "50px",
+                }}
+              />
+            </div>
+
+          </div>
+          {loadingKeyword ? (
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: isMobile ? "calc(100vh - 180px)" : "calc(100vh - 280px)", }}>
+              <Spin size="large" />
+            </div>
+
+          ) : (<Table
+            scroll={{
+              y: isMobile
+                ? "calc(100vh - 180px)"
+                : "calc(100vh - 280px)",
+            }}
+            size="small"
+            columns={columnsforPredictoKeywordStatus}
+            className={`custom-dark-table ${theme === "dark"
+              ? "dark-mode-pagination"
+              : "light-mode-pagination"
+              }`}
+            // dataSource={tableData}
+            dataSource={predictoKeywordStatusData}
+            rowKey="id"
+            pagination={{
+              pageSize: paginationSize,
+              showSizeChanger: true,
+              onChange: (page, pageSize) => {
+                setPaginationSize(pageSize);
+              }
+            }}
+          />)}
+        </div>
+      )}
+      {!showTaboolaStatus && !showPredictoadStatus && !showPredictoKeywordStatus && (
         <div>
           <Tabs
             activeKey={activeTab}
