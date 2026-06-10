@@ -51,7 +51,8 @@ const newtworkCollections = {
     "FB_CodeFuel": "Facebook_CodeFuel_Daily",
     "FB_Predicto": "Facebook_Predicto_Daily",
     "FB_Affinity": "Facebook_Affinity_Daily",
-    "FB_Botup": "Facebook_Botup_Daily"
+    "FB_Botup": "Facebook_Botup_Daily",
+    "FB_MWG": "Facebook_Mwg_Daily"
 }
 const selectTimezone = {
     UTC: 'UTCDate',

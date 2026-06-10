@@ -23,6 +23,7 @@ const contentStyle = {
 };
 const newtworkCollections = {
     "FB_Mnet": "Facebook_Mnet_Daily",
+    "FB_MWG": "Facebook_Mwg_Daily",
     "FB_MnetBing": "Facebook_MnetBing",
     "FB_Enki": "Facebook_Enki",
     "FB_System1": 'Facebook_System1',
@@ -35,6 +36,7 @@ const newtworkCollections = {
     "FB_Tonic1": "Facebook_Tonic1",
     "FB_Sedo": "Facebook_Sedo",
     "FB_Inmobi": "Facebook_Inmobi",
+    "FB_MWG": "Facebook_Mwg_Daily"
 }
 
 const MnetDomainReports = ({ startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, userdetails, refreshComments, refreshpage }) => {

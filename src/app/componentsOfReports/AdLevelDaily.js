@@ -44,7 +44,8 @@ const newtworkCollections = {
   "FB_Inmobi": "Facebook_Inmobi",
   "FB_TonicRsoc": "Facebook_TonicRsoc",
   "FB_InuvoPrism": "Facebook_InuvoPrism",
-  "FB_CodeFuel": "Facebook_AD_Daily"
+  "FB_CodeFuel": "Facebook_AD_Daily",
+  "FB_MWG": "Facebook_AD_Daily"
 }
 const selectTimezone = {
   UTC: 'UTCDate',
@@ -2968,6 +2969,9 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
         case "Outbrain_TonicRsoc":
           networkCollection = "Outbrain_TonicRsoc";
           break;
+        case "FB_MWG":
+          networkCollection = "Facebook_AD_Daily";
+          break;
         default:
           networkCollection = "Facebook_Mnet_AD";
           break;
@@ -2975,7 +2979,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
 
       // ✅ call the new multi-account endpoint
       const fetchData = await apiClient.post(
-        newRevenuePratner === "FB_Mnet" || newRevenuePratner === "FB_CodeFuel" || newRevenuePratner === "FB_MnetBing" ? `/reports/data/adsdaily` : "/reports/data/ads",
+        newRevenuePratner === "FB_Mnet" || newRevenuePratner === "FB_CodeFuel" || newRevenuePratner === "FB_MnetBing" || newRevenuePratner === "FB_MWG" ? `/reports/data/adsdaily` : "/reports/data/ads",
         {
           dateStart: startDate,
           dateEnd: endDate,
@@ -3809,7 +3813,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
       setdailyData(data);
       // setdailyData(newRowDataForFilter.current);
     }
-  }, [campaignStatusFilter,typeFilter, Camapignlevelstatus]);
+  }, [campaignStatusFilter, typeFilter, Camapignlevelstatus]);
 
   // useEffect(() => {
   //   // console.log(campaignComments, "campaignComments");
