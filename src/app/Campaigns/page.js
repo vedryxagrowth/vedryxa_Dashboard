@@ -6479,9 +6479,9 @@ const App = () => {
                 value={languageSearch}
                 onChange={value => setLanguageSearch(value)}
                 dropdownClassName={theme === "dark" && "custom-dropdown"}
-                style={{ width: 170 }}
+                style={{ width: 170, marginLeft:"10px", marginRight:"10px" }}
                 options={[
-                  { label: "All", value: "all" },
+                  { label: "All Language", value: "all" },
                   ...filtersList.current.languageList.map(item => ({ label: item, value: item }))
                 ]}
               />
@@ -6490,9 +6490,9 @@ const App = () => {
                 value={statusSearch}
                 onChange={value => setStatusSearch(value)}
                 dropdownClassName={theme === "dark" && "custom-dropdown"}
-                style={{ width: 170 }}
+                style={{ width: 170, marginRight:"10px" }}
                 options={[
-                  { label: "All", value: "all" },
+                  { label: "All Status", value: "all" },
                   ...filtersList.current.statusList.map(item => ({ label: item, value: item }))
                 ]}
               />
@@ -6503,7 +6503,7 @@ const App = () => {
                 dropdownClassName={theme === "dark" && "custom-dropdown"}
                 style={{ width: 170 }}
                 options={[
-                  { label: "All", value: "all" },
+                  { label: "All Verticles", value: "all" },
                   ...filtersList.current.verticleList.map(item => ({ label: item, value: item }))
                 ]}
               />
