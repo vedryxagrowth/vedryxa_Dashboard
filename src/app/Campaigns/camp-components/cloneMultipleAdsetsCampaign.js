@@ -85,7 +85,7 @@ const positionOptions = {
   facebook: [
     { key: "feed", label: "Facebook Feed" },
     { key: "marketplace", label: "Facebook Marketplace" },
-    { key: "video_feeds", label: "Facebook Video Feeds" },
+    // { key: "video_feeds", label: "Facebook Video Feeds" },
     { key: "instream_video", label: "Facebook In-Stream Videos" },
     { key: "facebook_reels", label: "Facebook Reels" },
     { key: "profile_feed-f", label: "Facebook Profile Feed" },
