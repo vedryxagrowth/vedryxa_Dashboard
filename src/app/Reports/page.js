@@ -88,7 +88,8 @@ const NetworkDefaultTimezones = {
     "FB_Affinity": "PDT",
     "FB_Botup": "EDT",
     "Outbrain_TonicRsoc": "EDT",
-    "FB_MWG": "UTC"
+    "FB_MWG": "UTC",
+    "Taboola_Inuvoprism": "PDT"
 }
 
 
@@ -23469,7 +23470,7 @@ const MyTablePage = () => {
                                 />
                             </Tabs.TabPane>
 
-                            {newRevenuePratner === "FB_Mnet"  || newRevenuePratner === "FB_MWG"  && (
+                            {newRevenuePratner === "FB_Mnet" || newRevenuePratner === "FB_MWG" && (
                                 <Tabs.TabPane key="5">
                                     <MnetDomainReports
                                         startDate={newStartDate}
