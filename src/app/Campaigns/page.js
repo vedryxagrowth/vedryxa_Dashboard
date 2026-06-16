@@ -5802,7 +5802,7 @@ const App = () => {
                   transition: "all 0.15s ease-in-out",
                 }}
               >
-                {showPredictoKeywordStatus ? "Launching" : "Keywords"}
+                {showPredictoKeywordStatus ? "Launching" : "Article"}
               </Button>
             )}
             {isMobile && filteredMultipleAdsetCampaigns.length > 0 && (
