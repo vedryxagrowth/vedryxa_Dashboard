@@ -39,7 +39,8 @@ const revenuePartnerNames = {
     "Affinity": "FB_Affinity",
     "Botup": "FB_Botup",
     "Outbrain_Tonic_Rsoc": "Outbrain_TonicRsoc",
-    "MWG": "FB_MWG"
+    "MWG": "FB_MWG",
+    "Taboola_Inuvoprism":"Taboola_Inuvoprism"
 };
 
 
@@ -63,7 +64,8 @@ const newtworkCollections = {
     "FB_Affinity": "Facebook_Affinity_Daily",
     "FB_Botup": "Facebook_Botup_Daily",
     "Outbrain_TonicRsoc": "Outbrain_TonicRsoc",
-    "FB_MWG": "Facebook_Mwg_Daily"
+    "FB_MWG": "Facebook_Mwg_Daily",
+    "Taboola_Inuvoprism":"Taboola_InuvoPrismDaily"
 }
 
 const NetworkDefaultTimezones = {
@@ -86,7 +88,8 @@ const NetworkDefaultTimezones = {
     "FB_Affinity": "PDT",
     "FB_Botup": "EDT",
     "Outbrain_TonicRsoc": "EDT",
-    "FB_MWG": "UTC"
+    "FB_MWG": "UTC",
+    "Taboola_Inuvoprism":"PDT"
 }
 
 import { DatePicker, Space, ConfigProvider, Flex, Spin, Skeleton } from 'antd';
@@ -1690,6 +1693,8 @@ const Dashboard = () => {
                     newKey = "Outbrain_TonicRsoc"
                 } else if (key === "FB_MWG") {
                     newKey = "Facebook_Mwg_Daily"
+                }else if (key === "Taboola_Inuvoprism") {
+                    newKey = "Taboola_InuvoPrismDaily"
                 }
                 else { newKey = "Facebook_" + splitKey[1]; }
 
