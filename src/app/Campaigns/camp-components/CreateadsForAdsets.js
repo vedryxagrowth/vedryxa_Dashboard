@@ -177,7 +177,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData, ads
       onError("Image hash data not loaded");
       return [];
     }
-    const token = imagehash.token;
+    const token = imagehash.launchingToken;
     const account = imagehash.accountNumber;
 
     const uploadFilesSequentially = async (selectedFiles) => {

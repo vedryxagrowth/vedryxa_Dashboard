@@ -374,7 +374,7 @@ const Editads = ({ doubleAdset, viewCampaignData, changeRRefrst, editdata, onClo
   // Custom request for uploading media (images/videos)
 
   const customRequest = async (imageshow, imagehash, onSuccess, onError) => {
-    const token = imagehash.token;
+    const token = imagehash.launchingToken;
     const account = imagehash.accountNumber;
     let thambnailurl = '';
 

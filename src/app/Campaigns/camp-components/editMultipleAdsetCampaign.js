@@ -9924,7 +9924,7 @@ const EditMultipleAdsetCampaignDrawer = ({
       onError("Image hash data not loaded");
       return [];
     }
-    const token = imagehash.token;
+    const token = imagehash.launchingToken;
     const account = imagehash.accountNumber;
 
     const createS3Folder = async (folderPath) => {
@@ -10563,7 +10563,7 @@ const EditMultipleAdsetCampaignDrawer = ({
         }),
         Daily_amount: parseFloat(values.Daily_amount) * 100,
         Status: values.Status,
-        access_token: imagehash.token,
+        access_token: imagehash.launchingToken,
         createdDate: fullCampaignData.camapaignlevel.createdDate,
         EditedDate: moment().tz(imagehash.timeZone).format("YYYY-MM-DD"),
         ...(fullCampaignData.camapaignlevel.campaignid

@@ -10049,7 +10049,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
         return [];
       }
 
-      const token = imagehash.token;
+      const token = imagehash.launchingToken;
       const account = imagehash.accountNumber;
 
       /*
@@ -11060,7 +11060,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
         Bid_strategy: values.Bid_strategy,
         Daily_amount: parseFloat(values.Daily_amount) * 100,
         Status: values.Status,
-        access_token: imagehash.token,
+        access_token: imagehash.launchingToken,
         createdDate: moment().tz(imagehash.timeZone).format("YYYY-MM-DD"),
         // ...(fullCampaignData.camapaignlevel.campaignid
         //   ? { campaignid: fullCampaignData.camapaignlevel.campaignid }
