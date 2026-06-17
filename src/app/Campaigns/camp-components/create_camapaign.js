@@ -10558,7 +10558,7 @@ const CreateCampaignDrawer = ({
         return [];
       }
 
-      const token = newAccountObject.token;
+      const token = newAccountObject.launchingToken;
       const account = newAccountObject.accountNumber;
 
       /*
@@ -11629,7 +11629,7 @@ const CreateCampaignDrawer = ({
                   }),
                   Daily_amount: parseFloat(values.Daily_amount) * 100,
                   Status: values.Status,
-                  access_token: newImageHash.token,
+                  access_token: newImageHash.launchingToken,
                   createdDate: moment().tz(newImageHash.timeZone).format("YYYY-MM-DD"),
                 },
               };
@@ -11853,7 +11853,7 @@ const CreateCampaignDrawer = ({
                 }),
                 Daily_amount: parseFloat(values.Daily_amount) * 100,
                 Status: values.Status,
-                access_token: newImageHash.token,
+                access_token: newImageHash.launchingToken,
                 createdDate: moment().tz(newImageHash.timeZone).format("YYYY-MM-DD"),
               },
             };
@@ -12449,7 +12449,7 @@ const CreateCampaignDrawer = ({
           Bid_strategy: values.Bid_strategy,
           Daily_amount: parseFloat(values.Daily_amount) * 100,
           Status: values.Status,
-          access_token: imagehash.token,
+          access_token: imagehash.launchingToken,
           createdDate: moment().tz(imagehash.timeZone).format("YYYY-MM-DD"),
         },
         adsetlevel: {
