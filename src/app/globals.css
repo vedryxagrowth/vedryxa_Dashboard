@@ -4390,3 +4390,12 @@ body.dark-mode .black-icon-creatives1.anticon svg {
 }
 
 /* commnet added for */
+/* Input placeholder */
+.small-placeholder input::placeholder {
+    font-size: 12px;
+}
+
+/* Select placeholder */
+.small-placeholder .ant-select-selection-placeholder {
+    font-size: 12px;
+}
