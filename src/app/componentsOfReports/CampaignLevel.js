@@ -44,7 +44,8 @@ const newtworkCollections = {
     "FB_Inmobi": "Facebook_Inmobi",
     "FB_TonicRsoc": "Facebook_TonicRsoc",
     "FB_InuvoPrism": "Facebook_InuvoPrism",
-    "FB_CodeFuel": "Facebook_CodeFuel"
+    "FB_CodeFuel": "Facebook_CodeFuel",
+    "Taboola_Inuvoprism": "Taboola_InuvoprismLive"
 
 }
 const selectTimezone = {
@@ -3445,7 +3446,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
     // }, [oneTimeFetch.current]);
 
     useEffect(() => {
-        if (campaignStatusFilter && Camapignlevelstatus.length > 0) {
+        if (campaignStatusFilter && Camapignlevelstatus.length >= 0) {
             // console.log("test1");
             functionCall1();
         }

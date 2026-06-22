@@ -42,7 +42,8 @@ const newtworkCollections = {
     "FB_Inmobi": "Facebook_Inmobi",
     "FB_TonicRsoc": "Facebook_TonicRsoc",
     "FB_InuvoPrism": "Facebook_InuvoPrism",
-    "FB_Botup": "Facebook_Botup"
+    "FB_Botup": "Facebook_Botup",
+    "Taboola_Inuvoprism": "Taboola_InuvoprismLive"
 }
 
 const networkCollectionsForAiAssistant = {
