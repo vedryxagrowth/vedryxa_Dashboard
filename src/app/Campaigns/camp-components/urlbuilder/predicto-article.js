@@ -16,8 +16,10 @@ import {
     PlusOutlined,
     ThunderboltOutlined,
     CloseOutlined,
+    DeleteOutlined
 } from "@ant-design/icons";
 import axios from "axios";
+import { useTokenContext } from "../../../components/parent";
 
 const { TextArea } = Input;
 import JoditEditor from "jodit-react";
@@ -25,13 +27,16 @@ import JoditEditor from "jodit-react";
 export default function AddSuggestedKeywordModal({
     open,
     onClose,
-    onSuccess,
+    // onSuccess,
+    storeInState
 }) {
+    const { theme } = useTokenContext();
     const [loading, setLoading] = useState(false);
     const [activeTab, setActiveTab] = useState("general");
     const [termInput, setTermInput] = useState("");
     const [languages, setLanguages] = useState([]);
     const [verticles, setVerticles] = useState([]);
+    const [contentVisited, setContentVisited] = useState(false);
 
     const [form, setForm] = useState({
         nativeKeyword: "",
@@ -54,6 +59,14 @@ export default function AddSuggestedKeywordModal({
             toolbarAdaptive: false,
             showCharsCounter: true,
             showWordsCounter: true,
+            theme: theme === "dark" ? "dark" : "default",
+
+            style: {
+                background:
+                    theme === "dark" ? "#2A2A2A" : "#ffffff",
+                color:
+                    theme === "dark" ? "#ffffff" : "#000000",
+            },
             buttons: [
                 "undo",
                 "redo",
@@ -78,7 +91,7 @@ export default function AddSuggestedKeywordModal({
                 "source"
             ]
         }),
-        []
+        [theme]
     );
 
     useEffect(() => {
@@ -159,6 +172,15 @@ export default function AddSuggestedKeywordModal({
             message.error("Native keyword is required");
             return;
         }
+        if (!form.englishId) {
+            message.error("English ID is required");
+            return;
+        }
+
+        if (!form.terms.length) {
+            message.error("Terms is required");
+            return;
+        }
 
         if (!form.language) {
             message.error("Language is required");
@@ -170,9 +192,26 @@ export default function AddSuggestedKeywordModal({
             return;
         }
 
-        if (!form.title) {
-            message.error("Title is required");
-            return;
+        // Validate content fields only if user visited Content tab
+        if (contentVisited) {
+            if (!form.title?.trim()) {
+                message.error("Title is required");
+                return;
+            }
+
+            if (!form.excerpt?.trim()) {
+                message.error("Excerpt is required");
+                return;
+            }
+
+            const plainContent = form.content
+                ?.replace(/<[^>]*>/g, "")
+                ?.trim();
+
+            if (!plainContent) {
+                message.error("Content is required");
+                return;
+            }
         }
 
         const payload = {
@@ -186,53 +225,107 @@ export default function AddSuggestedKeywordModal({
                     search_volume: 0,
                     competition: 0,
                     notes: "",
-                    article_headline: form.title,
-                    article_excerpt: form.excerpt,
-                    article_content: form.content,
-                    suggested_keywords: form.terms.join(", "),
+                    article_headline: form.title || null,
+                    article_excerpt: form.excerpt || null,
+                    article_content: form.content || null,
+                    suggested_keywords: form.terms,
                 },
             ],
         };
 
+        console.log(payload)
+
         try {
             setLoading(true);
 
-            const response = await fetch(
-                "/api/keywords/create-article",
+            const token = localStorage.getItem("token");
+
+            const response = await axios.post(
+                `http://localhost:7000/open/predicto/keyword/articlecreate`,
+                payload,
                 {
-                    method: "POST",
                     headers: {
+                        Authorization: token,
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify(payload),
                 }
             );
 
-            if (!response.ok) {
-                throw new Error("Failed");
+            if (response.status === 201 || response.status === 200) {
+                const responseData = response.data.data;
+
+                storeInState(responseData);
+                setForm({
+                    nativeKeyword: "",
+                    englishId: "",
+                    language: "",
+                    vertical: "",
+                    terms: [],
+                    title: "",
+                    excerpt: "",
+                    content: "",
+                })
+                // resetForm();
+
+                // if (onSuccess) {
+                //     onSuccess();
+                // }
+
+                // onClose();
             }
-
-            message.success("Suggested keyword created");
-
-            resetForm();
-
-            if (onSuccess) {
-                onSuccess();
-            }
-
-            onClose();
         } catch (error) {
             console.error(error);
-            message.error("Failed to create article");
+
+            message.error(
+                error?.response?.data?.detail?.[0]?.msg ||
+                error?.response?.data?.message ||
+                "Failed to create article"
+            );
         } finally {
             setLoading(false);
         }
+
+        // try {
+        //     setLoading(true);
+
+        //     const response = await fetch(
+        //         "/api/keywords/create-article",
+        //         {
+        //             method: "POST",
+        //             headers: {
+        //                 "Content-Type": "application/json",
+        //             },
+        //             body: JSON.stringify(payload),
+        //         }
+        //     );
+
+        //     if (!response.ok) {
+        //         throw new Error("Failed");
+        //     }
+
+        //     message.success("Suggested keyword created");
+
+        //     resetForm();
+
+        //     if (onSuccess) {
+        //         onSuccess();
+        //     }
+
+        //     onClose();
+        // } catch (error) {
+        //     console.error(error);
+        //     message.error("Failed to create article");
+        // } finally {
+        //     setLoading(false);
+        // }
     };
 
     return (
         <Modal
             open={open}
             onCancel={onClose}
+            className={`custom-modal ${theme === "dark" ? "dark-theme-modal" : ""}`}
+            dropdownClassName={theme === "dark" && "custom-dropdown"}
             footer={null}
             width={480}
             centered
@@ -265,335 +358,21 @@ export default function AddSuggestedKeywordModal({
                 </p>
             </div>
 
-            {/* <Tabs
-                activeKey={activeTab}
-                onChange={setActiveTab}
-                centered
-                items={[
-                    {
-                        key: "general",
-                        label: "General",
-                        children: (
-                            <div>
-                                <div
-                                    style={{
-                                        display: "grid",
-                                        gridTemplateColumns: "1fr 1fr",
-                                        gap: 16,
-                                        marginBottom: 20,
-                                    }}
-                                >
-                                    <div>
-                                        <label
-                                            style={{
-                                                display: "block",
-                                                marginBottom: 8,
-                                                fontWeight: 600,
-                                            }}
-                                        >
-                                            Native Keyword (Main)
-                                        </label>
-
-                                        <Input
-                                            size="large"
-                                            placeholder="Main article keyword"
-                                            value={form.nativeKeyword}
-                                            onChange={(e) =>
-                                                setForm({
-                                                    ...form,
-                                                    nativeKeyword: e.target.value,
-                                                })
-                                            }
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label
-                                            style={{
-                                                display: "block",
-                                                marginBottom: 8,
-                                                fontWeight: 600,
-                                            }}
-                                        >
-                                            English ID
-                                        </label>
-
-                                        <Input
-                                            size="large"
-                                            placeholder="english-id-format"
-                                            value={form.englishId}
-                                            onChange={(e) =>
-                                                setForm({
-                                                    ...form,
-                                                    englishId: e.target.value,
-                                                })
-                                            }
-                                        />
-                                    </div>
-                                </div>
-
-                                <div
-                                    style={{
-                                        display: "grid",
-                                        gridTemplateColumns: "1fr 1fr",
-                                        gap: 16,
-                                        marginBottom: 24,
-                                    }}
-                                >
-                                    <div>
-                                        <label
-                                            style={{
-                                                display: "block",
-                                                marginBottom: 8,
-                                                fontWeight: 600,
-                                            }}
-                                        >
-                                            Language
-                                        </label>
-
-                                        <Select
-                                            size="large"
-                                            style={{ width: "100%" }}
-                                            placeholder="Select language"
-                                            value={form.language || undefined}
-                                            onChange={(value) =>
-                                                setForm({
-                                                    ...form,
-                                                    language: value,
-                                                })
-                                            }
-                                            options={[
-                                                {
-                                                    label: "English",
-                                                    value: "english",
-                                                },
-                                                {
-                                                    label: "Spanish",
-                                                    value: "spanish",
-                                                },
-                                                {
-                                                    label: "French",
-                                                    value: "french",
-                                                },
-                                            ]}
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <label
-                                            style={{
-                                                display: "block",
-                                                marginBottom: 8,
-                                                fontWeight: 600,
-                                            }}
-                                        >
-                                            Vertical
-                                        </label>
-
-                                        <Select
-                                            size="large"
-                                            style={{ width: "100%" }}
-                                            placeholder="Select vertical"
-                                            value={form.vertical || undefined}
-                                            onChange={(value) =>
-                                                setForm({
-                                                    ...form,
-                                                    vertical: value,
-                                                })
-                                            }
-                                            options={[
-                                                {
-                                                    label: "Technology",
-                                                    value: "technology",
-                                                },
-                                                {
-                                                    label: "Finance",
-                                                    value: "finance",
-                                                },
-                                                {
-                                                    label: "Health",
-                                                    value: "health",
-                                                },
-                                            ]}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <div
-                                        style={{
-                                            display: "flex",
-                                            justifyContent: "space-between",
-                                            marginBottom: 10,
-                                        }}
-                                    >
-                                        <label
-                                            style={{
-                                                fontWeight: 600,
-                                            }}
-                                        >
-                                            Terms
-                                        </label>
-
-                                        <Button
-                                            type="text"
-                                            icon={<ThunderboltOutlined />}
-                                            onClick={generateTerms}
-                                        >
-                                            Generate Terms
-                                        </Button>
-                                    </div>
-
-                                    <div
-                                        style={{
-                                            color: "#667085",
-                                            marginBottom: 12,
-                                        }}
-                                    >
-                                        Add related terms and drag to reorder them
-                                    </div>
-
-                                    <Space.Compact
-                                        style={{
-                                            width: "100%",
-                                        }}
-                                    >
-                                        <Input
-                                            size="large"
-                                            placeholder="Add a new term"
-                                            value={termInput}
-                                            onChange={(e) =>
-                                                setTermInput(e.target.value)
-                                            }
-                                        />
-
-                                        <Button
-                                            type="primary"
-                                            icon={<PlusOutlined />}
-                                            onClick={addTerm}
-                                        />
-                                    </Space.Compact>
-
-                                    <div
-                                        style={{
-                                            display: "flex",
-                                            flexWrap: "wrap",
-                                            gap: 8,
-                                            marginTop: 15,
-                                        }}
-                                    >
-                                        {form.terms.map((term) => (
-                                            <Tag
-                                                key={term}
-                                                closable
-                                                onClose={() =>
-                                                    removeTerm(term)
-                                                }
-                                            >
-                                                {term}
-                                            </Tag>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        ),
-                    },
-
-                    {
-                        key: "content",
-                        label: "Content",
-                        children: (
-                            <div
-                                style={{
-                                    height: "50vh",
-                                    overflowY: "auto",
-                                    paddingRight: 8,
-                                }}
-                            >
-                                <div style={{ marginBottom: 20 }}>
-                                    <label
-                                        style={{
-                                            display: "block",
-                                            marginBottom: 8,
-                                            fontWeight: 600,
-                                        }}
-                                    >
-                                        Title
-                                    </label>
-
-                                    <Input
-                                        size="large"
-                                        maxLength={255}
-                                        placeholder="Enter title"
-                                        value={form.title}
-                                        onChange={(e) =>
-                                            setForm({
-                                                ...form,
-                                                title: e.target.value,
-                                            })
-                                        }
-                                    />
-                                </div>
-
-                                <div style={{ marginBottom: 20 }}>
-                                    <label
-                                        style={{
-                                            display: "block",
-                                            marginBottom: 8,
-                                            fontWeight: 600,
-                                        }}
-                                    >
-                                        Excerpt
-                                    </label>
-
-                                    <TextArea
-                                        rows={4}
-                                        maxLength={500}
-                                        placeholder="Brief description"
-                                        value={form.excerpt}
-                                        onChange={(e) =>
-                                            setForm({
-                                                ...form,
-                                                excerpt: e.target.value,
-                                            })
-                                        }
-                                    />
-                                </div>
-
-                                <div>
-                                    <label
-                                        style={{
-                                            display: "block",
-                                            marginBottom: 8,
-                                            fontWeight: 600,
-                                        }}
-                                    >
-                                        Content
-                                    </label>
-
-                                    <TextArea
-                                        rows={12}
-                                        placeholder="Write article content..."
-                                        value={form.content}
-                                        onChange={(e) =>
-                                            setForm({
-                                                ...form,
-                                                content: e.target.value,
-                                            })
-                                        }
-                                    />
-                                </div>
-                            </div>
-                        ),
-                    },
-                ]}
-            /> */}
-
             <div style={{ marginBottom: 12 }}>
                 <Segmented
                     block
                     value={activeTab}
-                    onChange={setActiveTab}
+                    // onChange={setActiveTab}
+                    onChange={(value) => {
+                        setActiveTab(value);
+
+                        if (value === "content") {
+                            setContentVisited(true);
+                        }
+                        else {
+                            setContentVisited(false)
+                        }
+                    }}
                     options={[
                         {
                             label: (
@@ -632,6 +411,8 @@ export default function AddSuggestedKeywordModal({
                         padding: 6,
                         borderRadius: 14,
                         height: 40,
+                        color: theme === "dark" ? "#fff" : "#000",
+                        background: theme === "dark" ? "rgba(255,255,255,0.08)" : "#eef2f6",
                     }}
                 />
 
@@ -662,7 +443,8 @@ export default function AddSuggestedKeywordModal({
                                     </label>
 
                                     <Input
-                                        className="small-placeholder"
+                                        // className="small-placeholder"
+                                        className={theme === 'dark' ? 'small-placeholder custom-input-dark' : 'small-placeholder custom-input-light'}
                                         // size="large"
                                         placeholder="Main article keyword"
                                         value={form.nativeKeyword}
@@ -689,7 +471,8 @@ export default function AddSuggestedKeywordModal({
                                     </label>
 
                                     <Input
-                                        className="small-placeholder"
+                                        // className="small-placeholder"
+                                        className={theme === 'dark' ? 'small-placeholder custom-input-dark' : 'small-placeholder custom-input-light'}
                                         // size="large"
                                         placeholder="english-id-format"
                                         value={form.englishId}
@@ -725,7 +508,9 @@ export default function AddSuggestedKeywordModal({
                                     </label>
 
                                     <Select
-                                        className="small-placeholder"
+                                        // className="small-placeholder"
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'small-placeholder dark-theme' : 'small-placeholder light-theme'}
                                         showSearch
                                         // size="large"
                                         style={{ width: "100%", height: "32px" }}
@@ -756,7 +541,9 @@ export default function AddSuggestedKeywordModal({
                                     <Select
                                         size="large"
                                         showSearch
-                                        className="small-placeholder"
+                                        // className="small-placeholder"
+                                        dropdownClassName={theme === 'dark' && "custom-dropdown"}
+                                        className={theme === 'dark' ? 'small-placeholder dark-theme' : 'small-placeholder light-theme'}
                                         style={{ width: "100%", height: "32px" }}
                                         placeholder="Select vertical"
                                         value={form.vertical || undefined}
@@ -815,7 +602,8 @@ export default function AddSuggestedKeywordModal({
                                 >
                                     <Input
                                         // size="large"
-                                        className="small-placeholder"
+                                        // className="small-placeholder"
+                                        className={theme === 'dark' ? 'small-placeholder custom-input-dark' : 'small-placeholder custom-input-light'}
                                         placeholder="Add a new term"
                                         value={termInput}
                                         onChange={(e) =>
@@ -831,7 +619,7 @@ export default function AddSuggestedKeywordModal({
                                     />
                                 </div>
 
-                                <div
+                                {/* <div
                                     style={{
                                         display: "flex",
                                         flexWrap: "wrap",
@@ -849,6 +637,63 @@ export default function AddSuggestedKeywordModal({
                                         >
                                             {term}
                                         </Tag>
+                                    ))}
+                                </div> */}
+                                <div
+                                    style={{
+                                        marginTop: 15,
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        gap: 8,
+                                    }}
+                                >
+                                    {form.terms.map((term, index) => (
+                                        <div
+                                            key={`${term}-${index}`}
+                                            style={{
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "space-between",
+                                                padding: "10px 12px",
+                                                border: `1px solid ${theme === "dark" ? "#434343" : "#d9d9d9"
+                                                    }`,
+                                                borderRadius: 8,
+                                                background:
+                                                    theme === "dark" ? "#1f1f1f" : "#f9fafb",
+                                            }}
+                                        >
+                                            <div
+                                                style={{
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    gap: 8,
+                                                }}
+                                            >
+                                                <span
+                                                    style={{
+                                                        cursor: "grab",
+                                                        color: theme === "dark" ? "#8c8c8c" : "#999",
+                                                        fontSize: "16px",
+                                                    }}
+                                                >
+                                                    ⋮⋮
+                                                </span>
+
+                                                <span
+                                                    style={{
+                                                        color:
+                                                            theme === "dark" ? "#fff" : "#000",
+                                                    }}
+                                                >{term}</span>
+                                            </div>
+
+                                            <Button
+                                                type="text"
+                                                danger
+                                                icon={<DeleteOutlined />}
+                                                onClick={() => removeTerm(term)}
+                                            />
+                                        </div>
                                     ))}
                                 </div>
                             </div>
@@ -877,6 +722,7 @@ export default function AddSuggestedKeywordModal({
 
                                 <Input
                                     // size="large"
+                                    className={theme === 'dark' ? 'small-placeholder custom-input-dark' : 'small-placeholder custom-input-light'}
                                     maxLength={255}
                                     placeholder="Enter title"
                                     value={form.title}
@@ -961,6 +807,7 @@ export default function AddSuggestedKeywordModal({
                                             content: newContent,
                                         }))
                                     }
+
                                 />
                             </div>
                         </div>

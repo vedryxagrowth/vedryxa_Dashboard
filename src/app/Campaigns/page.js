@@ -2694,12 +2694,20 @@ const App = () => {
             text: "Denied",
           },
           error: {
-            color: "#fa8c16",
+            color: "red",
             text: "Error",
           },
           processing: {
             color: "#8c8c8c",
             text: "Processing",
+          },
+          pending: {
+            color: "#fa8c16",
+            text: "pending",
+          },
+          queued: {
+            color: "#8c8c8c",
+            text: "Queued",
           }
         };
 
@@ -2959,7 +2967,15 @@ const App = () => {
         let keywords = [];
 
         try {
-          keywords = JSON.parse(value || "[]");
+          if (Array.isArray(value)) {
+            keywords = value;
+          } else if (typeof value === "string") {
+            if (value.trim().startsWith("[")) {
+              keywords = JSON.parse(value);
+            } else {
+              keywords = value.split(",").map(item => item.trim());
+            }
+          }
         } catch (err) {
           return "-";
         }
@@ -5308,6 +5324,11 @@ const App = () => {
     [selectedKey]
   );
 
+  const storeTheKeyword = (keyword) => {
+    setPredictoKeywordStatusData(prev => ([...prev, keyword]))
+    setOpenComponentForCreateArticle(false)
+  }
+
   return (
     <div>
       <CreateCampaignDrawer
@@ -5384,6 +5405,7 @@ const App = () => {
         open={openComponentForCreateArticle}
         onClose={() => setOpenComponentForCreateArticle(false)}
         // onSuccess={() => refetch()}
+        storeInState={storeTheKeyword}
       />
       {/* <Editcam
                 rowData={selectedEditCampaign}
@@ -6527,7 +6549,7 @@ const App = () => {
               }}
             >
               <Button
-                onClick={()=> setOpenComponentForCreateArticle(true)}
+                onClick={() => setOpenComponentForCreateArticle(true)}
                 icon={<PlusOutlined className="black-icon" />}
                 style={{
                   backgroundColor: "#91c25f",
