@@ -2258,13 +2258,13 @@ const Dashboard = () => {
                         specifiedDate,
                         domain,
                         accountNumber,
-                        spend: obj.spend ? parseFloat(obj.spend) : 0,
-                        estimated_revenue: obj.estimated_revenue ? parseFloat(obj.estimated_revenue) : 0,
-                        fbLeads: obj.fbLeads ? parseInt(obj.fbLeads) : 0,
-                        conversions: obj.conversions ? parseInt(obj.conversions) : 0,
-                        fbClicks: obj.fbClicks ? parseInt(obj.fbClicks) : 0,
-                        fbLinkClicks: obj.fbLinkClicks ? parseInt(obj.fbLinkClicks) : 0, //new
-                        impressions: obj.impressions ? parseInt(obj.impressions) : 0, // new
+                        spend:  0,
+                        estimated_revenue:  0,
+                        fbLeads:  0,
+                        conversions:  0,
+                        fbClicks:  0,
+                        fbLinkClicks: 0, //new
+                        impressions:  0, // new
                         revenuePartner: obj.revenuePartner,
                         mediaBuyerName: obj.MediaBuyerName,
                         holder: obj.Holder,
@@ -2306,13 +2306,13 @@ const Dashboard = () => {
                         specifiedDate,
                         BMName,
                         AgencyName,
-                        spend: obj.spend ? parseFloat(obj.spend) : 0,
-                        estimated_revenue: obj.estimated_revenue ? parseFloat(obj.estimated_revenue) : 0,
-                        fbLeads: obj.fbLeads ? parseInt(obj.fbLeads) : 0,
-                        conversions: obj.conversions ? parseInt(obj.conversions) : 0,
-                        fbClicks: obj.fbClicks ? parseInt(obj.fbClicks) : 0,
-                        fbLinkClicks: obj.fbLinkClicks ? parseInt(obj.fbLinkClicks) : 0, //new
-                        impressions: obj.impressions ? parseInt(obj.impressions) : 0, // new
+                        spend:  0,
+                        estimated_revenue:  0,
+                        fbLeads:  0,
+                        conversions:  0,
+                        fbClicks:  0,
+                        fbLinkClicks:  0, //new
+                        impressions:  0, // new
                         accountNumber,
                         accountName: userdetails?.adAccounts[revenuePartnerNames[revenuePartner]]?.find(each => each.accountNumber === accountNumber)?.accountName
                     };

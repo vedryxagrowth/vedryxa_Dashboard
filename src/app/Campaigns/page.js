@@ -71,6 +71,7 @@ import DuplicateCampaignDrawer from "./camp-components/Dupcampaign";
 import { redirect } from "next/navigation";
 import ExpandedRowContent from "./camp-components/expandcreatives";
 import ExpandedAdsetsContent from "./camp-components/expandcreativesformultipleadsets";
+import AddSuggestedKeywordModal from "./camp-components/urlbuilder/predicto-article"
 import moment from "moment-timezone";
 import dayjs from "dayjs";
 import { DatePicker } from "antd";
@@ -226,6 +227,7 @@ const App = () => {
   const filtersList = useRef({ languageList: [], statusList: [], verticleList: [] })
   const [loadingKeyword, setLoadingKeyword] = useState(true);
   const [loadingArticleForKeyword, setLoadingArticleForKeyword] = useState([]);
+  const [openComponentForCreateArticle, setOpenComponentForCreateArticle] = useState(false);
   const lastUpdatedDateandTime = useRef("");
   // console.log(checkedRowRecords);
   // console.log(multipleAdsetCampaignData);
@@ -2692,12 +2694,20 @@ const App = () => {
             text: "Denied",
           },
           error: {
-            color: "#fa8c16",
+            color: "red",
             text: "Error",
           },
           processing: {
             color: "#8c8c8c",
             text: "Processing",
+          },
+          pending: {
+            color: "#fa8c16",
+            text: "pending",
+          },
+          queued: {
+            color: "#8c8c8c",
+            text: "Queued",
           }
         };
 
@@ -2957,7 +2967,15 @@ const App = () => {
         let keywords = [];
 
         try {
-          keywords = JSON.parse(value || "[]");
+          if (Array.isArray(value)) {
+            keywords = value;
+          } else if (typeof value === "string") {
+            if (value.trim().startsWith("[")) {
+              keywords = JSON.parse(value);
+            } else {
+              keywords = value.split(",").map(item => item.trim());
+            }
+          }
         } catch (err) {
           return "-";
         }
@@ -5306,6 +5324,11 @@ const App = () => {
     [selectedKey]
   );
 
+  const storeTheKeyword = (keyword) => {
+    setPredictoKeywordStatusData(prev => ([...prev, keyword]))
+    setOpenComponentForCreateArticle(false)
+  }
+
   return (
     <div>
       <CreateCampaignDrawer
@@ -5376,6 +5399,13 @@ const App = () => {
         visible={editOnlyDrawerVisible}
         changeRRefrst={changeRRefrst}
         onClose={() => setEditOnlyDrawerVisible(false)}
+      />
+
+      <AddSuggestedKeywordModal
+        open={openComponentForCreateArticle}
+        onClose={() => setOpenComponentForCreateArticle(false)}
+        // onSuccess={() => refetch()}
+        storeInState={storeTheKeyword}
       />
       {/* <Editcam
                 rowData={selectedEditCampaign}
@@ -5802,7 +5832,7 @@ const App = () => {
                   transition: "all 0.15s ease-in-out",
                 }}
               >
-                {showPredictoKeywordStatus ? "Launching" : "Keywords"}
+                {showPredictoKeywordStatus ? "Launching" : "Article"}
               </Button>
             )}
             {isMobile && filteredMultipleAdsetCampaigns.length > 0 && (
@@ -6479,7 +6509,7 @@ const App = () => {
                 value={languageSearch}
                 onChange={value => setLanguageSearch(value)}
                 dropdownClassName={theme === "dark" && "custom-dropdown"}
-                style={{ width: 170, marginLeft:"10px", marginRight:"10px" }}
+                style={{ width: 170, marginLeft: "10px", marginRight: "10px" }}
                 options={[
                   { label: "All Language", value: "all" },
                   ...filtersList.current.languageList.map(item => ({ label: item, value: item }))
@@ -6490,7 +6520,7 @@ const App = () => {
                 value={statusSearch}
                 onChange={value => setStatusSearch(value)}
                 dropdownClassName={theme === "dark" && "custom-dropdown"}
-                style={{ width: 170, marginRight:"10px" }}
+                style={{ width: 170, marginRight: "10px" }}
                 options={[
                   { label: "All Status", value: "all" },
                   ...filtersList.current.statusList.map(item => ({ label: item, value: item }))
@@ -6518,6 +6548,19 @@ const App = () => {
 
               }}
             >
+              <Button
+                onClick={() => setOpenComponentForCreateArticle(true)}
+                icon={<PlusOutlined className="black-icon" />}
+                style={{
+                  backgroundColor: "#91c25f",
+                  border: "1px solid #91c25f",
+                  width: "120px",
+                  // marginRight: "5px"
+                }}
+                type="primary"
+              >
+                Create Article
+              </Button>
               <Tooltip
                 title={
                   lastUpdatedDateandTime.current
