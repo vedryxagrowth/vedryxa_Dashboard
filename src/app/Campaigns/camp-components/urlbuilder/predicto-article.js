@@ -98,7 +98,7 @@ export default function AddSuggestedKeywordModal({
         if (open) {
             const getData = async () => {
                 const token = localStorage.getItem("token")
-                const response = await axios.get("http://localhost:7000/open/open/predicto/keyword/article/languagesandverticle-list", {
+                const response = await axios.get("https://fblaunching.vyaktimetrics.com/open/open/predicto/keyword/article/languagesandverticle-list", {
                     headers: { Authorization: token },
                 })
                 setLanguages(response.data.Languages)
@@ -228,7 +228,7 @@ export default function AddSuggestedKeywordModal({
                     article_headline: form.title || null,
                     article_excerpt: form.excerpt || null,
                     article_content: form.content || null,
-                    suggested_keywords: form.terms,
+                    suggested_keywords: JSON.stringify(form.terms),
                 },
             ],
         };
@@ -237,11 +237,12 @@ export default function AddSuggestedKeywordModal({
 
         try {
             setLoading(true);
+            
 
             const token = localStorage.getItem("token");
 
             const response = await axios.post(
-                `http://localhost:7000/open/predicto/keyword/articlecreate`,
+                `https://fblaunching.vyaktimetrics.com/open/predicto/keyword/articlecreate`,
                 payload,
                 {
                     headers: {
