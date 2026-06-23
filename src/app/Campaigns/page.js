@@ -617,8 +617,28 @@ const App = () => {
     </StickyBox>
   );
 
-  const showDrawer = () => {
-    setDrawerVisible(true);
+  const getTheCampaignLimit = async () => {
+    const campaignLimit = await axios.get('https://fblaunching.vyaktimetrics.com/open/campaignlimitperday', {
+      headers: {
+        Authorization: token,
+      }
+    });
+    return campaignLimit.data;
+  }
+
+  const showDrawer = async () => {
+    const limit = await getTheCampaignLimit();
+    console.log(limit)
+    if (limit.data.remainingCount > 0 || limit.data.remainingCount === "No_Limit") {
+      if (limit.data.remainingCount !== "No_Limit" && limit.data.remainingCount <= 10) {
+        message.warning(`Campaign launch limit is nearly reached. Only ${limit.data.remainingCount} campaign launches remaining.`)
+      }
+      setDrawerVisible(true)
+    }
+    else {
+      message.warning("Campaign launch limit reached. Unable to launch new campaigns.");
+      setDrawerVisible(false);
+    }
   };
 
   const showCreateNewDraftDrawer = () => {
@@ -1963,10 +1983,25 @@ const App = () => {
     setView(status);
   };
 
-  const handleCloneClickMultipleAdsetData = (record, status) => {
+  const handleCloneClickMultipleAdsetData = async (record, status) => {
     // console.log(record, "viewdata campaign")
-    setSelectedCloneMultipleAdsetData(record);
-    setViewCloneMultipleAdsetDataDrawerVisible(true);
+    const limit = await getTheCampaignLimit();
+    if (limit.data.remainingCount > 0 || limit.data.remainingCount === "No_Limit") {
+      // setDrawerVisible(true);
+      // setdupDrawerVisible(true);
+      // setduplicatenewcampaigns(record);
+      if (limit.data.remainingCount !== "No_Limit" && limit.data.remainingCount <= 10) {
+        message.warning(`Campaign launch limit is nearly reached. Only ${limit.data.remainingCount} campaign launches remaining.`)
+      }
+      setSelectedCloneMultipleAdsetData(record);
+      setViewCloneMultipleAdsetDataDrawerVisible(true);
+
+    }
+    else {
+      message.warning("Campaign launch limit reached. Unable to launch new campaigns.");
+      setViewCloneMultipleAdsetDataDrawerVisible(false);
+    }
+
   };
 
   // Safely stringify any error (string / object)
