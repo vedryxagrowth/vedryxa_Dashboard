@@ -1103,371 +1103,382 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
   //   };
   // }, [userdetails?.email]);
 
-//   useEffect(() => {
+  //   useEffect(() => {
 
-//     console.log("🔔 Setting up notifications...");
+  //     console.log("🔔 Setting up notifications...");
 
-//     if (!userdetails?.email) return;
+  //     if (!userdetails?.email) return;
 
-//     /*
-//     ✅ NORMALIZE EMAIL
-//     */
-//     const normalizedEmail =
-//       userdetails.email.trim().toLowerCase();
+  //     /*
+  //     ✅ NORMALIZE EMAIL
+  //     */
+  //     const normalizedEmail =
+  //       userdetails.email.trim().toLowerCase();
 
-//     /*
-//     ✅ REGISTER USER
-//     */
-//     const registerUser = () => {
+  //     /*
+  //     ✅ REGISTER USER
+  //     */
+  //     const registerUser = () => {
 
-//       console.log("📨 REGISTERING:", normalizedEmail);
+  //       console.log("📨 REGISTERING:", normalizedEmail);
 
-//       socket.emit("register", normalizedEmail);
+  //       socket.emit("register", normalizedEmail);
 
-//     };
+  //     };
 
-//     /*
-//     ✅ INITIAL CONNECT
-//     */
-//     socket.on("connect", () => {
+  //     /*
+  //     ✅ INITIAL CONNECT
+  //     */
+  //     socket.on("connect", () => {
 
-//   console.log(
-//     "✅ SOCKET CONNECTED:",
-//     socket.id
-//   );
+  //   console.log(
+  //     "✅ SOCKET CONNECTED:",
+  //     socket.id
+  //   );
 
-//   /*
-//   ✅ JOIN ROOM AGAIN
-//   */
-//   registerUser();
+  //   /*
+  //   ✅ JOIN ROOM AGAIN
+  //   */
+  //   registerUser();
 
-// });
+  // });
 
-//     /*
-//     ✅ RECONNECT AFTER SERVER RESTART
-//     */
-//     // socket.on("reconnect", () => {
+  //     /*
+  //     ✅ RECONNECT AFTER SERVER RESTART
+  //     */
+  //     // socket.on("reconnect", () => {
 
-//     //   console.log(
-//     //     "♻️ SOCKET RECONNECTED:",
-//     //     socket.id
-//     //   );
+  //     //   console.log(
+  //     //     "♻️ SOCKET RECONNECTED:",
+  //     //     socket.id
+  //     //   );
 
-//     //   registerUser();
+  //     //   registerUser();
 
-//     // });
+  //     // });
 
-//     /*
-//     ✅ INITIAL FETCH
-//     */
-//     fetchNotifications().then((initial) => {
+  //     /*
+  //     ✅ INITIAL FETCH
+  //     */
+  //     fetchNotifications().then((initial) => {
 
-//       console.log(
-//         "🟢 Initial full notifications:",
-//         initial
-//       );
+  //       console.log(
+  //         "🟢 Initial full notifications:",
+  //         initial
+  //       );
 
-//       prevNotificationsRef.current =
-//         initial || {};
+  //       prevNotificationsRef.current =
+  //         initial || {};
 
-//     });
+  //     });
 
-//     /*
-//     ✅ HANDLE SOCKET EVENT
-//     */
-//     const handleUpdate = async () => {
+  //     /*
+  //     ✅ HANDLE SOCKET EVENT
+  //     */
+  //     const handleUpdate = async () => {
 
-//       console.log(
-//         "🔥 notifications_updated RECEIVED"
-//       );
+  //       console.log(
+  //         "🔥 notifications_updated RECEIVED"
+  //       );
 
-//       const newNotifications =
-//         await fetchNotifications();
+  //       const newNotifications =
+  //         await fetchNotifications();
 
-//       const old =
-//         prevNotificationsRef.current || {};
+  //       const old =
+  //         prevNotificationsRef.current || {};
 
-//       const newlyAdded = [];
+  //       const newlyAdded = [];
 
-//       console.log(
-//         "📦 New full notifications:",
-//         newNotifications
-//       );
+  //       console.log(
+  //         "📦 New full notifications:",
+  //         newNotifications
+  //       );
 
-//       console.log(
-//         "📁 Previous:",
-//         old
-//       );
+  //       console.log(
+  //         "📁 Previous:",
+  //         old
+  //       );
 
-//       for (
-//         const category of Object.keys(
-//           newNotifications || {}
-//         )
-//       ) {
+  //       for (
+  //         const category of Object.keys(
+  //           newNotifications || {}
+  //         )
+  //       ) {
 
-//         const newItems =
-//           newNotifications[category] || [];
+  //         const newItems =
+  //           newNotifications[category] || [];
 
-//         const oldItems =
-//           old[category] || [];
+  //         const oldItems =
+  //           old[category] || [];
 
-//         const newInCategory =
-//           newItems.filter((n) => {
+  //         const newInCategory =
+  //           newItems.filter((n) => {
 
-//             return !oldItems.some((o) => {
+  //             return !oldItems.some((o) => {
 
-//               return n.id && o.id
-//                 ? n.id === o.id
-//                 : (
-//                   o.message === n.message &&
-//                   new Date(o.date).getTime() ===
-//                   new Date(n.date).getTime()
-//                 );
+  //               return n.id && o.id
+  //                 ? n.id === o.id
+  //                 : (
+  //                   o.message === n.message &&
+  //                   new Date(o.date).getTime() ===
+  //                   new Date(n.date).getTime()
+  //                 );
 
-//             });
+  //             });
 
-//           });
+  //           });
 
-//         newInCategory.forEach((item) => {
+  //         newInCategory.forEach((item) => {
 
-//           newlyAdded.push({
-//             ...item,
-//             _category: category,
-//           });
+  //           newlyAdded.push({
+  //             ...item,
+  //             _category: category,
+  //           });
 
-//         });
+  //         });
 
-//       }
+  //       }
 
-//       console.log(
-//         "🆕 Newly added:",
-//         newlyAdded
-//       );
+  //       console.log(
+  //         "🆕 Newly added:",
+  //         newlyAdded
+  //       );
 
-//       if (newlyAdded.length > 0) {
+  //       if (newlyAdded.length > 0) {
 
-//         showAllAntdNotificationsSequentially(
-//           newlyAdded
-//         );
+  //         showAllAntdNotificationsSequentially(
+  //           newlyAdded
+  //         );
 
-//       }
+  //       }
 
-//       prevNotificationsRef.current =
-//         newNotifications || {};
+  //       prevNotificationsRef.current =
+  //         newNotifications || {};
 
-//     };
+  //     };
 
-//     /*
-//     ✅ SOCKET EVENT LISTENER
-//     */
-//     socket.on(
-//       "notifications_updated",
-//       handleUpdate
-//     );
+  //     /*
+  //     ✅ SOCKET EVENT LISTENER
+  //     */
+  //     socket.on(
+  //       "notifications_updated",
+  //       handleUpdate
+  //     );
 
-//     /*
-//     ✅ CLEANUP
-//     */
-//     return () => {
+  //     /*
+  //     ✅ CLEANUP
+  //     */
+  //     return () => {
 
-//       socket.off("connect");
+  //       socket.off("connect");
 
-//       // socket.off("reconnect");
+  //       // socket.off("reconnect");
 
-//       socket.off(
-//         "notifications_updated",
-//         handleUpdate
-//       );
+  //       socket.off(
+  //         "notifications_updated",
+  //         handleUpdate
+  //       );
 
-//     };
+  //     };
 
-//   }, [userdetails?.email]);
+  //   }, [userdetails?.email]);
 
-useEffect(() => {
+  useEffect(() => {
 
-  // console.log("🔔 Setting up notifications...");
+    // console.log("🔔 Setting up notifications...");
 
-  if (!userdetails?.email) return;
+    if (!userdetails?.email) return;
 
-  /*
-  ✅ NORMALIZE EMAIL
-  */
-  const normalizedEmail =
-    userdetails.email.trim().toLowerCase();
+    /*
+    ✅ NORMALIZE EMAIL
+    */
+    const normalizedEmail =
+      userdetails.email.trim().toLowerCase();
 
-  /*
-  ✅ REGISTER USER INTO ROOM
-  */
-  const registerUser = () => {
+    /*
+    ✅ REGISTER USER INTO ROOM
+    */
+    const registerUser = () => {
 
-    // console.log(
-    //   "📨 REGISTERING:",
-    //   normalizedEmail
-    // );
+      // console.log(
+      //   "📨 REGISTERING:",
+      //   normalizedEmail
+      // );
 
-    socket.emit(
-      "register",
-      normalizedEmail
-    );
+      socket.emit(
+        "register",
+        normalizedEmail
+      );
 
-  };
+    };
 
-  /*
-  ✅ SOCKET ALREADY CONNECTED
-  */
-  if (socket.connected) {
+    /*
+    ✅ SOCKET ALREADY CONNECTED
+    */
+    if (socket.connected) {
 
-    // console.log(
-    //   "✅ SOCKET ALREADY CONNECTED:",
-    //   socket.id
-    // );
+      // console.log(
+      //   "✅ SOCKET ALREADY CONNECTED:",
+      //   socket.id
+      // );
 
-    registerUser();
+      registerUser();
 
-  }
+    }
 
-  /*
-  ✅ CONNECT + RECONNECT
-  */
-  const handleConnect = () => {
+    /*
+    ✅ CONNECT + RECONNECT
+    */
+    const handleConnect = () => {
 
-    // console.log(
-    //   "✅ SOCKET CONNECTED:",
-    //   socket.id
-    // );
+      // console.log(
+      //   "✅ SOCKET CONNECTED:",
+      //   socket.id
+      // );
 
-    registerUser();
+      registerUser();
 
-  };
+    };
 
-  socket.on("connect", handleConnect);
+    socket.on("connect", handleConnect);
 
-  /*
-  ✅ INITIAL FETCH
-  */
-  fetchNotifications().then((initial) => {
+    /*
+    ✅ INITIAL FETCH
+    */
+    fetchNotifications().then((initial) => {
 
-    // console.log(
-    //   "🟢 Initial full notifications:",
-    //   initial
-    // );
+      // console.log(
+      //   "🟢 Initial full notifications:",
+      //   initial
+      // );
 
-    prevNotificationsRef.current =
-      initial || {};
+      prevNotificationsRef.current =
+        initial || {};
 
-  });
+    });
 
-  /*
-  ✅ HANDLE SOCKET EVENT
-  */
-  const handleUpdate = async () => {
+    /*
+    ✅ HANDLE SOCKET EVENT
+    */
+    const handleUpdate = async () => {
 
-    // console.log(
-    //   "🔥 notifications_updated RECEIVED"
-    // );
+      // console.log(
+      //   "🔥 notifications_updated RECEIVED"
+      // );
 
-    const newNotifications =
-      await fetchNotifications();
+      const newNotifications =
+        await fetchNotifications();
 
-    const old =
-      prevNotificationsRef.current || {};
+      const old =
+        prevNotificationsRef.current || {};
 
-    const newlyAdded = [];
+      const newlyAdded = [];
 
-    // console.log(
-    //   "📦 New full notifications:",
-    //   newNotifications
-    // );
+      // console.log(
+      //   "📦 New full notifications:",
+      //   newNotifications
+      // );
 
-    // console.log(
-    //   "📁 Previous:",
-    //   old
-    // );
+      // console.log(
+      //   "📁 Previous:",
+      //   old
+      // );
 
-    for (
-      const category of Object.keys(
-        newNotifications || {}
-      )
-    ) {
+      for (
+        const category of Object.keys(
+          newNotifications || {}
+        )
+      ) {
 
-      const newItems =
-        newNotifications[category] || [];
+        const newItems =
+          newNotifications[category] || [];
 
-      const oldItems =
-        old[category] || [];
+        const oldItems =
+          old[category] || [];
 
-      const newInCategory =
-        newItems.filter((n) => {
+        const newInCategory =
+          newItems.filter((n) => {
 
-          return !oldItems.some((o) => {
+            return !oldItems.some((o) => {
 
-            return n.id && o.id
-              ? n.id === o.id
-              : (
+              return n.id && o.id
+                ? n.id === o.id
+                : (
                   o.message === n.message &&
                   new Date(o.date).getTime() ===
                   new Date(n.date).getTime()
                 );
 
+            });
+
+          });
+
+        newInCategory.forEach((item) => {
+
+          newlyAdded.push({
+            ...item,
+            _category: category,
           });
 
         });
 
-      newInCategory.forEach((item) => {
+      }
 
-        newlyAdded.push({
-          ...item,
-          _category: category,
-        });
+      // console.log(
+      //   "🆕 Newly added:",
+      //   newlyAdded
+      // );
 
-      });
+      // if (newlyAdded.length > 0) {
 
-    }
+      //   showAllAntdNotificationsSequentially(
+      //     newlyAdded
+      //   );
 
-    // console.log(
-    //   "🆕 Newly added:",
-    //   newlyAdded
-    // );
+      // }
+      if (newlyAdded.length > 0) {
+        const latestNotification = newlyAdded.reduce((latest, current) =>
+          new Date(current.date) > new Date(latest.date)
+            ? current
+            : latest
+        );
 
-    if (newlyAdded.length > 0) {
+        showAllAntdNotificationsSequentially([
+          latestNotification,
+        ]);
+      }
 
-      showAllAntdNotificationsSequentially(
-        newlyAdded
-      );
+      prevNotificationsRef.current =
+        newNotifications || {};
 
-    }
+    };
 
-    prevNotificationsRef.current =
-      newNotifications || {};
-
-  };
-
-  /*
-  ✅ SOCKET LISTENER
-  */
-  socket.on(
-    "notifications_updated",
-    handleUpdate
-  );
-
-  /*
-  ✅ CLEANUP
-  */
-  return () => {
-
-    socket.off(
-      "connect",
-      handleConnect
-    );
-
-    socket.off(
+    /*
+    ✅ SOCKET LISTENER
+    */
+    socket.on(
       "notifications_updated",
       handleUpdate
     );
 
-  };
+    /*
+    ✅ CLEANUP
+    */
+    return () => {
 
-}, [userdetails?.email]);
+      socket.off(
+        "connect",
+        handleConnect
+      );
+
+      socket.off(
+        "notifications_updated",
+        handleUpdate
+      );
+
+    };
+
+  }, [userdetails?.email]);
 
   // fetchNotifications always returns array
   const fetchNotifications = async () => {

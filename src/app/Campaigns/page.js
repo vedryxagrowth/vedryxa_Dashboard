@@ -631,12 +631,29 @@ const App = () => {
     console.log(limit)
     if (limit.data.remainingCount > 0 || limit.data.remainingCount === "No_Limit") {
       if (limit.data.remainingCount !== "No_Limit" && limit.data.remainingCount <= 10) {
-        message.warning(`Campaign launch limit is nearly reached. Only ${limit.data.remainingCount} campaign launches remaining.`)
+        // message.warning(`Campaign launch limit is nearly reached. Only ${limit.data.remainingCount} campaign launches remaining.`)
+        message.open({
+          type: "warning",
+          content: `Campaign launch limit is nearly reached. Only ${limit.data.remainingCount} campaign launches remaining.`,
+          style: {
+            marginTop: "20px",
+          },
+          className: theme === "dark" ? "custom-warning-dark" : "custom-warning-light",
+        });
+
       }
       setDrawerVisible(true)
     }
     else {
-      message.warning("Campaign launch limit reached. Unable to launch new campaigns.");
+      // message.warning("Campaign launch limit reached. Unable to launch new campaigns.");
+      message.open({
+        type: "warning",
+        content: "Campaign launch limit reached. Unable to launch new campaigns.",
+        style: {
+          marginTop: "20px",
+        },
+        className: theme === "dark" ? "custom-warning-dark" : "custom-warning-light"
+      });
       setDrawerVisible(false);
     }
   };
@@ -1991,14 +2008,30 @@ const App = () => {
       // setdupDrawerVisible(true);
       // setduplicatenewcampaigns(record);
       if (limit.data.remainingCount !== "No_Limit" && limit.data.remainingCount <= 10) {
-        message.warning(`Campaign launch limit is nearly reached. Only ${limit.data.remainingCount} campaign launches remaining.`)
+        // message.warning(`Campaign launch limit is nearly reached. Only ${limit.data.remainingCount} campaign launches remaining.`)
+        message.open({
+          type: "warning",
+          content: `Campaign launch limit is nearly reached. Only ${limit.data.remainingCount} campaign launches remaining.`,
+          style: {
+            marginTop: "20px",
+          },
+          className: theme === "dark" ? "custom-warning-dark" : "custom-warning-light",
+        });
       }
       setSelectedCloneMultipleAdsetData(record);
       setViewCloneMultipleAdsetDataDrawerVisible(true);
 
     }
     else {
-      message.warning("Campaign launch limit reached. Unable to launch new campaigns.");
+      // message.warning("Campaign launch limit reached. Unable to launch new campaigns.");
+      message.open({
+        type: "warning",
+        content: "Campaign launch limit reached. Unable to launch new campaigns.",
+        style: {
+          marginTop: "20px",
+        },
+        className: theme === "dark" ? "custom-warning-dark" : "custom-warning-light",
+      });
       setViewCloneMultipleAdsetDataDrawerVisible(false);
     }
 
