@@ -11613,6 +11613,7 @@ const CreateCampaignDrawer = ({
                 Approval: "PENDING_APPROVAL",
                 fbstatus: "No-Live",
                 Category: selectedCategory,
+                ISTDate: moment().tz("Asia/Kolkata").format("DD-MM-YYYY"),
                 camapaignlevel: {
                   createdby: userdetails?.userName,
                   Name: values.Name,
@@ -11834,6 +11835,7 @@ const CreateCampaignDrawer = ({
             let AllAdsetsData = {
               campaign_name: values.Name,
               Account_Number: account,
+              ISTDate: moment().tz("Asia/Kolkata").format("DD-MM-YYYY"),
               Approval: "PENDING_APPROVAL",
               fbstatus: "No-Live",
               Category: selectedCategory,

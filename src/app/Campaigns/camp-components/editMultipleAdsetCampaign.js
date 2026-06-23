@@ -10436,6 +10436,9 @@ const EditMultipleAdsetCampaignDrawer = ({
     AllAdsetsData["campaign_name"] = values?.Name;
     AllAdsetsData["Account_Number"] = fullCampaignData.Account_Number;
     // AllAdsetsData["Approval"] = fullCampaignData.Approval;
+    if (fullCampaignData.ISTDate) {
+      AllAdsetsData["ISTDate"] = fullCampaignData.ISTDate;
+    }
     if (fullCampaignData.Approval === "Rejected") {
       AllAdsetsData["Approval"] = "PENDING_APPROVAL";
     } else {

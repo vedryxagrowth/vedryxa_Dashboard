@@ -11040,6 +11040,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
       identifier: uuidv4(),
       campaign_name: values.Name,
       Account_Number: values.Account_Number,
+      ISTDate: moment().tz("Asia/Kolkata").format("DD-MM-YYYY"),
       Approval: "PENDING_APPROVAL",
       fbstatus: "No-Live",
       // Category: fullCampaignData.Category || "",
