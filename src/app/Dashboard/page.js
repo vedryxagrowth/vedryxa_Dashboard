@@ -38,7 +38,9 @@ const revenuePartnerNames = {
     "Predicto": "FB_Predicto",
     "Affinity": "FB_Affinity",
     "Botup": "FB_Botup",
-    "Outbrain_Tonic_Rsoc": "Outbrain_TonicRsoc"
+    "Outbrain_Tonic_Rsoc": "Outbrain_TonicRsoc",
+    "MWG": "FB_MWG",
+    "Taboola_Inuvoprism":"Taboola_Inuvoprism"
 };
 
 
@@ -61,7 +63,9 @@ const newtworkCollections = {
     "FB_Predicto": "Facebook_Predicto_Daily",
     "FB_Affinity": "Facebook_Affinity_Daily",
     "FB_Botup": "Facebook_Botup_Daily",
-    "Outbrain_TonicRsoc": "Outbrain_TonicRsoc"
+    "Outbrain_TonicRsoc": "Outbrain_TonicRsoc",
+    "FB_MWG": "Facebook_Mwg_Daily",
+    "Taboola_Inuvoprism":"Taboola_InuvoPrismDaily"
 }
 
 const NetworkDefaultTimezones = {
@@ -83,7 +87,9 @@ const NetworkDefaultTimezones = {
     "FB_Predicto": "EDT",
     "FB_Affinity": "PDT",
     "FB_Botup": "EDT",
-    "Outbrain_TonicRsoc": "EDT"
+    "Outbrain_TonicRsoc": "EDT",
+    "FB_MWG": "UTC",
+    "Taboola_Inuvoprism":"PDT"
 }
 
 import { DatePicker, Space, ConfigProvider, Flex, Spin, Skeleton } from 'antd';
@@ -1685,6 +1691,10 @@ const Dashboard = () => {
                     newKey = "Facebook_Botup_Daily"
                 } else if (key === "Outbrain_TonicRsoc") {
                     newKey = "Outbrain_TonicRsoc"
+                } else if (key === "FB_MWG") {
+                    newKey = "Facebook_Mwg_Daily"
+                }else if (key === "Taboola_Inuvoprism") {
+                    newKey = "Taboola_InuvoPrismDaily"
                 }
                 else { newKey = "Facebook_" + splitKey[1]; }
 
@@ -2248,13 +2258,13 @@ const Dashboard = () => {
                         specifiedDate,
                         domain,
                         accountNumber,
-                        spend: obj.spend ? parseFloat(obj.spend) : 0,
-                        estimated_revenue: obj.estimated_revenue ? parseFloat(obj.estimated_revenue) : 0,
-                        fbLeads: obj.fbLeads ? parseInt(obj.fbLeads) : 0,
-                        conversions: obj.conversions ? parseInt(obj.conversions) : 0,
-                        fbClicks: obj.fbClicks ? parseInt(obj.fbClicks) : 0,
-                        fbLinkClicks: obj.fbLinkClicks ? parseInt(obj.fbLinkClicks) : 0, //new
-                        impressions: obj.impressions ? parseInt(obj.impressions) : 0, // new
+                        spend:  0,
+                        estimated_revenue:  0,
+                        fbLeads:  0,
+                        conversions:  0,
+                        fbClicks:  0,
+                        fbLinkClicks: 0, //new
+                        impressions:  0, // new
                         revenuePartner: obj.revenuePartner,
                         mediaBuyerName: obj.MediaBuyerName,
                         holder: obj.Holder,
@@ -2296,13 +2306,13 @@ const Dashboard = () => {
                         specifiedDate,
                         BMName,
                         AgencyName,
-                        spend: obj.spend ? parseFloat(obj.spend) : 0,
-                        estimated_revenue: obj.estimated_revenue ? parseFloat(obj.estimated_revenue) : 0,
-                        fbLeads: obj.fbLeads ? parseInt(obj.fbLeads) : 0,
-                        conversions: obj.conversions ? parseInt(obj.conversions) : 0,
-                        fbClicks: obj.fbClicks ? parseInt(obj.fbClicks) : 0,
-                        fbLinkClicks: obj.fbLinkClicks ? parseInt(obj.fbLinkClicks) : 0, //new
-                        impressions: obj.impressions ? parseInt(obj.impressions) : 0, // new
+                        spend:  0,
+                        estimated_revenue:  0,
+                        fbLeads:  0,
+                        conversions:  0,
+                        fbClicks:  0,
+                        fbLinkClicks:  0, //new
+                        impressions:  0, // new
                         accountNumber,
                         accountName: userdetails?.adAccounts[revenuePartnerNames[revenuePartner]]?.find(each => each.accountNumber === accountNumber)?.accountName
                     };
@@ -6735,9 +6745,9 @@ const Dashboard = () => {
                                     <div className="metrics-container">
                                         <div className="metrics-grid">
                                             {metrics.map((m, i) => (
-                                                <Card className="metric-card" key={i} 
-                                                // bordered={false}
-                                                variant="borderless"
+                                                <Card className="metric-card" key={i}
+                                                    // bordered={false}
+                                                    variant="borderless"
                                                     style={{
                                                         backgroundColor: theme === "dark" ? "#2F2F2F" : "white"
                                                     }}>

@@ -86,7 +86,7 @@ const positionOptions = {
   facebook: [
     { key: "feed", label: "Facebook Feed" },
     { key: "marketplace", label: "Facebook Marketplace" },
-    { key: "video_feeds", label: "Facebook Video Feeds" },
+    // { key: "video_feeds", label: "Facebook Video Feeds" },
     { key: "instream_video", label: "Facebook In-Stream Videos" },
     { key: "facebook_reels", label: "Facebook Reels" },
     { key: "profile_feed-f", label: "Facebook Profile Feed" },
@@ -9924,7 +9924,7 @@ const EditMultipleAdsetCampaignDrawer = ({
       onError("Image hash data not loaded");
       return [];
     }
-    const token = imagehash.token;
+    const token = imagehash.launchingToken;
     const account = imagehash.accountNumber;
 
     const createS3Folder = async (folderPath) => {
@@ -10436,6 +10436,9 @@ const EditMultipleAdsetCampaignDrawer = ({
     AllAdsetsData["campaign_name"] = values?.Name;
     AllAdsetsData["Account_Number"] = fullCampaignData.Account_Number;
     // AllAdsetsData["Approval"] = fullCampaignData.Approval;
+    if (fullCampaignData.ISTDate) {
+      AllAdsetsData["ISTDate"] = fullCampaignData.ISTDate;
+    }
     if (fullCampaignData.Approval === "Rejected") {
       AllAdsetsData["Approval"] = "PENDING_APPROVAL";
     } else {
@@ -10563,7 +10566,7 @@ const EditMultipleAdsetCampaignDrawer = ({
         }),
         Daily_amount: parseFloat(values.Daily_amount) * 100,
         Status: values.Status,
-        access_token: imagehash.token,
+        access_token: imagehash.launchingToken,
         createdDate: fullCampaignData.camapaignlevel.createdDate,
         EditedDate: moment().tz(imagehash.timeZone).format("YYYY-MM-DD"),
         ...(fullCampaignData.camapaignlevel.campaignid

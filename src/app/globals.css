@@ -4389,4 +4389,25 @@ body.dark-mode .black-icon-creatives1.anticon svg {
   line-height: 18px;
 }
 
-/* commnet added*/
+/* commnet added for */
+/* Input placeholder */
+.small-placeholder input::placeholder {
+    font-size: 12px;
+}
+
+/* Select placeholder */
+.small-placeholder .ant-select-selection-placeholder {
+    font-size: 12px;
+}
+
+.custom-warning-dark .ant-message-notice-content {
+  background: #1f1f1f !important;
+  color: #faad14 !important;
+  border: 1px solid #434343;
+}
+
+.custom-warning-light .ant-message-notice-content {
+  background: #fffbe6 !important;
+  color: #d48806 !important;
+  border: 1px solid #ffe58f;
+}

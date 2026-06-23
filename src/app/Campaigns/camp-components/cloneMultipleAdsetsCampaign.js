@@ -85,7 +85,7 @@ const positionOptions = {
   facebook: [
     { key: "feed", label: "Facebook Feed" },
     { key: "marketplace", label: "Facebook Marketplace" },
-    { key: "video_feeds", label: "Facebook Video Feeds" },
+    // { key: "video_feeds", label: "Facebook Video Feeds" },
     { key: "instream_video", label: "Facebook In-Stream Videos" },
     { key: "facebook_reels", label: "Facebook Reels" },
     { key: "profile_feed-f", label: "Facebook Profile Feed" },
@@ -10049,7 +10049,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
         return [];
       }
 
-      const token = imagehash.token;
+      const token = imagehash.launchingToken;
       const account = imagehash.accountNumber;
 
       /*
@@ -11040,6 +11040,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
       identifier: uuidv4(),
       campaign_name: values.Name,
       Account_Number: values.Account_Number,
+      ISTDate: moment().tz("Asia/Kolkata").format("DD-MM-YYYY"),
       Approval: "PENDING_APPROVAL",
       fbstatus: "No-Live",
       // Category: fullCampaignData.Category || "",
@@ -11060,7 +11061,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
         Bid_strategy: values.Bid_strategy,
         Daily_amount: parseFloat(values.Daily_amount) * 100,
         Status: values.Status,
-        access_token: imagehash.token,
+        access_token: imagehash.launchingToken,
         createdDate: moment().tz(imagehash.timeZone).format("YYYY-MM-DD"),
         // ...(fullCampaignData.camapaignlevel.campaignid
         //   ? { campaignid: fullCampaignData.camapaignlevel.campaignid }
