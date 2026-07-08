@@ -1,21 +1,21 @@
-import { chromium } from "playwright";
+import chromium from "@sparticuz/chromium";
+import { chromium as playwright } from "playwright-core";
 
 
 let browserInstance = null;
+
 
 async function getBrowser() {
 
     if (!browserInstance) {
 
-        browserInstance = await chromium.launch({
-            headless: true,
+        browserInstance = await playwright.launch({
             args: [
-                "--no-sandbox",
-                "--disable-setuid-sandbox",
+                ...chromium.args,
                 "--disable-dev-shm-usage",
-                "--disable-gpu",
-                "--disable-software-rasterizer"
-            ]
+            ],
+            executablePath: await chromium.executablePath(),
+            headless: chromium.headless,
         });
 
 
@@ -24,7 +24,6 @@ async function getBrowser() {
         });
 
     }
-
 
     return browserInstance;
 }
