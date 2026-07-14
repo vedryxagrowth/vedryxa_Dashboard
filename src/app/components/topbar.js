@@ -30,7 +30,7 @@ import {
   // UserOutlined,
   LaptopOutlined
 } from '@ant-design/icons';
-import { Bell, Edit3Icon, Moon, Sun, StickyNote, View, Eye, MoonIcon } from 'lucide-react';
+import { Bell, Edit3Icon, Moon, Sun, StickyNote, View, Eye, MoonIcon, Link } from 'lucide-react';
 import { getSession } from 'next-auth/react';
 import debounce from 'lodash.debounce';
 import soundFile from "../../../public/notification_sounds.mp3";
@@ -2535,8 +2535,10 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
             display: 'flex',
             padding: '20px',
             boxSizing: 'border-box',
+
           }}
         >
+
           <div
             style={{
               flex: 1,
@@ -2691,6 +2693,7 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
             >
               Secure enterprise-grade authentication
             </div>
+
           </div>
           <img
             src="/logolight.png"
@@ -2703,8 +2706,80 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
               height: 'auto',
             }}
           />
+
+          <div
+            style={{
+              position: "fixed",
+              bottom: 0,
+              left: 0,
+              width: "100%",
+              height: "38px",
+              background: "#edfaf3",
+              display: "flex",
+              justifyContent: "space-around",
+              alignItems: "center",
+              padding: "0 32px",
+              fontSize: "13px",
+              zIndex: 1000,
+              boxSizing: "border-box",
+            }}
+          >
+            {/* Left */}
+            <span
+              style={{
+                color: "#8C8C8C",
+                fontSize: "12px",
+              }}
+            >
+              © {new Date().getFullYear()} Vyaktimetrics. All rights reserved.
+            </span>
+
+            {/* Right */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+              }}
+            >
+              <a
+                href="/privacy-policy.html"
+                style={{
+                  color: "#666",
+                  textDecoration: "none",
+                }}
+              >
+                Privacy Policy
+              </a>
+
+              <span style={{ color: "#C5C5C5" }}>|</span>
+
+              <a
+                href="/terms-of-service.html"
+                style={{
+                  color: "#666",
+                  textDecoration: "none",
+                }}
+              >
+                Terms of Service
+              </a>
+
+              <span style={{ color: "#C5C5C5" }}>|</span>
+
+              <a
+                href="/data-deletion.html"
+                style={{
+                  color: "#666",
+                  textDecoration: "none",
+                }}
+              >
+                Data Deletion
+              </a>
+            </div>
+          </div>
         </div>
       )}
+
     </>
   );
 };
