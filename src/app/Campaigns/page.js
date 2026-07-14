@@ -5546,7 +5546,27 @@ const App = () => {
             >
               Remaining amount: ${accountRemaining}
             </span>
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                window.open(
+                  `/Campaigns/AdLibrary`,
+                  "_blank",
+                  "noopener,noreferrer"
+                );
+              }}
+
+              style={{
+                backgroundColor: "#91C25F",
+                color: "#000",
+                border: "none",
+                border: "#4caf50",
+              }}
+            >
+              Ad Library
+            </Button>
             {userdetails?.role !== "Network_Partner" && (
+
               <Button
                 onClick={showDrawer}
                 icon={<PlusOutlined className="black-icon" />}
