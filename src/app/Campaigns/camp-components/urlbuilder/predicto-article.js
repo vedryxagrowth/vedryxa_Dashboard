@@ -228,7 +228,7 @@ export default function AddSuggestedKeywordModal({
                     article_headline: form.title || null,
                     article_excerpt: form.excerpt || null,
                     article_content: form.content || null,
-                    suggested_keywords: JSON.stringify(form.terms),
+                    suggested_keywords: form.terms,
                 },
             ],
         };

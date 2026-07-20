@@ -672,6 +672,8 @@ const App = () => {
     setCreateNewDraft(false);
     setViewEditMultipleAdsetDataDrawerVisible(false);
     setViewCloneMultipleAdsetDataDrawerVisible(false);
+    setSelectedEditMultipleAdsetData(null);
+    setSelectedCloneMultipleAdsetData(null);
   };
 
   useEffect(() => {
