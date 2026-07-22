@@ -79,6 +79,7 @@ import StickyBox from "react-sticky-box";
 import { FaClone, FaEye, FaPenToSquare, FaTrashCan, FaRegCommentDots } from "react-icons/fa6";
 import { TiTickOutline, TiTimesOutline } from "react-icons/ti";
 import { IoMdCreate } from "react-icons/io";
+import { FaFacebook } from "react-icons/fa";
 import { useSearchParams } from "next/navigation";
 const CampaignHistoryModal = React.lazy(() => import('../Campaigns/camp-components/campaignHistory'));
 
@@ -672,6 +673,8 @@ const App = () => {
     setCreateNewDraft(false);
     setViewEditMultipleAdsetDataDrawerVisible(false);
     setViewCloneMultipleAdsetDataDrawerVisible(false);
+    setSelectedEditMultipleAdsetData(null);
+    setSelectedCloneMultipleAdsetData(null);
   };
 
   useEffect(() => {
@@ -3170,46 +3173,77 @@ const App = () => {
       key: "fbstatus",
       width: 80,
       align: "center",
-      render: (text, record) => (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 10,
-          }}
-        >
-          {record.fbstatus === "Live" ? (
-            <CheckCircleFilled
-              style={{ color: "#91C25F", fontSize: 16 }}
-              className="black-icon-active-1"
-            />
-          ) : (
-            <CloseCircleFilled
-              style={{ color: "#EC7117", fontSize: 16 }}
-              className="black-icon-pause-1"
-            />
-          )}
-
-          <Switch
-            checked={record.Status === "ACTIVE"}
-            onChange={(checked) =>
-              onToggleStatusForMultipleAdsets(record, checked)
-            }
-            checkedChildren="✓"
-            unCheckedChildren="✗"
-            // disabled={record.Approval !== "Approved"}
-            size="default"
+      render: (text, record) => {
+        const doesAdsWentToFacebook = record.allAds.some(
+          item => item.facebookUploadFailed === true
+        );
+        return (
+          <div
             style={{
-              backgroundColor:
-                record.Status === "ACTIVE" ? "#91C25F" : undefined,
-              minWidth: 40,
-              height: 22,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 10,
             }}
-          />
+          >
+            {doesAdsWentToFacebook ?
+              <span
+                style={{
+                  background: "red",
+                  borderRadius: "50%",
+                  padding: "3px",
+                  display: "inline-flex",
+                }}
+              >
+                <FaFacebook color="white" />
+              </span>
+              :
+              (
+                record.fbstatus === "Live" ? (
+                  <CheckCircleFilled
+                    style={{ color: "#91C25F", fontSize: 16 }}
+                    className="black-icon-active-1"
+                  />
+                ) : (
+                  <CloseCircleFilled
+                    style={{ color: "#EC7117", fontSize: 16 }}
+                    className="black-icon-pause-1"
+                  />
+                )
+              )}
+            {/* {record.fbstatus === "Live" ? (
+              <CheckCircleFilled
+                style={{ color: "#91C25F", fontSize: 16 }}
+                className="black-icon-active-1"
+              />
+            ) : (
+              <CloseCircleFilled
+                style={{ color: "#EC7117", fontSize: 16 }}
+                className="black-icon-pause-1"
+              />
+            )} */}
 
-        </div>
-      ),
+            <Switch
+              checked={record.Status === "ACTIVE"}
+              onChange={(checked) =>
+                onToggleStatusForMultipleAdsets(record, checked)
+              }
+              disabled={doesAdsWentToFacebook}
+              checkedChildren="✓"
+              unCheckedChildren="✗"
+              // disabled={record.Approval !== "Approved"}
+              size="default"
+              style={{
+                backgroundColor:
+                  record.Status === "ACTIVE" ? "#91C25F" : undefined,
+                minWidth: 40,
+                height: 22,
+              }}
+            />
+
+          </div>
+        )
+      },
     },
     {
       title: "Campaign name",

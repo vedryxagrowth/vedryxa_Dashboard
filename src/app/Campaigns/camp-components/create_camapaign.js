@@ -10663,9 +10663,7 @@ const CreateCampaignDrawer = ({
       CREATE S3 FOLDER
       =========================================
       */
-      const createS3Folder = async (
-        folderPath
-      ) => {
+      const createS3Folder = async (folderPath) => {
         try {
           await fetch(
             "https://app.vyaktimetrics.com/creatives/userfiles/uploaduserfiles",
@@ -10874,7 +10872,7 @@ const CreateCampaignDrawer = ({
         folderPath
       ) => {
         const adName = `${account}_${data?.AddName}_${adIndex}`;
-
+        let s3FileUrl = "";
         try {
           let fileBlob = null;
           let fileName = "";
@@ -10975,7 +10973,7 @@ const CreateCampaignDrawer = ({
             "Uploading to S3..."
           );
 
-          const s3FileUrl =
+          s3FileUrl =
             await retryApi(
               () =>
                 uploadFileToS3(
@@ -11150,6 +11148,18 @@ const CreateCampaignDrawer = ({
             "Single file upload failed:",
             error
           );
+
+          if (s3FileUrl) {
+            return {
+              success: true,
+              filename: s3FileUrl,
+              facebookUploadFailed: true,
+              error:
+                error?.response?.data ||
+                error?.message ||
+                "Facebook upload failed",
+            };
+          }
 
           onError("error", error);
 
@@ -11653,6 +11663,7 @@ const CreateCampaignDrawer = ({
                   onError,
                   adsets[i].id
                 );
+                console.log(imageHashArray, "imageHashArray");
                 const getTheImages = imagesHashArray
                   .map(media => media.imag_hash)
                   .filter(Boolean);
@@ -11724,6 +11735,25 @@ const CreateCampaignDrawer = ({
                       Website_URL: values.adsets[i][account].Website_URL,
                       // urlParameters: values.urlParameters
                     };
+                  } else {
+                    {
+                      // This is an image
+                      return {
+                        id: uuidv4(),
+                        AddName: `${values.adsets[i].AddName}_${index + 1}`,
+                        filename: media.filename,
+                        imag_hash: media.imag_hash,
+                        facebookUploadFailed: true,
+                        page_id: page_id,
+                        message: values.adsets[i].message,
+                        headline: values.adsets[i].headline,
+                        Description: values.adsets[i].Description,
+                        Caption: values.adsets[i][account].Caption,
+                        Website_URL: values.adsets[i][account].Website_URL,
+
+                        // urlParameters: values.urlParameters
+                      };
+                    }
                   }
                 });
                 // console.log(addLevelData, "addLevelData")
@@ -11879,6 +11909,8 @@ const CreateCampaignDrawer = ({
                 adsets[i].id
               );
 
+              console.log(imagesHashArray, "imagesHashArray");
+
               const getTheImages = imagesHashArray
                 .map(media => media.imag_hash)
                 .filter(Boolean);
@@ -11947,6 +11979,23 @@ const CreateCampaignDrawer = ({
                     Description: values.adsets[i].Description,
                     Caption: values.adsets[i][account].Caption,
                     Website_URL: values.adsets[i][account].Website_URL,
+                    // urlParameters: values.urlParameters
+                  };
+                } else {
+                  // This is an image
+                  return {
+                    id: uuidv4(),
+                    AddName: `${values.adsets[i].AddName}_${index + 1}`,
+                    filename: media.filename,
+                    imag_hash: media.imag_hash,
+                    facebookUploadFailed: true,
+                    page_id: page_id,
+                    message: values.adsets[i].message,
+                    headline: values.adsets[i].headline,
+                    Description: values.adsets[i].Description,
+                    Caption: values.adsets[i][account].Caption,
+                    Website_URL: values.adsets[i][account].Website_URL,
+
                     // urlParameters: values.urlParameters
                   };
                 }

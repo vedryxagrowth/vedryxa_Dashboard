@@ -84,6 +84,10 @@ const AdsetCard = ({
 
   const adsetKey = adset?.adsetKey || `adsetlevel_${index + 1}`;
 
+  const doesAdsWentToFacebook = adset.addlevel.some(
+    item => item.facebookUploadFailed === true
+  );
+
   const [isActive, setIsActive] = useState(
     String(adset?.Status ?? adset?.status ?? "PAUSED").toUpperCase() === "ACTIVE"
   );
@@ -212,9 +216,9 @@ const AdsetCard = ({
       if (response.status === 200) {
         // console.log("Approved");
         // changeRRefrst && changeRRefrst();
-        setadlevel(prev=>prev.map(aditem=>{
-          if(aditem.id === item.id){
-            return({...aditem, status: "Approved"})
+        setadlevel(prev => prev.map(aditem => {
+          if (aditem.id === item.id) {
+            return ({ ...aditem, status: "Approved" })
           }
           return aditem
         }))
@@ -291,9 +295,9 @@ const AdsetCard = ({
       );
       if (response.status === 200) {
         // console.log("Rejected:", currentItem.id);
-        setadlevel(prev=>prev.map(aditem=>{
-          if(aditem.id === currentItem.id){
-            return({...aditem, status: "Rejected", rejectionReason: rejectionReason})
+        setadlevel(prev => prev.map(aditem => {
+          if (aditem.id === currentItem.id) {
+            return ({ ...aditem, status: "Rejected", rejectionReason: rejectionReason })
           }
           return aditem
         }))
@@ -460,6 +464,7 @@ const AdsetCard = ({
           <Switch
             checkedChildren="✓"
             unCheckedChildren="✗"
+            disabled={doesAdsWentToFacebook}
             checked={isActive}
             onChange={handleChange}
             style={{
@@ -1196,6 +1201,7 @@ const AdsetCard = ({
                             checkedChildren="✓"
                             unCheckedChildren="✗"
                             checked={adIsActive}
+                            disabled={item.facebookUploadFailed}
                             onChange={makeHandleChangeAd(item, adsetKey)}
                             style={{
                               backgroundColor: adIsActive ? "#91C25F" : undefined,
@@ -1501,12 +1507,12 @@ const AdsetCard = ({
                                   backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
                                   color: theme === "dark" ? "#ffffff" : "#000000",
                                 }}>
-                                <MessageOutlined style={{ marginRight: "5px" }} onClick={() => {
-                                  setSelectedItem(item);
-                                  setIconInputValue(item.rejectionReason || "");
-                                  setIsIconModalOpen(true);
-                                }} />
-                              </Tooltip>
+                                  <MessageOutlined style={{ marginRight: "5px" }} onClick={() => {
+                                    setSelectedItem(item);
+                                    setIconInputValue(item.rejectionReason || "");
+                                    setIsIconModalOpen(true);
+                                  }} />
+                                </Tooltip>
                               )}
                               <p style={{ margin: 0 }}>
                                 <CloseCircleOutlined style={{ marginLeft: "5px" }} />
