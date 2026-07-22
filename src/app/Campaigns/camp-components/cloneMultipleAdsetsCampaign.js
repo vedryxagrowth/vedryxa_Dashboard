@@ -11301,119 +11301,132 @@ const CloneMultipleAdsetCampaignDrawer = ({
           formData.append("file", fileBlob, file.name);
           formData.append("access_token", token);
 
-          let fbResponse;
-          if (
-            file.url.endsWith(".png") ||
-            file.url.endsWith(".jpg") ||
-            file.url.endsWith(".jpeg")
-          ) {
-            const fileName = file.name.split("/").pop();
+          try {
+            let fbResponse;
+            if (
+              file.url.endsWith(".png") ||
+              file.url.endsWith(".jpg") ||
+              file.url.endsWith(".jpeg")
+            ) {
+              const fileName = file.name.split("/").pop();
 
-            fbResponse = await axios.post(
-              `https://graph.facebook.com/v20.0/act_${values?.Account_Number}/adimages`,
-              formData,
-              { headers: { "Content-Type": "multipart/form-data" } }
-            );
+              fbResponse = await axios.post(
+                `https://graph.facebook.com/v20.0/act_${values?.Account_Number}/adimages`,
+                formData,
+                { headers: { "Content-Type": "multipart/form-data" } }
+              );
 
-            if (fbResponse.status === 200) {
-              onSuccess("ok", fbResponse);
-              mediaHashArray = {
-                filename: s3FileUrl,
-                imag_hash: fbResponse.data?.images?.[fileName]?.hash,
-              };
-            } else {
-              onError("error", fbResponse);
-              console.error("Image upload failed");
-            }
-          } else if (file.url.endsWith(".mp4")) {
-            fbResponse = await axios.post(
-              `https://graph.facebook.com/v20.0/act_${values?.Account_Number}/advideos`,
-              formData,
-              { headers: { "Content-Type": "multipart/form-data" } }
-            );
+              if (fbResponse.status === 200) {
+                onSuccess("ok", fbResponse);
+                mediaHashArray = {
+                  filename: s3FileUrl,
+                  imag_hash: fbResponse.data?.images?.[fileName]?.hash,
+                };
+              } else {
+                onError("error", fbResponse);
+                console.error("Image upload failed");
+              }
+            } else if (file.url.endsWith(".mp4")) {
+              fbResponse = await axios.post(
+                `https://graph.facebook.com/v20.0/act_${values?.Account_Number}/advideos`,
+                formData,
+                { headers: { "Content-Type": "multipart/form-data" } }
+              );
 
-            // if (fbResponse.status === 200) {
-            //   const videoid = fbResponse?.data?.id;
-            //   await new Promise((resolve) => setTimeout(resolve, 10000));
+              // if (fbResponse.status === 200) {
+              //   const videoid = fbResponse?.data?.id;
+              //   await new Promise((resolve) => setTimeout(resolve, 10000));
 
-            //   const thumbnailResponse = await axios.get(
-            //     `https://graph.facebook.com/v20.0/${videoid}`,
-            //     {
-            //       params: {
-            //         access_token: token,
-            //         fields: "thumbnails",
-            //         is_preferred: true,
-            //       },
-            //     }
-            //   );
+              //   const thumbnailResponse = await axios.get(
+              //     `https://graph.facebook.com/v20.0/${videoid}`,
+              //     {
+              //       params: {
+              //         access_token: token,
+              //         fields: "thumbnails",
+              //         is_preferred: true,
+              //       },
+              //     }
+              //   );
 
-            //   const preferredThumbnail =
-            //     thumbnailResponse.data.thumbnails.data.find(
-            //       (thumbnail) => thumbnail.is_preferred === true
-            //     );
-            //   const uri = preferredThumbnail ? preferredThumbnail.uri : "";
+              //   const preferredThumbnail =
+              //     thumbnailResponse.data.thumbnails.data.find(
+              //       (thumbnail) => thumbnail.is_preferred === true
+              //     );
+              //   const uri = preferredThumbnail ? preferredThumbnail.uri : "";
 
-            //   onSuccess("ok", fbResponse);
-            //   mediaHashArray = {
-            //     filename: s3FileUrl,
-            //     videoid: videoid,
-            //     thambnailurl: uri,
-            //   };
-            // } 
-            if (fbResponse.status === 200) {
-              const videoid = fbResponse?.data?.id;
+              //   onSuccess("ok", fbResponse);
+              //   mediaHashArray = {
+              //     filename: s3FileUrl,
+              //     videoid: videoid,
+              //     thambnailurl: uri,
+              //   };
+              // } 
+              if (fbResponse.status === 200) {
+                const videoid = fbResponse?.data?.id;
 
-              let uri = "";
-              let retryCount = 0;
-              const maxRetries = 20;
+                let uri = "";
+                let retryCount = 0;
+                const maxRetries = 20;
 
-              while (!uri && retryCount < maxRetries) {
-                await new Promise((resolve) =>
-                  setTimeout(resolve, retryCount === 0 ? 10000 : 5000)
-                );
-
-                const thumbnailResponse =
-                  await axios.get(
-                    `https://graph.facebook.com/v20.0/${videoid}`,
-                    {
-                      params: {
-                        access_token: token,
-                        fields: "thumbnails",
-                        is_preferred: true,
-                      },
-                    }
+                while (!uri && retryCount < maxRetries) {
+                  await new Promise((resolve) =>
+                    setTimeout(resolve, retryCount === 0 ? 10000 : 5000)
                   );
 
-                const thumbnails =
-                  thumbnailResponse?.data
-                    ?.thumbnails?.data || [];
-
-                if (thumbnails.length) {
-                  const preferredThumbnail =
-                    thumbnails.find(
-                      (thumbnail) =>
-                        thumbnail.is_preferred === true
+                  const thumbnailResponse =
+                    await axios.get(
+                      `https://graph.facebook.com/v20.0/${videoid}`,
+                      {
+                        params: {
+                          access_token: token,
+                          fields: "thumbnails",
+                          is_preferred: true,
+                        },
+                      }
                     );
 
-                  uri =
-                    preferredThumbnail?.uri || "";
+                  const thumbnails =
+                    thumbnailResponse?.data
+                      ?.thumbnails?.data || [];
+
+                  if (thumbnails.length) {
+                    const preferredThumbnail =
+                      thumbnails.find(
+                        (thumbnail) =>
+                          thumbnail.is_preferred === true
+                      );
+
+                    uri =
+                      preferredThumbnail?.uri || "";
+                  }
+
+                  retryCount++;
                 }
 
-                retryCount++;
+                onSuccess("ok", fbResponse);
+
+                mediaHashArray = {
+                  filename: s3FileUrl,
+                  videoid: videoid,
+                  thambnailurl: uri,
+                };
               }
-
-              onSuccess("ok", fbResponse);
-
-              mediaHashArray = {
-                filename: s3FileUrl,
-                videoid: videoid,
-                thambnailurl: uri,
-              };
+              else {
+                onError("error", fbResponse);
+                console.error("Video upload to Facebook failed");
+              }
             }
-            else {
-              onError("error", fbResponse);
-              console.error("Video upload to Facebook failed");
-            }
+          }
+          catch (error) {
+            console.error("Facebook upload failed:", error);
+
+            mediaHashArray = {
+              filename: s3FileUrl,
+              facebookUploadFailed: true,
+              error:
+                error?.response?.data ||
+                error?.message,
+            };
           }
         } else {
           const uniqueId = uuidv4();
@@ -11428,150 +11441,163 @@ const CloneMultipleAdsetCampaignDrawer = ({
           formData.append("file", fileBlob, safeName);
           formData.append("access_token", token);
 
-          let response, fbResponse;
+          try {
+            let response, fbResponse;
 
-          if (file.type.startsWith("image/")) {
-            // response = await axios.post(
-            //   "https://www.testapi.adsgoat.in/upload",
-            //   formData,
-            //   {
-            //     headers: {
-            //       Authorization: localStorage.getItem("token"),
-            //       "Content-Type": "multipart/form-data",
-            //     },
-            //   }
-            // );
+            if (file.type.startsWith("image/")) {
+              // response = await axios.post(
+              //   "https://www.testapi.adsgoat.in/upload",
+              //   formData,
+              //   {
+              //     headers: {
+              //       Authorization: localStorage.getItem("token"),
+              //       "Content-Type": "multipart/form-data",
+              //     },
+              //   }
+              // );
 
-            //   if (!response.data.imageUrl) {
-            //     onError("Error: Image URL not returned from custom API");
-            //     console.error(
-            //       "Image upload to custom API failed, imageUrl missing"
-            //     );
-            //     continue;
-            //   }
+              //   if (!response.data.imageUrl) {
+              //     onError("Error: Image URL not returned from custom API");
+              //     console.error(
+              //       "Image upload to custom API failed, imageUrl missing"
+              //     );
+              //     continue;
+              //   }
 
-            fbResponse = await axios.post(
-              `https://graph.facebook.com/v20.0/act_${values?.Account_Number}/adimages`,
-              formData,
-              { headers: { "Content-Type": "multipart/form-data" } }
-            );
+              fbResponse = await axios.post(
+                `https://graph.facebook.com/v20.0/act_${values?.Account_Number}/adimages`,
+                formData,
+                { headers: { "Content-Type": "multipart/form-data" } }
+              );
 
-            if (s3FileUrl && fbResponse.status === 200) {
-              onSuccess("ok", response);
-              mediaHashArray = {
-                filename: s3FileUrl,
-                imag_hash: fbResponse.data?.images?.[safeName]?.hash,
-              };
-            } else {
-              onError("error", response);
-              console.error("Image upload failed");
-            }
-          } else if (file.type.startsWith("video/")) {
-            // response = await axios.post(
-            //   "https://www.testapi.adsgoat.in/upload",
-            //   formData,
-            //   {
-            //     headers: {
-            //       Authorization: localStorage.getItem("token"),
-            //       "Content-Type": "multipart/form-data",
-            //     },
-            //   }
-            // );
+              if (s3FileUrl && fbResponse.status === 200) {
+                onSuccess("ok", response);
+                mediaHashArray = {
+                  filename: s3FileUrl,
+                  imag_hash: fbResponse.data?.images?.[safeName]?.hash,
+                };
+              } else {
+                onError("error", response);
+                console.error("Image upload failed");
+              }
+            } else if (file.type.startsWith("video/")) {
+              // response = await axios.post(
+              //   "https://www.testapi.adsgoat.in/upload",
+              //   formData,
+              //   {
+              //     headers: {
+              //       Authorization: localStorage.getItem("token"),
+              //       "Content-Type": "multipart/form-data",
+              //     },
+              //   }
+              // );
 
-            //   if (response.status !== 200) {
-            //     onError("error", response);
-            //     console.error("Video upload to custom API failed");
-            //     continue;
-            //   }
+              //   if (response.status !== 200) {
+              //     onError("error", response);
+              //     console.error("Video upload to custom API failed");
+              //     continue;
+              //   }
 
-            fbResponse = await axios.post(
-              `https://graph.facebook.com/v20.0/act_${values?.Account_Number}/advideos`,
-              formData,
-              { headers: { "Content-Type": "multipart/form-data" } }
-            );
+              fbResponse = await axios.post(
+                `https://graph.facebook.com/v20.0/act_${values?.Account_Number}/advideos`,
+                formData,
+                { headers: { "Content-Type": "multipart/form-data" } }
+              );
 
-            // if (fbResponse.status === 200) {
-            //   const videoid = fbResponse?.data?.id;
-            //   await new Promise((resolve) => setTimeout(resolve, 10000));
+              // if (fbResponse.status === 200) {
+              //   const videoid = fbResponse?.data?.id;
+              //   await new Promise((resolve) => setTimeout(resolve, 10000));
 
-            //   const thumbnailResponse = await axios.get(
-            //     `https://graph.facebook.com/v20.0/${videoid}`,
-            //     {
-            //       params: {
-            //         access_token: token,
-            //         fields: "thumbnails",
-            //         is_preferred: true,
-            //       },
-            //     }
-            //   );
+              //   const thumbnailResponse = await axios.get(
+              //     `https://graph.facebook.com/v20.0/${videoid}`,
+              //     {
+              //       params: {
+              //         access_token: token,
+              //         fields: "thumbnails",
+              //         is_preferred: true,
+              //       },
+              //     }
+              //   );
 
-            //   const preferredThumbnail =
-            //     thumbnailResponse.data.thumbnails.data.find(
-            //       (thumbnail) => thumbnail.is_preferred === true
-            //     );
-            //   const uri = preferredThumbnail ? preferredThumbnail.uri : "";
+              //   const preferredThumbnail =
+              //     thumbnailResponse.data.thumbnails.data.find(
+              //       (thumbnail) => thumbnail.is_preferred === true
+              //     );
+              //   const uri = preferredThumbnail ? preferredThumbnail.uri : "";
 
-            //   onSuccess("ok", fbResponse);
-            //   mediaHashArray = {
-            //     filename: s3FileUrl,
-            //     videoid: videoid,
-            //     thambnailurl: uri,
-            //   };
-            // } 
-            if (fbResponse.status === 200) {
-              const videoid = fbResponse?.data?.id;
+              //   onSuccess("ok", fbResponse);
+              //   mediaHashArray = {
+              //     filename: s3FileUrl,
+              //     videoid: videoid,
+              //     thambnailurl: uri,
+              //   };
+              // } 
+              if (fbResponse.status === 200) {
+                const videoid = fbResponse?.data?.id;
 
-              let uri = "";
-              let retryCount = 0;
-              const maxRetries = 20;
+                let uri = "";
+                let retryCount = 0;
+                const maxRetries = 20;
 
-              while (!uri && retryCount < maxRetries) {
-                await new Promise((resolve) =>
-                  setTimeout(resolve, retryCount === 0 ? 10000 : 5000)
-                );
-
-                const thumbnailResponse =
-                  await axios.get(
-                    `https://graph.facebook.com/v20.0/${videoid}`,
-                    {
-                      params: {
-                        access_token: token,
-                        fields: "thumbnails",
-                        is_preferred: true,
-                      },
-                    }
+                while (!uri && retryCount < maxRetries) {
+                  await new Promise((resolve) =>
+                    setTimeout(resolve, retryCount === 0 ? 10000 : 5000)
                   );
 
-                const thumbnails =
-                  thumbnailResponse?.data
-                    ?.thumbnails?.data || [];
-
-                if (thumbnails.length) {
-                  const preferredThumbnail =
-                    thumbnails.find(
-                      (thumbnail) =>
-                        thumbnail.is_preferred === true
+                  const thumbnailResponse =
+                    await axios.get(
+                      `https://graph.facebook.com/v20.0/${videoid}`,
+                      {
+                        params: {
+                          access_token: token,
+                          fields: "thumbnails",
+                          is_preferred: true,
+                        },
+                      }
                     );
 
-                  uri =
-                    preferredThumbnail?.uri || "";
+                  const thumbnails =
+                    thumbnailResponse?.data
+                      ?.thumbnails?.data || [];
+
+                  if (thumbnails.length) {
+                    const preferredThumbnail =
+                      thumbnails.find(
+                        (thumbnail) =>
+                          thumbnail.is_preferred === true
+                      );
+
+                    uri =
+                      preferredThumbnail?.uri || "";
+                  }
+
+                  retryCount++;
                 }
 
-                retryCount++;
+                onSuccess("ok", fbResponse);
+
+                mediaHashArray = {
+                  filename: s3FileUrl,
+                  videoid: videoid,
+                  thambnailurl: uri,
+                };
               }
-
-              onSuccess("ok", fbResponse);
-
-              mediaHashArray = {
-                filename: s3FileUrl,
-                videoid: videoid,
-                thambnailurl: uri,
-              };
+              else {
+                onError("error", fbResponse);
+                console.error("Video upload to Facebook failed");
+              }
             }
-            else {
-              onError("error", fbResponse);
-              console.error("Video upload to Facebook failed");
-            }
+          }
+          catch (error) {
+            console.error("Facebook upload failed:", error);
+
+            mediaHashArray = {
+              filename: s3FileUrl,
+              facebookUploadFailed: true,
+              error:
+                error?.response?.data ||
+                error?.message,
+            };
           }
         }
         return mediaHashArray;
@@ -11935,6 +11961,9 @@ const CloneMultipleAdsetCampaignDrawer = ({
             newAd.videoid = fileData.videoid;
             newAd.thambnailurl = fileData.thambnailurl;
             newAd.filename = fileData.filename;
+          } else {
+            newAd.filename = fileData.filename;
+            newAd.facebookUploadFailed = true;
           }
 
           return newAd;

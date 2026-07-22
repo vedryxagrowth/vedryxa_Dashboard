@@ -530,7 +530,7 @@ const Editads = ({ doubleAdset, viewCampaignData, changeRRefrst, editdata, onClo
 
         // const mediaData = await customRequest(imageshow, imagehash, onSuccess, onError);
 
-        let newAddData = { id: uuidv4(), ...formData, filename: editdata?.filename, imag_hash: editdata?.imag_hash };
+        let newAddData = { id: uuidv4(), ...formData, filename: editdata?.filename, imag_hash: editdata?.imag_hash, facebookUploadFailed: editdata?.facebookUploadFailed };
         if (editdata?.videoid) {
           newAddData = {
             ...newAddData,
@@ -588,7 +588,9 @@ const Editads = ({ doubleAdset, viewCampaignData, changeRRefrst, editdata, onClo
         Caption: values.Caption,
         Website_URL: values.Website_URL,
       };
-
+      if(values.facebookUploadFailed){
+        data1.facebookUploadFailed = true
+      }
       // Include image hash or video id if they exist
       if (values.imag_hash) {
         data1.imag_hash = values.imag_hash;
