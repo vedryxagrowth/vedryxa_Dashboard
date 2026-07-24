@@ -382,6 +382,7 @@ const FacebookAdsScraper = () => {
                             onClick={() => {
                                 setAds([]);
                                 localStorage.removeItem("facebook_ads_data");
+                                setSelectedAds([])
                             }}
                             style={{
                                 width: "80px",
