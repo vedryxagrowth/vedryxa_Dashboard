@@ -1,38 +1,21 @@
-import chromium from "@sparticuz/chromium";
-import { chromium as playwright } from "playwright-core";
-
+import { chromium } from "playwright";
 
 let browserInstance = null;
 
-
 async function getBrowser() {
-
     if (!browserInstance) {
-
-        browserInstance = await playwright.launch({
-            args: [
-                ...chromium.args,
-                "--disable-dev-shm-usage",
-            ],
-            executablePath: await chromium.executablePath(),
-            headless: chromium.headless,
+        browserInstance = await chromium.launch({
+            headless: true,
+            args: ["--disable-dev-shm-usage"]
         });
-
 
         browserInstance.on("disconnected", () => {
             browserInstance = null;
         });
-
     }
 
     return browserInstance;
 }
-export const config = {
-    api: {
-        responseLimit: false
-    }
-};
-
 export default async function handler(req, res) {
 
     if (req.method !== "POST") {
