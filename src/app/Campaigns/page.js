@@ -6757,7 +6757,7 @@ const App = () => {
       )}
       {showPredictoadStatus && !showTaboolaStatus && !showPredictoKeywordStatus && (
         <div>
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <Row style={{ display: "flex", justifyContent: "space-between" }}>
             <div
               style={{
                 display: "flex",
@@ -6765,21 +6765,24 @@ const App = () => {
                 alignItems: "center",
                 marginBottom: "5px",
                 padding: "3px",
-
+                flexWrap:"wrap",
+                // width:"100%"
               }}
             >
-              <Input.TextArea
-                rows={2}
-                value={adIds}
-                style={{
-                  minWidth: "450px",
-                  backgroundColor: theme === "dark" ? "#313131" : "#ffffff",
-                  color: theme === "dark" ? "#ffffff" : "#000000",
-                  borderColor: theme === "dark" ? "#434343" : "#d9d9d9",
-                }}
-                onChange={(e) => setAdIds(e.target.value)}
-                placeholder="Enter Ad IDs separated by commas"
-              />
+              <Col>
+                <Input.TextArea
+                  rows={2}
+                  value={adIds}
+                  style={{
+                    minWidth: "450px",
+                    backgroundColor: theme === "dark" ? "#313131" : "#ffffff",
+                    color: theme === "dark" ? "#ffffff" : "#000000",
+                    borderColor: theme === "dark" ? "#434343" : "#d9d9d9",
+                  }}
+                  onChange={(e) => setAdIds(e.target.value)}
+                  placeholder="Enter Ad IDs separated by commas"
+                />
+              </Col>
               <Col flex="none" className='Dashboard-Details-1'>
                 <ConfigProvider
                   // locale={locale}
@@ -6837,60 +6840,34 @@ const App = () => {
                   />
                 </ConfigProvider>
               </Col>
-              {/* <Col>
-                <ConfigProvider
-                  // locale={locale}
-                  theme={{
-                    token: {
-                      colorPrimary: '#91C25F',
-                      colorTextLightSolid: '#000',
-                    },
+              <Col>
+                <Button
+                  loading={loading}
+                  disabled={loading}
+                  style={{
+                    backgroundColor: "#91c25f",
+                    border: "1px solid #91c25f",
+                    width: "100px",
                   }}
-                  style={{ width: "150px" }}
+                  type="primary"
+                  onClick={handleCheckPredictoAdStatus}
                 >
-                  <RangePicker
-                    presets={rangePresets}
-                    onChange={handleChangeDatesForPredictoAds}
-                    disabledDate={disabledDate}
-                    // defaultValue={defaultDates}
-                    defaultValue={[dayjs(), dayjs()]}
-                    format="YYYY-MM-DD"
-                    style={{
-                      width: isMobile ? '340px' : '240px',
-                      backgroundColor: theme === 'dark' ? '#555' : undefined,
-                      color: theme === 'dark' ? 'white' : undefined,
-                      border: '1px solid #4CAF50',
-                      borderRadius: '6px'
-                    }}
-                    // dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : 'light-theme-dropdown'}
-                    dropdownClassName={`custom-single-month-picker Dashboard-Details-2${theme === 'dark' ? 'dark-theme-dropdown' : 'light-theme-dropdown'}`}
-                  />
-                </ConfigProvider>
-              </Col> */}
-              <Button
-                loading={loading}
-                disabled={loading}
-                style={{
-                  backgroundColor: "#91c25f",
-                  border: "1px solid #91c25f",
-                  width: "100px",
-                }}
-                type="primary"
-                onClick={handleCheckPredictoAdStatus}
-              >
-                {loading ? "Fetching..." : "Check Status"}
-              </Button>
-              <Button
-                type="primary"
-                onClick={fetchInitialDataForPredictoAdStatus}
-                icon={<ReloadOutlined className="black-icon" />}
-                style={{
-                  backgroundColor: "#91C25F",
-                  color: "#000",
-                  border: "none",
-                  width: "50px",
-                }}
-              />
+                  {loading ? "Fetching..." : "Check Status"}
+                </Button>
+              </Col>
+              <Col>
+                <Button
+                  type="primary"
+                  onClick={fetchInitialDataForPredictoAdStatus}
+                  icon={<ReloadOutlined className="black-icon" />}
+                  style={{
+                    backgroundColor: "#91C25F",
+                    color: "#000",
+                    border: "none",
+                    width: "50px",
+                  }}
+                />
+              </Col>
             </div>
             <div>
               <Input
@@ -6908,7 +6885,7 @@ const App = () => {
                 }}
               />
             </div>
-          </div>
+          </Row>
           {loadingAdPolicies ? (
             <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: isMobile ? "calc(100vh - 180px)" : "calc(100vh - 280px)", }}>
               <Spin size="large" />

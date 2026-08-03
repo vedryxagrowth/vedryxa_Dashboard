@@ -4411,3 +4411,15 @@ body.dark-mode .black-icon-creatives1.anticon svg {
   color: #d48806 !important;
   border: 1px solid #ffe58f;
 }
+
+.predicto-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+@media (max-width: 767px) {
+  .predicto-buttons {
+    width: 100%;
+    margin-top: 10px;
+  }
+}
