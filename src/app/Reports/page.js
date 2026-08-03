@@ -110,6 +110,7 @@ const MnetDailyAdReport = React.lazy(() => import('../componentsOfReports/MnetAd
 const CampaignHistoryModal = React.lazy(() => import('../componentsOfReports/ReportsActivityHistory'));
 const HourlyCampaignLevelReports = React.lazy(() => import('../componentsOfReports/HourlyBreakDown'));
 const HourReports = React.lazy(() => import('../componentsOfReports/Hour'));
+const PredictoCountryWiseReport = React.lazy(() => import("../componentsOfReports/PredictoCountryWiseReports"))
 
 const MyTablePage = () => {
     const router = useRouter();
@@ -21821,6 +21822,7 @@ const MyTablePage = () => {
         { key: '2', label: 'Daily', content: 'Content for Daily data' },
         // { key: '3', label: 'Campaigns', content: 'Content for Campaign data' },
         { key: '4', label: 'Agency', content: 'Content for BMName data' },
+        ...(newRevenuePratner === "FB_Predicto" ? [{ key: '5', label: 'Country', content: 'Content for country data' }] : []),
         ...(newRevenuePratner === "FB_Mnet" || newRevenuePratner === "FB_MWG" ? [{ key: '5', label: 'Domain', content: 'Content for Domain data' }] : []),
         ...(newRevenuePratner === "FB_Mnet" ? [{ key: '6', label: 'Hourly', content: 'Content for hour wise break down' }] : []),
         ...(newRevenuePratner === "FB_DomainActive" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : []),
@@ -23470,6 +23472,26 @@ const MyTablePage = () => {
                                     getMainMenuItems={getMainMenuItems}
                                 />
                             </Tabs.TabPane>
+
+                            {newRevenuePratner === "FB_Predicto" &&
+                                <Tabs.TabPane key="5">
+                                    <PredictoCountryWiseReport
+                                        startDate={newStartDate}
+                                        endDate={newendDate}
+                                        newaccount={newaccount}
+                                        newtime={newtime}
+                                        newRevenuePratner={newRevenuePratner}
+                                        inputValue={inputValue}
+                                        newAccountName={newAccountName}
+                                        campaignComments={campaignComments}
+                                        Camapignlevelstatus={Camapignlevelstatus}
+                                        userdetails={userdetails}
+                                        refreshComments={refreshComments}
+                                        refreshpage={refreshContent}
+                                        getMainMenuItems={getMainMenuItems}
+                                    />
+                                </Tabs.TabPane>
+                            }
 
                             {newRevenuePratner === "FB_Mnet" || newRevenuePratner === "FB_MWG" && (
                                 <Tabs.TabPane key="5">
