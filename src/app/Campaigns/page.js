@@ -166,6 +166,8 @@ const App = () => {
   const yesterday = dayjs().subtract(0, "day").format("YYYY-MM-DD");
   const [startDate, setStartDate] = useState(yesterday);
   const [endDate, setEndDate] = useState(yesterday);
+  const [startDateForAds, setStartDateForAds] = useState(yesterday);
+  const [endDateForAds, setEndDateForAds] = useState(yesterday);
   const [selected, setSelected] = useState("Choose Option");
   const [deleteDraftId, setDeleteDraftId] = useState("");
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
@@ -216,18 +218,22 @@ const App = () => {
   const [platform, setPlatform] = useState(2);
   const [tableData, setTableData] = useState([]);
   const [predictoAdStatusData, setPredictoAdStatusData] = useState([]);
+  const [predictoAdDeatils, setPredictoAdDeatils] = useState([]);
   const [predictoKeywordStatusData, setPredictoKeywordStatusData] = useState([]);
   const [predictoKeywordArticleStatusData, setPredictoKeywordArticleStatusData] = useState([]);
   const [searchAdId, setSearchAdId] = useState("");
   const [keywordSearch, setKeywordSearch] = useState("");
   const [appliedSearch, setAppliedSearch] = useState("");
+  const [predictoAdPoliciesAppliedSearch, setPredictoAdPoliciesAppliedSearch] = useState("");
   const keywordStatusDataRef = useRef([]);
   const [languageSearch, setLanguageSearch] = useState("all");
   const [statusSearch, setStatusSearch] = useState("all");
   const [verticleSearch, setVerticleSearch] = useState("all");
   const filtersList = useRef({ languageList: [], statusList: [], verticleList: [] })
   const [loadingKeyword, setLoadingKeyword] = useState(true);
+  const [loadingAdPolicies, setLoadingAdPolicies] = useState(true);
   const [loadingArticleForKeyword, setLoadingArticleForKeyword] = useState([]);
+  const [loadingCampaignDetails, setLoadingCampaignDetails] = useState({});
   const [openComponentForCreateArticle, setOpenComponentForCreateArticle] = useState(false);
   const lastUpdatedDateandTime = useRef("");
   // console.log(checkedRowRecords);
@@ -977,6 +983,28 @@ const App = () => {
     }
   };
 
+  const handleChangeDatesForPredictoAds = (dates) => {
+    if (dates && dates.length === 2) {
+      const [start, end] = dates;
+      // const formattedStart = start.format("YYYY-MM-DD");
+      // const formattedEnd = end.format("YYYY-MM-DD");
+
+      // setStartDate(formattedStart);
+      // setEndDate(formattedEnd);
+
+      // if (selectedValue) {
+      //   fetchData(selectedValue, formattedStart, formattedEnd);
+      //   fetchMultipleAdsetCampaigns(
+      //     selectedValue,
+      //     formattedStart,
+      //     formattedEnd
+      //   );
+      // }
+      setStartDateForAds(start.format("YYYY-MM-DD"));
+      setEndDateForAds(end.format("YYYY-MM-DD"));
+    }
+  };
+
   const allowFetchOnSelectRef = useRef(false);
 
   const handleKeyChange = (key) => {
@@ -1142,6 +1170,17 @@ const App = () => {
     // );
     // setFilteredData(filtered);
   };
+  const handleSearchPredictoAds = (e) => {
+    const searchValue = (e.target.value);
+    if (!searchValue) {
+      setSearchAdId("")
+      setPredictoAdPoliciesAppliedSearch([])
+      return;
+    }
+    const searchArray = searchValue.split(",").map(item => item.trim()).filter(Boolean);
+    setSearchAdId(searchValue)
+    setPredictoAdPoliciesAppliedSearch(searchArray)
+  }
   const handleSearchSubmit = () => {
     setSendInputToApi(searchInput);
     // fetchData(selectedValue, startDate, endDate, searchInput); // Fetch data with search input
@@ -2680,22 +2719,195 @@ const App = () => {
       title: "Campaign ID",
       dataIndex: "campaign_id",
       key: "campaignId",
+      render: (text, record) => {
+        const findTheAdDetailsObject = predictoAdDeatils.find(
+          (item) => item.id === record.ad_id
+        );
+
+        const isCopied =
+          loadingCampaignDetails[`campaign-${record.ad_id}`]?.copied;
+
+        return (
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <span>{text}</span>
+
+            {findTheAdDetailsObject && (
+              <Tooltip
+                title={isCopied ? "Copied!" : "Click to copy"}
+                overlayInnerStyle={{
+                  backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                  color: theme === "dark" ? "#ffffff" : "#000000",
+                  borderRadius: 6,
+                  padding: "6px 10px",
+                  fontSize: "14px",
+                }}
+              >
+                <span
+                  style={{
+                    fontWeight: 400,
+                    fontSize: "10px",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => {
+                    navigator.clipboard.writeText(
+                      findTheAdDetailsObject?.campaign?.name || ""
+                    );
+
+                    setLoadingCampaignDetails((prev) => ({
+                      ...prev,
+                      [`campaign-${record.ad_id}`]: { copied: true },
+                    }));
+
+                    setTimeout(() => {
+                      setLoadingCampaignDetails((prev) => ({
+                        ...prev,
+                        [`campaign-${record.ad_id}`]: { copied: false },
+                      }));
+                    }, 2000);
+                  }}
+                >
+                  {findTheAdDetailsObject?.campaign?.name}
+                </span>
+              </Tooltip>
+            )}
+          </div>
+        );
+      },
     },
     {
       title: "Adset ID",
       dataIndex: "adset_id",
       key: "adsetId",
+      render: (text, record) => {
+        const findTheAdDetailsObject = predictoAdDeatils.find(
+          (item) => item.id === record.ad_id
+        );
+
+        const isCopied =
+          loadingCampaignDetails[`adset-${record.ad_id}`]?.copied;
+
+        return (
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <span>{text}</span>
+
+            {findTheAdDetailsObject && (
+              <Tooltip
+                title={isCopied ? "Copied!" : "Click to copy"}
+                overlayInnerStyle={{
+                  backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                  color: theme === "dark" ? "#ffffff" : "#000000",
+                  borderRadius: 6,
+                  padding: "6px 10px",
+                  fontSize: "14px",
+                }}
+              >
+                <span
+                  style={{
+                    fontWeight: 400,
+                    fontSize: "10px",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => {
+                    navigator.clipboard.writeText(
+                      findTheAdDetailsObject?.adset?.name || ""
+                    );
+
+                    setLoadingCampaignDetails((prev) => ({
+                      ...prev,
+                      [`adset-${record.ad_id}`]: { copied: true },
+                    }));
+
+                    setTimeout(() => {
+                      setLoadingCampaignDetails((prev) => ({
+                        ...prev,
+                        [`adset-${record.ad_id}`]: { copied: false },
+                      }));
+                    }, 2000);
+                  }}
+                >
+                  {findTheAdDetailsObject?.adset?.name}
+                </span>
+              </Tooltip>
+            )}
+          </div>
+        );
+      },
     },
     {
       title: "Ad ID",
       dataIndex: "ad_id",
       key: "adId",
+      render: (text) => {
+        const findTheAdDetailsObject = predictoAdDeatils.find(
+          (item) => item.id === text
+        );
+
+        const isCopied =
+          loadingCampaignDetails[`ad-${text}`]?.copied;
+
+        return (
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <span>{text}</span>
+
+            {findTheAdDetailsObject && (
+              <Tooltip
+                title={isCopied ? "Copied!" : "Click to copy"}
+                overlayInnerStyle={{
+                  backgroundColor: theme === "dark" ? "#2b2b2b" : "#ffffff",
+                  color: theme === "dark" ? "#ffffff" : "#000000",
+                  borderRadius: 6,
+                  padding: "6px 10px",
+                  fontSize: "14px",
+                }}
+              >
+                <span
+                  style={{
+                    fontWeight: 400,
+                    fontSize: "10px",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => {
+                    navigator.clipboard.writeText(
+                      findTheAdDetailsObject?.name || ""
+                    );
+
+                    setLoadingCampaignDetails((prev) => ({
+                      ...prev,
+                      [`ad-${text}`]: { copied: true },
+                    }));
+
+                    setTimeout(() => {
+                      setLoadingCampaignDetails((prev) => ({
+                        ...prev,
+                        [`ad-${text}`]: { copied: false },
+                      }));
+                    }, 2000);
+                  }}
+                >
+                  {findTheAdDetailsObject?.name}
+                </span>
+              </Tooltip>
+            )}
+          </div>
+        );
+      },
     },
 
     {
       title: "Status",
       dataIndex: "status",
       key: "status",
+      render: (text) => {
+        const status = text === "approved";
+        return (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            {status
+              ? <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }} className='black-icon-active-1' />
+              : <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} className='black-icon-pause-1' />}
+            <span>{text}</span>
+          </div>
+        )
+      }
     },
     {
       title: "Created At",
@@ -2713,7 +2925,7 @@ const App = () => {
       title: "Reason",
       dataIndex: "reason",
       key: "reason",
-      width: 200,
+      width: 150,
       render: (text) => (
         <Tooltip
           placement="right"
@@ -5078,6 +5290,7 @@ const App = () => {
 
   const fetchInitialDataForPredictoAdStatus = async () => {
     try {
+      setLoadingAdPolicies(true)
       const response = await axios.get(
         "https://fblaunching.vyaktimetrics.com/open/predicto/ad-status/list",
         {
@@ -5089,9 +5302,13 @@ const App = () => {
 
       if (response.data?.ok) {
         setPredictoAdStatusData(response.data.data || []);
+        setPredictoAdDeatils(response.data.adDetails)
       }
     } catch (error) {
       console.error(error);
+    }
+    finally {
+      setLoadingAdPolicies(false);
     }
   };
 
@@ -5278,6 +5495,7 @@ const App = () => {
         "https://fblaunching.vyaktimetrics.com/open/predicto/ad-status",
         {
           adIds: ids,
+          dates: { startDate: startDateForAds, endDate: endDateForAds },
           adNetwork: platform
         },
         {
@@ -5302,14 +5520,22 @@ const App = () => {
           prev.map(item => [item.ad_id, item])
         );
 
+        const newItems = [];
+
         results.forEach(item => {
-          existing.set(item.ad_id, {
-            ...existing.get(item.ad_id),
-            ...item,
-          });
+          if (existing.has(item.ad_id)) {
+            // Update existing object
+            existing.set(item.ad_id, {
+              ...existing.get(item.ad_id),
+              ...item,
+            });
+          } else {
+            // Collect new objects
+            newItems.push(item);
+          }
         });
 
-        return [...existing.values()];
+        return [...newItems, ...existing.values()];
       });
 
       message.success("Ad status fetched successfully");
@@ -5381,10 +5607,15 @@ const App = () => {
 
   const handleTogglePredictoAdStatus = async () => {
     if (!showPredictoadStatus) {
+      setShowPredictoKeywordStatus(false);
+      setShowPredictoadStatus(true);
       await fetchInitialDataForPredictoAdStatus();
     }
-    setShowPredictoadStatus(!showPredictoadStatus);
-    setShowPredictoKeywordStatus(false)
+    else {
+      setShowPredictoadStatus(false);
+    }
+    // setShowPredictoadStatus(!showPredictoadStatus);
+    // setShowPredictoKeywordStatus(false)
   }
 
   const handleTogglePredictoKeywordStatus = async () => {
@@ -5410,9 +5641,14 @@ const App = () => {
     )
     : tableData;
 
-  const filteredPredictoAdStatusData = appliedSearch
+  // const filteredPredictoAdStatusData = predictoAdPoliciesAppliedSearch
+  //   ? predictoAdStatusData.filter((item) =>
+  //     item.ad_id?.toString().includes(predictoAdPoliciesAppliedSearch.trim())
+  //   )
+  //   : predictoAdStatusData;
+  const filteredPredictoAdStatusData = predictoAdPoliciesAppliedSearch.length
     ? predictoAdStatusData.filter((item) =>
-      item.ad_id?.toString().includes(appliedSearch.trim())
+      predictoAdPoliciesAppliedSearch.includes(item.ad_id?.toString())
     )
     : predictoAdStatusData;
 
@@ -5426,10 +5662,20 @@ const App = () => {
     [selectedKey]
   );
 
+  // const storeTheKeyword = (keyword) => {
+  //   console.log(keyword, "keyword");
+  //   setPredictoKeywordStatusData(prev => ([keyword, ...prev]))
+  //   keywordStatusDataRef.current 
+  //   setOpenComponentForCreateArticle(false)
+  // }
   const storeTheKeyword = (keyword) => {
-    setPredictoKeywordStatusData(prev => ([...prev, keyword]))
-    setOpenComponentForCreateArticle(false)
-  }
+    const updatedData = [keyword, ...(keywordStatusDataRef.current || [])];
+
+    keywordStatusDataRef.current = updatedData;
+    setPredictoKeywordStatusData(updatedData);
+
+    setOpenComponentForCreateArticle(false);
+  };
 
   return (
     <div>
@@ -6511,7 +6757,7 @@ const App = () => {
       )}
       {showPredictoadStatus && !showTaboolaStatus && !showPredictoKeywordStatus && (
         <div>
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <Row style={{ display: "flex", justifyContent: "space-between" }}>
             <div
               style={{
                 display: "flex",
@@ -6519,52 +6765,116 @@ const App = () => {
                 alignItems: "center",
                 marginBottom: "5px",
                 padding: "3px",
-
+                flexWrap:"wrap",
+                // width:"100%"
               }}
             >
-              <Input.TextArea
-                rows={2}
-                value={adIds}
-                style={{
-                  minWidth: "450px",
-                  backgroundColor: theme === "dark" ? "#313131" : "#ffffff",
-                  color: theme === "dark" ? "#ffffff" : "#000000",
-                  borderColor: theme === "dark" ? "#434343" : "#d9d9d9",
-                }}
-                onChange={(e) => setAdIds(e.target.value)}
-                placeholder="Enter Ad IDs separated by commas"
-              />
-              <Button
-                loading={loading}
-                disabled={loading}
-                style={{
-                  backgroundColor: "#91c25f",
-                  border: "1px solid #91c25f",
-                  width: "100px",
-                }}
-                type="primary"
-                onClick={handleCheckPredictoAdStatus}
-              >
-                {loading ? "Fetching..." : "Check Status"}
-              </Button>
-              <Button
-                type="primary"
-                onClick={fetchInitialDataForPredictoAdStatus}
-                icon={<ReloadOutlined className="black-icon" />}
-                style={{
-                  backgroundColor: "#91C25F",
-                  color: "#000",
-                  border: "none",
-                  width: "50px",
-                }}
-              />
+              <Col>
+                <Input.TextArea
+                  rows={2}
+                  value={adIds}
+                  style={{
+                    minWidth: "450px",
+                    backgroundColor: theme === "dark" ? "#313131" : "#ffffff",
+                    color: theme === "dark" ? "#ffffff" : "#000000",
+                    borderColor: theme === "dark" ? "#434343" : "#d9d9d9",
+                  }}
+                  onChange={(e) => setAdIds(e.target.value)}
+                  placeholder="Enter Ad IDs separated by commas"
+                />
+              </Col>
+              <Col flex="none" className='Dashboard-Details-1'>
+                <ConfigProvider
+                  // locale={locale}
+                  theme={{
+                    token: {
+                      colorPrimary: '#91C25F',
+                      colorTextLightSolid: '#000',
+                    },
+                  }}
+                >
+                  <RangePicker
+                    presets={rangePresets}
+                    onChange={handleChangeDatesForPredictoAds}
+                    disabledDate={disabledDate}
+                    // defaultValue={defaultDates}
+                    defaultValue={[dayjs(), dayjs()]}
+                    format="YYYY-MM-DD"
+                    style={{
+                      width: '220px',
+                      backgroundColor: theme === 'dark' ? '#555' : undefined,
+                      color: theme === 'dark' ? 'white' : undefined,
+                      border: '1px solid #4CAF50',
+                      borderRadius: '6px'
+                    }}
+                    dropdownClassName={`${theme === 'dark' ? 'dark-theme-dropdown' : 'light-theme-dropdown'}`}
+                  />
+                </ConfigProvider>
+              </Col>
+              <Col flex="none" className='Dashboard-Details-2'>
+                <ConfigProvider
+                  // locale={locale}
+                  theme={{
+                    token: {
+                      colorPrimary: '#91C25F',
+                      colorTextLightSolid: '#000',
+                    },
+                  }}
+                >
+                  <RangePicker
+                    presets={rangePresets}
+                    onChange={handleChangeDatesForPredictoAds}
+                    disabledDate={disabledDate}
+                    // defaultValue={defaultDates}
+                    defaultValue={[dayjs(), dayjs()]}
+                    format="YYYY-MM-DD"
+                    style={{
+                      width: isMobile ? '340px' : '240px',
+                      backgroundColor: theme === 'dark' ? '#555' : undefined,
+                      color: theme === 'dark' ? 'white' : undefined,
+                      border: '1px solid #4CAF50',
+                      borderRadius: '6px'
+                    }}
+                    // dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : 'light-theme-dropdown'}
+                    dropdownClassName={`custom-single-month-picker Dashboard-Details-2${theme === 'dark' ? 'dark-theme-dropdown' : 'light-theme-dropdown'}`}
+                  />
+                </ConfigProvider>
+              </Col>
+              <Col>
+                <Button
+                  loading={loading}
+                  disabled={loading}
+                  style={{
+                    backgroundColor: "#91c25f",
+                    border: "1px solid #91c25f",
+                    width: "100px",
+                  }}
+                  type="primary"
+                  onClick={handleCheckPredictoAdStatus}
+                >
+                  {loading ? "Fetching..." : "Check Status"}
+                </Button>
+              </Col>
+              <Col>
+                <Button
+                  type="primary"
+                  onClick={fetchInitialDataForPredictoAdStatus}
+                  icon={<ReloadOutlined className="black-icon" />}
+                  style={{
+                    backgroundColor: "#91C25F",
+                    color: "#000",
+                    border: "none",
+                    width: "50px",
+                  }}
+                />
+              </Col>
             </div>
             <div>
               <Input
                 placeholder="Search Ad ID..."
                 value={searchAdId}
-                onChange={(e) => setSearchAdId(e.target.value)}
-                onPressEnter={() => setAppliedSearch(searchAdId)}
+                onChange={handleSearchPredictoAds}
+                // onPressEnter={() => setAppliedSearch(searchAdId)}
                 className={
                   theme === "dark" ? "custom-input-dark" : "custom-input-light"
                 }
@@ -6575,24 +6885,47 @@ const App = () => {
                 }}
               />
             </div>
-          </div>
-          <Table
-            columns={columnsforPredictoadStatus}
-            className={`custom-dark-table ${theme === "dark"
-              ? "dark-mode-pagination"
-              : "light-mode-pagination"
-              }`}
-            // dataSource={tableData}
-            dataSource={filteredPredictoAdStatusData}
-            rowKey="adId"
-            pagination={{
-              pageSize: paginationSize,
-              showSizeChanger: true,
-              onChange: (page, pageSize) => {
-                setPaginationSize(pageSize);
-              }
-            }}
-          />
+          </Row>
+          {loadingAdPolicies ? (
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: isMobile ? "calc(100vh - 180px)" : "calc(100vh - 280px)", }}>
+              <Spin size="large" />
+            </div>
+
+          )
+            :
+            <Table
+              columns={columnsforPredictoadStatus}
+              className={`custom-dark-table ${theme === "dark"
+                ? "dark-mode-pagination"
+                : "light-mode-pagination"
+                }`}
+              style={{
+                width: "100%",
+                // height: "calc(100vh - 300px)",
+                height: isMobile
+                  ? "calc(100vh - 180px)"
+                  : "calc(100vh - 280px)",
+                // minHeight: '100%',
+                // tableLayout: "fixed",
+              }}
+              scroll={{
+                x: "auto",
+                y: isMobile
+                  ? "calc(100vh - 40px)"
+                  : "calc(100vh - 240px)",
+              }}
+              // dataSource={tableData}
+              dataSource={filteredPredictoAdStatusData}
+              rowKey="adId"
+              pagination={{
+                pageSize: paginationSize,
+                showSizeChanger: true,
+                onChange: (page, pageSize) => {
+                  setPaginationSize(pageSize);
+                }
+              }}
+            />
+          }
         </div>
       )}
       {!showPredictoadStatus && !showTaboolaStatus && showPredictoKeywordStatus && (
