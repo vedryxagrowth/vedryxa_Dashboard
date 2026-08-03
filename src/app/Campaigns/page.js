@@ -6780,7 +6780,64 @@ const App = () => {
                 onChange={(e) => setAdIds(e.target.value)}
                 placeholder="Enter Ad IDs separated by commas"
               />
-              <Col>
+              <Col flex="none" className='Dashboard-Details-1'>
+                <ConfigProvider
+                  // locale={locale}
+                  theme={{
+                    token: {
+                      colorPrimary: '#91C25F',
+                      colorTextLightSolid: '#000',
+                    },
+                  }}
+                >
+                  <RangePicker
+                    presets={rangePresets}
+                    onChange={handleChangeDatesForPredictoAds}
+                    disabledDate={disabledDate}
+                    // defaultValue={defaultDates}
+                    defaultValue={[dayjs(), dayjs()]}
+                    format="YYYY-MM-DD"
+                    style={{
+                      width: '220px',
+                      backgroundColor: theme === 'dark' ? '#555' : undefined,
+                      color: theme === 'dark' ? 'white' : undefined,
+                      border: '1px solid #4CAF50',
+                      borderRadius: '6px'
+                    }}
+                    dropdownClassName={`${theme === 'dark' ? 'dark-theme-dropdown' : 'light-theme-dropdown'}`}
+                  />
+                </ConfigProvider>
+              </Col>
+              <Col flex="none" className='Dashboard-Details-2'>
+                <ConfigProvider
+                  // locale={locale}
+                  theme={{
+                    token: {
+                      colorPrimary: '#91C25F',
+                      colorTextLightSolid: '#000',
+                    },
+                  }}
+                >
+                  <RangePicker
+                    presets={rangePresets}
+                    onChange={handleChangeDatesForPredictoAds}
+                    disabledDate={disabledDate}
+                    // defaultValue={defaultDates}
+                    defaultValue={[dayjs(), dayjs()]}
+                    format="YYYY-MM-DD"
+                    style={{
+                      width: isMobile ? '340px' : '240px',
+                      backgroundColor: theme === 'dark' ? '#555' : undefined,
+                      color: theme === 'dark' ? 'white' : undefined,
+                      border: '1px solid #4CAF50',
+                      borderRadius: '6px'
+                    }}
+                    // dropdownClassName={theme === 'dark' ? 'dark-theme-dropdown' : 'light-theme-dropdown'}
+                    dropdownClassName={`custom-single-month-picker Dashboard-Details-2${theme === 'dark' ? 'dark-theme-dropdown' : 'light-theme-dropdown'}`}
+                  />
+                </ConfigProvider>
+              </Col>
+              {/* <Col>
                 <ConfigProvider
                   // locale={locale}
                   theme={{
@@ -6809,7 +6866,7 @@ const App = () => {
                     dropdownClassName={`custom-single-month-picker Dashboard-Details-2${theme === 'dark' ? 'dark-theme-dropdown' : 'light-theme-dropdown'}`}
                   />
                 </ConfigProvider>
-              </Col>
+              </Col> */}
               <Button
                 loading={loading}
                 disabled={loading}
