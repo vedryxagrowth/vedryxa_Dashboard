@@ -3490,6 +3490,7 @@ const App = () => {
         <div
           style={{ display: "flex", alignItems: "center", cursor: "pointer" }}
         >
+
           {/* <span
           // onClick={() => handleCampaignNameClick(record)}
           >{text}</span> */}
@@ -3502,6 +3503,7 @@ const App = () => {
                   direction="vertical"
                   size="small"
                   items={[
+
                     record?.createdDate && {
                       title: <b>Campaign Created</b>,
                       description: record.createdDate,
@@ -3509,20 +3511,34 @@ const App = () => {
                     },
 
 
-                    record?.campaignid && {
-                      title: <b>Campaign Launched in Facebook</b>,
-                      description: record.campaignid,
-                      status: "finish",
-                    },
+                    // record?.campaignid && {
+                    //   title: <b>Campaign Launched in Facebook</b>,
+                    //   description: record.campaignid,
+                    //   status: "finish",
+                    // },
 
-
+                    record?.campaignid
+                      ? {
+                        title: <b>Campaign Launched in Facebook</b>,
+                        description: record.campaignid,
+                        status: "finish",
+                      }
+                      : record?.campaignlevel_error && {
+                        title: <b>Campaign launching Failed</b>,
+                        description: (
+                          <div style={{ color: "red", fontSize: 12 }}>
+                            Error: {record.campaignlevel_error.message || record.campaignlevel_error.error_user_msg || record.campaignlevel_error}
+                          </div>
+                        ),
+                        status: "error",
+                      },
                     ...(record?.adsetsWithAds || [])
                       .map((adset) => {
                         const adsetError = record?.adsetErrors?.find(
                           (err) => err.name === adset.adsetName
                         );
 
-
+                        console.log(record, "record");
                         if (!adset.adsetId && !adsetError) return null;
 
 
@@ -3554,7 +3570,7 @@ const App = () => {
 
                               {!adset.adsetId && adsetError && (
                                 <div style={{ color: "red", fontSize: 12 }}>
-                                  Error: {adsetError.error}
+                                  Error: {adsetError.error?.error_user_msg || adsetError.message || adsetError.error}
                                 </div>
                               )}
                               <Steps
@@ -3600,7 +3616,7 @@ const App = () => {
 
                                         {adError && (
                                           <div style={{ color: "red", fontSize: 12 }}>
-                                            Error: {adError.error}
+                                            Error: {adError.error || adError.error?.error_user_msg}
                                           </div>
                                         )}
                                       </>
@@ -6765,7 +6781,7 @@ const App = () => {
                 alignItems: "center",
                 marginBottom: "5px",
                 padding: "3px",
-                flexWrap:"wrap",
+                flexWrap: "wrap",
                 // width:"100%"
               }}
             >
