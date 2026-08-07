@@ -24,6 +24,7 @@ import { FaRobot } from 'react-icons/fa';
 import { Audio } from 'react-loader-spinner';
 import { TiTickOutline, TiTimesOutline } from "react-icons/ti";
 import { Account } from 'aws-sdk';
+import ReportSwitch from "../componentsOfReports/ReportSwitch.js";
 
 
 const newtworkCollections = {
@@ -22859,7 +22860,7 @@ const MyTablePage = () => {
                     </Col>
                     {(revenuePratner === "FB_Mnet" || revenuePratner === "FB_MnetBing") && (
                         <Col>
-                            <Button
+                            {/* <Button
                                 type="primary"
                                 onMouseEnter={() => setRHovered(true)}
                                 onMouseLeave={() => setRHovered(false)}
@@ -22879,7 +22880,7 @@ const MyTablePage = () => {
                                     gap: "8px",
                                     transition: "all 0.15s ease-in-out",
                                 }}
-                            >
+                            > */}
                                 <Tooltip
                                     title="Revenue base report"
                                     styles={{
@@ -22891,7 +22892,7 @@ const MyTablePage = () => {
                                         }
                                         // fontWeight: 500,
                                     }}>
-                                    <span
+                                    {/* <span
                                         onClick={(e) => {
                                             // e.stopPropagation();
                                             router.push("/Basereport");
@@ -22903,9 +22904,12 @@ const MyTablePage = () => {
                                         }}
                                     >
                                         R
-                                    </span>
+                                    </span> */}
+                                    <ReportSwitch
+                                        theme={theme}
+                                    />
                                 </Tooltip>
-                            </Button>
+                            {/* </Button> */}
                         </Col>
                     )}
 

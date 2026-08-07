@@ -23,6 +23,8 @@ import { useTokenContext } from '../components/parent';
 import { FaRobot } from 'react-icons/fa';
 import { Audio } from 'react-loader-spinner';
 import { TiTickOutline, TiTimesOutline } from "react-icons/ti";
+import ReportSwitch from "../componentsOfReports/ReportSwitch.js";
+
 
 const newtworkCollections = {
     "FB_Mnet": "Facebook_Mnet",
@@ -73,6 +75,9 @@ const MnetDomainReports = React.lazy(() => import('../componentsOfReports/MnetDo
 const MnetLiveAdReports = React.lazy(() => import('../componentsOfReports/MnetAdLive'));
 const MnetDailyAdReport = React.lazy(() => import('../componentsOfReports/MnetAdDaily'));
 const CampaignHistoryModal = React.lazy(() => import('../componentsOfReports/ReportsActivityHistory'));
+const HourlyCampaignLevelReports = React.lazy(() => import('../componentsOfReports/HourlyBreakDown'));
+const HourReports = React.lazy(() => import('../componentsOfReports/Hour'));
+
 
 const MyTablePage = () => {
     const router = useRouter();
@@ -11306,6 +11311,598 @@ const MyTablePage = () => {
         },
     };
 
+    const columnDefsObjectHour = {
+        accountNumber: {
+            headerName: 'Account',
+            field: 'accountNumber',
+            showWhenGrouped: true,
+            minWidth: 170,
+            filter: "agTextColumnFilter",
+            // valueGetter: (params) => {
+            //     if (params.data) return params.data.accountNumber;
+            //     const firstChild = params.node?.childrenAfterGroup?.[0];
+            //     return firstChild?.data?.accountNumber || null;
+            // },
+            // tooltipValueGetter: (params) => {
+            //     // ✅ Get value for both leaf & grouped rows
+            //     if (params.data) return params.data.accountNumber;
+            //     const firstChild = params.node?.childrenAfterGroup?.[0];
+            //     return firstChild?.data?.accountNumber || '';
+            // },
+        },
+        M_tq: {
+            headerName: 'M_TQ',
+            field: 'M_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            aggFunc: liveSpender,
+            hide: true
+        },
+        D_tq: {
+            headerName: 'D_TQ',
+            field: 'D_tq',
+            aggFunc: 'sum',
+            valueFormatter: (params) => {
+                const val = Number(params.value);
+                return isNaN(val) ? "0.00" : `${val.toFixed(2)}`;
+            },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            sortable: true,
+            aggFunc: liveSpender,
+            hide: true
+        },
+        campaignname: {
+            headerName: 'CampaignID',
+            field: 'campaignname',
+            resizable: true,
+            sortable: true,
+            // hide: true,
+            minWidth: 180,
+            spanRows: true,
+            filter: "agTextColumnFilter",
+            // hide: true,
+            // rowGroup: true,
+            // enableRowGroup: true,
+            // pinned: 'left',
+            valueGetter: (params) => {
+                if (params.data) return params.data.campaignid;
+                const firstChild = params.node?.childrenAfterGroup?.[0];
+                return firstChild?.data?.campaignid || null;
+            },
+            hide: true
+        },
+        cpm: {
+            headerName: 'CPM',
+            field: 'cpm',
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            minWidth: 90,
+            headerTooltip: '(Spend/Impressions)*1000',
+            valueGetter: getCpm,
+            hide: false,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+        },
+        filteration: {
+            headerName: "Filteration",
+            field: 'filteration',
+            width: 115,
+            sortable: true,
+            valueGetter: getFilteration,
+            valueFormatter: params => `${params.value || 0}%`,
+            suppressMenu: true,
+            filter: "agNumberColumnFilter",
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            hide: false,
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+            },
+        },
+        actions: {
+            headerName: 'Budget',
+            field: 'actions',
+            minWidth: 90,
+            sortable: false,
+            filter: false,
+            enableSorting: false,
+            enableFilter: false,
+            suppressMenu: true,
+            hide: true,
+        },
+        adsetname: {
+            headerName: 'AdsetName',
+            field: 'adsetname',
+            sortable: true,
+            minWidth: 450,
+            filter: 'agTextColumnFilter',
+            filterParams: {
+                comparator: (a, b) => a.localeCompare(b),
+                suppressAndOrCondition: true,
+            },
+            suppressMenu: true,
+            hide: true,
+
+
+        },
+        adname: {
+            headerName: 'AdName', field: 'adname',
+            hide: true,
+        },
+        adid: {
+            headerName: 'AdID',
+            field: 'adid',
+            hide: true,
+
+
+        },
+        category: {
+            headerName: 'Category',
+            field: 'category',
+            minWidth: 110,
+            sortable: true,
+            // filter: 'agSetColumnFilter',
+            filter: "agTextColumnFilter",
+            hide: true,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+        },
+        from: {
+            headerName: 'Start',
+            field: 'from',
+            sortable: true,
+            minWidth: 110,
+            filter: "agDateColumnFilter",
+            hide: true,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+        },
+        to: {
+            headerName: 'End',
+            field: 'to',
+            minWidth: 110,
+            sortable: true,
+            filter: "agDateColumnFilter",
+            hide: true,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+        },
+        profitloss: {
+            headerName: 'P/L',
+            field: 'profitloss',
+            valueGetter: (params) => {
+                if (params.node.group) {
+                    const campaignName = params.node.groupData?.campaignname ? params.node.groupData?.campaignname : params.node.key;
+                    const campaignData = allProfitLossArray?.items?.filter(obj => obj.campaign_name === campaignName);
+                    const revenue = campaignData?.reduce((acc, obj) => acc + (parseFloat(obj?.estimated_revenue) || 0), 0);
+                    const spend = campaignData?.reduce((acc, obj) => acc + (parseFloat(obj?.spend) || 0), 0);
+
+                    return (revenue - spend) ? (revenue - spend).toFixed(2) : "" || "";
+                }
+                return '';
+            },
+            minWidth: 110,
+            filter: "agNumberColumnFilter",
+            cellClassRules: {
+                'hide-leaf-cell': (params) => !params.node.group,
+            },
+            cellStyle: { fontWeight: 'bold' },
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+        },
+        date: {
+            headerName: 'Date',
+            field: 'date',
+            minWidth: 110,
+            sortable: true,
+            filter: "agDateColumnFilter",
+
+
+            filterParams: {
+                comparator: (filterLocalDateAtMidnight, cellValue) => {
+                    if (!cellValue) return -1;
+
+
+                    // cellValue is already a Date object
+                    const cellDate = new Date(
+                        cellValue.getFullYear(),
+                        cellValue.getMonth(),
+                        cellValue.getDate()
+                    );
+
+
+                    if (cellDate < filterLocalDateAtMidnight) return -1;
+                    if (cellDate > filterLocalDateAtMidnight) return 1;
+                    return 0;
+                },
+            },
+
+
+            // 🔥 Convert raw YYYY-MM-DD → real Date object
+            valueGetter: (params) => {
+                const dateStr = params.data?.date;
+                if (!dateStr) return null;
+
+
+                const [y, m, d] = dateStr.split('-').map(Number);
+                return new Date(y, m - 1, d);
+            },
+
+
+            // 🔥 Display format only
+            valueFormatter: (params) => {
+                const d = params.value;
+                return d ? moment(d).format("DD-MM-YYYY") : '';
+            },
+
+
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+        },
+        'fb-hour': {
+            headerName: 'F-H',
+            field: 'fb-hour',
+            width: 35,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            rowGroup: true,
+            enableRowGroup: true,
+
+
+        },
+        'mnet-hour': {
+            headerName: 'N-H',
+            field: 'mnet-hour',
+            minWidth: 95,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' // Add a custom class
+
+
+        },
+        spend: {
+            headerName: 'Spend',
+            field: 'spend',
+            minWidth: 105,
+            aggFunc: liveSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter", // Keep filter active
+            valueFormatter: currencyFormatter,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "Total amount spent",
+            filterValueGetter: (params) => parseFloat(params.data.spend || 0),
+        },
+        revenue: {
+            headerName: 'Revenue',
+            field: 'revenue',
+            minWidth: 105,
+            aggFunc: liveSpender,
+            sortable: true,
+            // filter: "agNumberColumnFilter",
+            filter: "agNumberColumnFilter",
+            valueFormatter: currencyFormatter,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            filterValueGetter: (params) => parseFloat(params.data.revenue || 0),
+
+
+        },
+        profit: {
+            headerName: 'Profit',
+            field: 'profit',
+            minWidth: 105,
+            sortable: true,
+            aggFunc: liveSpender,
+            cellClassRules: {
+                'font-red': p => p.value < 0,
+                'font-green': params => params.value > 0,
+            },
+            // filter: "agNumberColumnFilter",
+            filter: "agNumberColumnFilter",
+            valueFormatter: currencyFormatter,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "Profit = Revenue - Spend",
+            filterValueGetter: (params) => parseFloat(params.data.profit || 0),
+
+
+        },
+        margin: {
+            headerName: 'Margin',
+            field: 'margin',
+            minWidth: 100,
+            valueGetter: getMargin,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+            },
+            valueFormatter: (params) => `${params.value}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "Margin = (Profit / Revenue) * 100",
+
+
+        },
+        fbleads: {
+            headerName: 'FBLeads',
+            field: 'fbleads',
+            minWidth: 105,
+            aggFunc: newSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' // Add a custom class
+
+
+        },
+        conversions: {
+            headerName: 'Conv',
+            field: 'conversions',
+            minWidth: 85,
+            aggFunc: newSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+
+
+            headerTooltip: "Conversions",
+
+
+        },
+        cpc: {
+            headerName: 'CPC',
+            field: 'cpc',
+            // valueGetter: (params) => {
+            //     if (params.node.group && params.node.aggData) {
+            //         return sanitizeNumericValue(params.node.aggData["cpc"]) || 0;
+            //     }
+            //     return sanitizeNumericValue(params.data?.cpc);
+            // },
+            aggFunc: cpcSpender,
+            minWidth: 80,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "CPC = Spend / FBClicks",
+
+
+        },
+        cpclinkclicks: {
+            headerName: 'CPC_LC',
+            field: 'cpclinkclicks',
+            // aggFunc: cpcSpender,
+            valueGetter: getCpcLc,
+            minWidth: 80,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "cpclinkclicks = Spend / FBLinkClicks",
+
+
+        },
+        fbclicks: {
+            headerName: 'FBClicks',
+            field: 'fbclicks',
+            minWidth: 110,
+            aggFunc: newSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' // Add a custom class
+
+
+        },
+        fblinkclicks: {
+            headerName: 'FB_LC',
+            field: 'fblinkclicks',
+            headerTooltip: 'fblinkclicks',
+            minWidth: 110,
+            aggFunc: newSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' // Add a custom class
+
+
+        },
+        impressions: {
+            headerName: 'IMP',
+            field: 'impressions',
+            minWidth: 100,
+            aggFunc: newSpender,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "Impressions",
+        },
+        ctr: {
+            headerName: 'CTR',
+            field: 'ctr',
+            valueGetter: getCtr,
+            minWidth: 100,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+            },
+            valueFormatter: (params) => `${params.value}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu' // Add a custom class
+
+
+        },
+        rpc: {
+            headerName: 'RPC',
+            field: 'rpc',
+            minWidth: 80,
+            valueGetter: getRpc,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "RPC = Revenue / Conversions",
+            cellStyle: { fontWeight: 'bold' } // Make text bold
+        },
+        cpl: {
+            headerName: 'CPL',
+            field: 'cpl',
+            minWidth: 80,
+            valueGetter: getCpl,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "CPL = Spend / FBLeads",
+
+
+        },
+        ncpl: {
+            headerName: 'NCPL',
+            field: 'ncpl',
+            minWidth: 90,
+            valueGetter: getNcpl,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "NCPL = Spend / Conversions",
+
+
+        },
+        fmargin: {
+            headerName: 'FMargin',
+            field: 'fmargin',
+            minWidth: 120,
+            valueGetter: getFmargin,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+            },
+            valueFormatter: (params) => `${params.value}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "FMargin = (Profit / Spend) * 100",
+
+
+        },
+        roi: {
+            headerName: 'ROI',
+            field: 'roi',
+            minWidth: 100,
+            valueGetter: getROI,
+            filter: "agNumberColumnFilter",
+            comparator: (valueA, valueB) => {
+                // Handle sorting based on the computed margin value
+                if (valueA == null) return -1;
+                if (valueB == null) return 1;
+                return valueA - valueB;
+            },
+            valueFormatter: (params) => `${params.value}%`,
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu', // Add a custom class
+            headerTooltip: "ROI = ((Revenue - Spend) / Spend) * 100",
+
+
+        },
+        adsetid: {
+            headerName: 'AdsetId',
+            field: 'adsetid',
+            sortable: true,
+            filter: "agTextColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            hide: true,
+        },
+        campaignid: {
+            headerName: 'CampaignId',
+            field: 'campaignid',
+            sortable: true,
+            filter: "agTextColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu',
+            width: 500,
+            hide: true,
+            // rowGroup: true,
+            // enableRowGroup: true,
+        },
+        timezone: {
+            headerName: 'TimeZone',
+            field: 'timezone',
+            filter: "agTextColumnFilter",
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: 'hide-menu'
+        },
+        history: {
+            headerName: 'Activity',
+            field: 'history',
+            minWidth: 90,
+            sortable: false,
+            filter: false,
+            enableSorting: false,
+            enableFilter: false,
+            suppressMenu: true,
+            hide: true,
+        },
+    };
     const columnDefsObjectAdsetLevelDaily = {
         accountNumber: {
             headerName: 'Account',
@@ -18286,7 +18883,9 @@ const MyTablePage = () => {
     const getColumnDefs = (order) => {
         return order?.map(colKey => columnDefsObject[colKey]).filter(item => item);
     };
-
+    const getColumnDefsHour = (order) => {
+        return order?.map(colKey => columnDefsObjectHour[colKey]).filter(item => item);
+    };
     const getColumnDefs1 = (order) => {
         return order?.map(colKey => columnDefsObject1[colKey]).filter(item => item);
     };
@@ -18335,6 +18934,8 @@ const MyTablePage = () => {
 
     const columnDefs4 = useRef();
 
+    const columnDefsHourly = useRef();
+
     const columnDefsAdsetLevel = useRef();
 
     const columnDefsAdLevel = useRef();
@@ -18359,6 +18960,7 @@ const MyTablePage = () => {
             columnDefs2.current = getColumnDefs2(mainData);
             columnDefs3.current = getColumnDefs3(mainData);
             columnDefs4.current = getColumnDefs4(mainData);
+            columnDefsHourly.current = getColumnDefsHour(mainData);
             columnDefsAdsetLevel.current = getColumnDefsAdsetLevel(mainData);
             columnDefsAdLevel.current = getColumnDefsAdLevel([...(newRevenuePratner === "FB_TonicRsoc" ? ["keyword"] : []), ...(mainData)]);
             columnDefsAdsetLevelDaily.current = (getColumnDefsAdsetLevelDaily(mainData));
@@ -18395,6 +18997,7 @@ const MyTablePage = () => {
         columnDefs2.current = (getColumnDefs2(updateDataArray));
         columnDefs3.current = (getColumnDefs3(updateDataArray));
         columnDefs4.current = (getColumnDefs4(updateDataArray));
+        columnDefsHourly.current = (getColumnDefsHour(updateDataArray));
         columnDefsAdsetLevel.current = (getColumnDefsAdsetLevel(updateDataArray));
         columnDefsAdLevel.current = (getColumnDefsAdLevel(updateDataArray));
         columnDefsAdsetLevelDaily.current = (getColumnDefsAdsetLevelDaily(updateDataArray));
@@ -19362,7 +19965,14 @@ const MyTablePage = () => {
         ...(newRevenuePratner === "FB_Tonic1" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : []),
         ...(newRevenuePratner === "FB_Inmobi" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : []),
         ...(newRevenuePratner === "FB_TonicRsoc" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : []),
-
+        ...(newRevenuePratner === "FB_Mnet" ? [{ key: '6', label: 'Hourly', content: 'Content for hour wise break down' }] : []),
+        ...(newRevenuePratner === "FB_Mnet"
+            ? [{
+                key: '7',
+                label: 'DayofHour',
+                content: 'Content for Hour data'
+            }]
+            : []),
         // ...(newRevenuePratner === "FB_Mnet" ? [{ key: '6', label: 'Ad-Live', content: 'Content for Domain data' }] : []),
         // ...(newRevenuePratner === "FB_Mnet" ? [{ key: '7', label: 'Ad-Daily', content: 'Content for Domain data' }] : []),
         // ...(newRevenuePratner === "FB_DomainActive" ? [{ key: '6', label: 'Names-Live', content: 'Content for Names Live data' }] : []),
@@ -20144,26 +20754,26 @@ const MyTablePage = () => {
                     </Col>
                     <Col>
                         {revenuePratner !== "FB_TonicRsoc" && (
-                            <Button
-                                type="primary"
-                                onMouseEnter={() => setRHovered(true)}
-                                onMouseLeave={() => setRHovered(false)}
-                                style={{
-                                    backgroundColor: Rhovered
-                                        ? theme === "dark"
-                                            ? "rgba(24,144,255,0.06)"
-                                            : "#e6f7ff"
-                                        : "transparent",
-                                    border: '1px solid #91d5ff',
-                                    borderRadius: "6px",
-                                    color: theme === "dark" ? "#ffffff" : "#000000",
-                                    padding: "0 12px",
-                                    height: "32px",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    gap: "8px",
-                                    transition: "all 0.15s ease-in-out",
-                                }}>
+                            // <Button
+                            //     type="primary"
+                            //     onMouseEnter={() => setRHovered(true)}
+                            //     onMouseLeave={() => setRHovered(false)}
+                            //     style={{
+                            //         backgroundColor: Rhovered
+                            //             ? theme === "dark"
+                            //                 ? "rgba(24,144,255,0.06)"
+                            //                 : "#e6f7ff"
+                            //             : "transparent",
+                            //         border: '1px solid #91d5ff',
+                            //         borderRadius: "6px",
+                            //         color: theme === "dark" ? "#ffffff" : "#000000",
+                            //         padding: "0 12px",
+                            //         height: "32px",
+                            //         display: "flex",
+                            //         alignItems: "center",
+                            //         gap: "8px",
+                            //         transition: "all 0.15s ease-in-out",
+                            //     }}>
                                 <Tooltip title="Spend base report" overlayInnerStyle={{
                                     backgroundColor: theme === 'dark' ? '#111' : '#fff',
                                     color: theme === 'dark' ? '#fff' : '#000',
@@ -20171,7 +20781,7 @@ const MyTablePage = () => {
                                     borderRadius: 6,
                                     // fontWeight: 500,
                                 }}>
-                                    <span
+                                    {/* <span
                                         onClick={(e) => {
                                             // e.stopPropagation(); // ✅ prevent Apply click
                                             router.push("/Reports");
@@ -20183,9 +20793,12 @@ const MyTablePage = () => {
                                         }}
                                     >
                                         S
-                                    </span>
+                                    </span> */}
+                                    <ReportSwitch
+                                        theme={theme}
+                                    />
                                 </Tooltip>
-                            </Button>
+                            // </Button>
                         )}
                     </Col>
 
@@ -20830,7 +21443,121 @@ const MyTablePage = () => {
                                 </Tabs.TabPane>
 
                             )}
+                            {newRevenuePratner === "FB_Mnet" && (
+                                <Tabs.TabPane key="6">
+                                    <HourlyCampaignLevelReports
+                                        startDate={newStartDate}
+                                        endDate={newendDate}
+                                        columnStructure={mainData}
+                                        allCampaignData={allCampaignData}
+                                        allProfitLossArray={allProfitLossArray}
+                                        // newaccount={newaccount}
+                                        newaccount={newaccount}
+                                        newtime={newtime}
+                                        newRevenuePratner={newRevenuePratner}
+                                        inputValue={inputValue}
+                                        newAccountName={newAccountName}
+                                        columnDefs={columnDefsHourly.current}
+                                        columnDefs1={columnDefsAdsetLevel.current}
+                                        columnDefs2={columnDefsAdLevel.current}
+                                        campaignComments={campaignComments}
+                                        setCampaignComments={setCampaignComments}
+                                        campaignStatusFilter={campaignStatusFilter}
+                                        Camapignlevelstatus={Camapignlevelstatus}
+                                        setCamapignlevelstatus={setCamapignlevelstatus}
+                                        commentsMap={commentsMap}
+                                        changeRRefrst={resetColumnStructure}
+                                        debouncedHandleColumnMove={debouncedHandleColumnMove}
+                                        userdetails={userdetails}
+                                        refreshComments={refreshComments}
+                                        refreshpage={refreshContent}
+                                        getMainMenuItems={getMainMenuItems}
+                                        toggleStatus={checked}
+                                        handleChangeToggle={handleChangeToggle}
+                                        theme={theme}
+                                        functionCallForCommnets={functionCallForCommnets}
+                                        functionCallForCampaigns={functionCallForCampaigns}
+                                        context={{
+                                            allCampaignData,
+                                            setCampaignRefreshTrigger,
+                                            changeRRefrst,
+                                            newaccount,
+                                            userdetails,
+                                            theme,
+                                            setCamapignlevelstatus,
+                                            campaignStatusOverridesRef, // ✅ ADD THIS
+                                            adsetStatusOverridesRef,
+                                            adsetPinOverridesRef,
+                                            adsetCommentOverridesRef,
+                                            adStatusOverridesRef,
+                                            adPinOverridesRef,
+                                            adCommentOverridesRef,
+                                        }}
+                                        handleChangeInput={handleChangeInput}
+                                        handleBlur={handleBlur}
+                                        onClickRefresh={onClickRefresh}
+                                        accountsAccess={accountsAccess}
+                                    />
+                                </Tabs.TabPane>
+                            )}
+                            {newRevenuePratner === "FB_Mnet" && (
+                                <Tabs.TabPane key="7">
+                                    <HourReports
+                                        startDate={newStartDate}
+                                        endDate={newendDate}
+                                        columnStructure={mainData}
+                                        allCampaignData={allCampaignData}
+                                        allProfitLossArray={allProfitLossArray}
+                                        // newaccount={newaccount}
+                                        newaccount={newaccount}
+                                        newtime={newtime}
+                                        newRevenuePratner={newRevenuePratner}
+                                        inputValue={inputValue}
+                                        activetab={activeTab}
+                                        newAccountName={newAccountName}
+                                        columnDefs={columnDefs}
+                                        // selectedHour={selectedHour}
+                                        campaignComments={campaignComments}
+                                        setCampaignComments={setCampaignComments}
+                                        campaignStatusFilter={campaignStatusFilter}
+                                        Camapignlevelstatus={Camapignlevelstatus}
+                                        setCamapignlevelstatus={setCamapignlevelstatus}
+                                        commentsMap={commentsMap}
+                                        changeRRefrst={resetColumnStructure}
+                                        debouncedHandleColumnMove={debouncedHandleColumnMove}
+                                        userdetails={userdetails}
+                                        refreshComments={refreshComments}
+                                        refreshpage={refreshContent}
+                                        getMainMenuItems={getMainMenuItems}
+                                        toggleStatus={checked}
+                                        handleChangeToggle={handleChangeToggle}
+                                        theme={theme}
+                                        functionCallForCommnets={functionCallForCommnets}
+                                        functionCallForCampaigns={functionCallForCampaigns}
+                                        context={{
+                                            allCampaignData,
+                                            setCampaignRefreshTrigger,
+                                            changeRRefrst,
+                                            newaccount,
+                                            userdetails,
+                                            theme,
+                                            setCamapignlevelstatus,
+                                            campaignStatusOverridesRef, // ✅ ADD THIS
+                                            adsetStatusOverridesRef,
+                                            adsetPinOverridesRef,
+                                            adsetCommentOverridesRef,
+                                            adStatusOverridesRef,
+                                            adPinOverridesRef,
+                                            adCommentOverridesRef,
+                                        }}
+                                        handleChangeInput={handleChangeInput}
+                                        handleBlur={handleBlur}
+                                        onClickRefresh={onClickRefresh}
+                                        accountsAccess={accountsAccess}
+                                    />
+                                </Tabs.TabPane>
 
+                            )}
                             {/* {newRevenuePratner === "FB_Mnet" && (
                     <Tabs.TabPane key="6">
                         <MnetLiveAdReports 
