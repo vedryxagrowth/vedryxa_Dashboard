@@ -810,6 +810,14 @@ const AddComponent = ({
             onReturnMessage={onReturnUrl}
           />
         );
+      case "FB_Media":
+        return (
+          <MnetUrlBuilder
+            defaultValues={websiteURL}
+            accountis={accountis}
+            onReturnMessage={onReturnUrl}
+          />
+        );
       case "FB_MnetBing":
         return (
           <MnetBingUrlBuilder
@@ -3603,6 +3611,14 @@ const AdsetComponent = ({
   const getUrlBuilder = useMemo(() => {
     switch (network) {
       case "FB_Mnet":
+        return (
+          <MnetUrlBuilder
+            defaultValues={websiteURL}
+            accountis={accountis}
+            onReturnMessage={onReturnUrl}
+          />
+        );
+      case "FB_Media":
         return (
           <MnetUrlBuilder
             defaultValues={websiteURL}
@@ -9022,6 +9038,10 @@ const CloneMultipleAdsetCampaignDrawer = ({
   const getUrlBuilder = useMemo(() => {
     switch (network) {
       case "FB_Mnet":
+        return (
+          <MnetUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
+        );
+      case "FB_Media":
         return (
           <MnetUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
         );

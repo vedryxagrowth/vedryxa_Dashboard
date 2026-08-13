@@ -66,7 +66,7 @@ const selectTimezone = {
     CEST: 'CESTDate'
 };
 
-const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, handleBlur, onClickRefresh, functionCallForCommnets, columnStructure, context, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, columnDefs1, columnDefs2, campaignComments, setCampaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, accountsAccess, commentsMap }) => {
+const LiveReports = ({ handleChangeInput, taxDetails, allCampaignData, allProfitLossArray, handleBlur, onClickRefresh, functionCallForCommnets, columnStructure, context, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, columnDefs1, columnDefs2, campaignComments, setCampaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, accountsAccess, commentsMap }) => {
     // console.log(columnDefs, "columnDefs");
     // console.log("hello world");
     // console.log("new multiple accounts:", newaccount);
@@ -120,7 +120,7 @@ const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, h
     const [removeSelectedCampaigns, setRemoveSelectedCampaigns] = useState("");
 
     const [removeSelectedAdsets, setRemoveSelectedAdsets] = useState("");
-    
+
     const [removeSelectedAds, setRemoveSelectedAds] = useState("");
     //Active pause
     const [campaignStatusFilter, setCampaignStatusFilter] = useState('ALL');
@@ -226,7 +226,7 @@ const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, h
         setSelectedAdsets(data);
         // console.log(data, "AdsetLeveldata");
     }
-     const showAdLevel = (data) => {
+    const showAdLevel = (data) => {
         setSelectedAds(data);
         // console.log(data, "AdsetLeveldata");
     }
@@ -259,7 +259,7 @@ const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, h
         setTimeout(() => {
             setRemoveSelectedAds("Remove");
         }
-        , 100);
+            , 100);
     }
 
     const moveToNextTab = (data) => {
@@ -1407,7 +1407,7 @@ const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, h
         theme,
     ]);
 
-    
+
     const renderCarouselNav = () => (
         <StickyBox offsetTop={64} offsetBottom={20} style={{ padding: '4px 5px' }}>
             <Row align="middle" justify="space-between">
@@ -1456,6 +1456,7 @@ const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, h
             <Tabs activeKey={activeTab} onChange={handleTabChange} renderTabBar={() => <></>}>
                 <Tabs.TabPane key="1">
                     <CampaignLevelReports
+                        taxDetails={taxDetails}
                         allProfitLossArray={allProfitLossArray}
                         allCampaignData={allCampaignData}
                         columnStructure={columnStructure}
@@ -1495,6 +1496,7 @@ const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, h
                 </Tabs.TabPane>
                 <Tabs.TabPane key="2">
                     <AdsetLevelReports
+                        taxDetails={taxDetails}
                         allProfitLossArray={allProfitLossArray}
                         allCampaignData={allCampaignData}
                         columnStructure={columnStructure}
@@ -1536,6 +1538,7 @@ const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, h
                 </Tabs.TabPane>
                 <Tabs.TabPane key="3">
                     <AdLevelReports
+                        taxDetails={taxDetails}
                         allProfitLossArray={allProfitLossArray}
                         allCampaignData={allCampaignData}
                         columnStructure={columnStructure}
