@@ -813,6 +813,14 @@ const AddComponent = ({
             onReturnMessage={onReturnUrl}
           />
         );
+      case "FB_Media":
+        return (
+          <MnetUrlBuilder
+            defaultValues={websiteURL}
+            accountis={accountis}
+            onReturnMessage={onReturnUrl}
+          />
+        );
       case "FB_MnetBing":
         return (
           <MnetBingUrlBuilder
@@ -3477,6 +3485,14 @@ const AdsetComponent = ({
             onReturnMessage={onReturnUrl}
           />
         );
+      case "FB_Media":
+        return (
+          <MnetUrlBuilder
+            defaultValues={websiteURL}
+            accountis={accountis}
+            onReturnMessage={onReturnUrl}
+          />
+        );
       case "FB_MnetBing":
         return (
           <MnetBingUrlBuilder
@@ -5717,7 +5733,7 @@ const AdsetComponent = ({
             label={<span style={{ color: "#B4B4B4" }}>Placements</span>}
             name={["adsets", index, "placements"]}
             rules={[{ required: true, message: "Please select a mode!" }]}
-            initialValue={adset.placements || "manual"}
+            initialValue={adset.placements || "Advance"}
           >
             <Select
               placeholder="Select a mode"
@@ -5726,7 +5742,7 @@ const AdsetComponent = ({
                 } green-border-select`}
             // defaultValue={adset.placements || "Advance"}
             >
-              <Option value="Advance" title={null} disabled={network === "FB_Mnet"}>
+              <Option value="Advance" title={null}>
                 Advance
               </Option>
               <Option value="manual" title={null}>
@@ -5783,10 +5799,6 @@ const AdsetComponent = ({
                           key={option.value}
                           value={option.value}
                           title={null}
-                          disabled={
-                            network === "FB_Mnet" &&
-                            ["messenger", "audience_network"].includes(option.value)
-                          }
                         >
                           {option.label}
                         </Option>
@@ -9334,6 +9346,10 @@ const EditMultipleAdsetCampaignDrawer = ({
         return (
           <MnetUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
         );
+      case "FB_Media":
+        return (
+          <MnetUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
+        );
       case "FB_MnetBing":
         return (
           <MnetBingUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
@@ -11397,7 +11413,7 @@ const EditMultipleAdsetCampaignDrawer = ({
             }
             else {
               // console.log("new ad created in adlevel");
-              const fileData = await getFilenameDeatials(item.filename);
+              const fileData = await f(item.filename);
               re_lunch = true;
               send_re_launch_status = true;
 

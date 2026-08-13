@@ -739,6 +739,11 @@ const AccountForm = ({
         return (
           <MnetUrlBuilder indexValueForAccount={indexValueForAccount} defaultValues={defaultURLBuilder} accountis={account} onReturnMessage={onReturnUrl} />
         );
+      case "FB_Media":
+        //defaultValues
+        return (
+          <MnetUrlBuilder indexValueForAccount={indexValueForAccount} defaultValues={defaultURLBuilder} accountis={account} onReturnMessage={onReturnUrl} />
+        );
       case "FB_MnetBing":
         //defaultValues
         return (
@@ -2130,6 +2135,11 @@ const AdsetComponent = ({
     // return (extraString) => {
     switch (network) {
       case "FB_Mnet":
+        //defaultValues
+        return (
+          <MnetUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
+        );
+      case "FB_Media":
         //defaultValues
         return (
           <MnetUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
@@ -9218,6 +9228,10 @@ const CreateCampaignDrawer = ({
   const getUrlBuilder = useMemo(() => {
     switch (network) {
       case "FB_Mnet":
+        return (
+          <MnetUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
+        );
+      case "FB_Media":
         return (
           <MnetUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
         );

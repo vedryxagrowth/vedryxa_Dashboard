@@ -1289,12 +1289,12 @@ const Daily = ({ functionCallForCommnets, context, taxDetails, activeTab, functi
                     //     matchedAdset = commentForCampaign.AdsetLevel;
                     // }
                     // return matchedAdset ? matchedAdset.status === "ACTIVE" : true; // default ACTIVE
-                    const campaignForAccount = Camapignlevelstatus.find(obj =>
-                        String(obj.campaign_id) === String(campaignid) &&
-                        String(obj.accountNumber) === String(rowAccount)
+                    const campaignForAccount = Camapignlevelstatus?.find(obj =>
+                        String(obj?.campaign_id) === String(campaignid) &&
+                        String(obj?.accountNumber) === String(rowAccount)
                     );
                     const arrayOfAdsets = campaignForAccount?.adsets || [];
-                    const matchedAdset = arrayOfAdsets.find(a => String(a.adset_id) === String(adsetid));
+                    const matchedAdset = arrayOfAdsets?.find(a => String(a?.adset_id) === String(adsetid));
                     return matchedAdset ? matchedAdset.status === "ACTIVE" : true; // default ACTIVE
                 });
 
@@ -3099,6 +3099,8 @@ const Daily = ({ functionCallForCommnets, context, taxDetails, activeTab, functi
             cronStatus.current = getValidField('cronStatus');
             accountStatus.current = getValidField('accountStatus');
 
+            console.log(mainData,"main")
+
 
             timezone.current = mainData.length > 0 ? mainData[0].accountTimezone : "";
             let totalSpend = 0;
@@ -3157,11 +3159,11 @@ const Daily = ({ functionCallForCommnets, context, taxDetails, activeTab, functi
                     const category = campaignComments.find(campaign => campaign.campaignid === eachData.campaign_id && campaign.Account === eachData.accountNumber && campaign.level === "campaign");
                     const campaign_date = Camapignlevelstatus.find(campaign => campaign.campaign_id === eachData.campaign_id && campaign.accountNumber === eachData.accountNumber);
                     const adsetObjectStatus = Camapignlevelstatus
-                        .find(item =>
-                            String(item.campaign_id) === String(eachData.campaign_id) &&
-                            String(item.accountNumber) === String(eachData.accountNumber)
-                        )?.adsets.find(adset =>
-                            String(adset.adset_id) === String(eachData.adset_id)
+                        ?.find(item =>
+                            String(item?.campaign_id) === String(eachData?.campaign_id) &&
+                            String(item?.accountNumber) === String(eachData?.accountNumber)
+                        )?.adsets?.find(adset =>
+                            String(adset?.adset_id) === String(eachData?.adset_id)
                         );
                     // console.log(eachData.campaign_name, "campaign_name");
                     return (
@@ -3212,6 +3214,8 @@ const Daily = ({ functionCallForCommnets, context, taxDetails, activeTab, functi
                 }) : null;
 
             const fullData = filteredData?.length > 0 ? [...filteredData] : [];
+
+            console.log(filteredData,"filteredData")
 
             let newFilterData;
             if (campaignStatusFilter !== "All") {
@@ -3310,12 +3314,12 @@ const Daily = ({ functionCallForCommnets, context, taxDetails, activeTab, functi
             // setTrue(false);
             setLoading1(false);
         } catch (error) {
-            // console.log(error);
+            console.log(error);
             // if(error.response.status === 500){
             //     apiStatus.current = true;
             // }
             // console.log(error);
-            setApiStatus(true);
+            setApiStatus(false);
             setLoading1(false);
         }
     }

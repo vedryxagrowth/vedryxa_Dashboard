@@ -316,85 +316,131 @@ const RevenuePartnerDashboard = () => {
 
         return 0;
     };
-    const getROI = (params) => {
-        const data = params.node.group ? params.node.aggData : params.data;
-        if (!data) return 0;
+    // const getROI = (params) => {
+    //     const data = params.node.group ? params.node.aggData : params.data;
+    //     if (!data) return 0;
 
-        const revenue = sanitizeNumericValue(data.revenue);
-        const spend = sanitizeNumericValue(data.spend);
+    //     const revenue = sanitizeNumericValue(data.revenue);
+    //     const spend = sanitizeNumericValue(data.spend);
 
-        if (isNaN(spend) || spend <= 0) return 0;
+    //     if (isNaN(spend) || spend <= 0) return 0;
 
-        const margin = ((revenue - spend) / spend) * 100;
-        const roundedMargin = isFinite(margin) && !isNaN(margin) ? Math.round(margin * 100) / 100 : 0;
+    //     const margin = ((revenue - spend) / spend) * 100;
+    //     const roundedMargin = isFinite(margin) && !isNaN(margin) ? Math.round(margin * 100) / 100 : 0;
 
-        if (params.node.group) {
-            params.node.aggData["roi"] = roundedMargin;
-        }
+    //     if (params.node.group) {
+    //         params.node.aggData["roi"] = roundedMargin;
+    //     }
 
-        return roundedMargin;
-    }
-    const getROIAfterTax = (params) => {
-        const data = params.node.group ? params.node.aggData : params.data;
-        if (!data) return 0;
+    //     return roundedMargin;
+    // }
+    // const getROIAfterTax = (params) => {
+    //     const data = params.node.group ? params.node.aggData : params.data;
+    //     if (!data) return 0;
 
-        const revenue = sanitizeNumericValue(data.revenue);
-        const spend = sanitizeNumericValue(data.taxSpend);
+    //     const revenue = sanitizeNumericValue(data.revenue);
+    //     const spend = sanitizeNumericValue(data.taxSpend);
 
-        if (isNaN(spend) || spend <= 0) return 0;
+    //     if (isNaN(spend) || spend <= 0) return 0;
 
-        const margin = ((revenue - spend) / spend) * 100;
-        const roundedMargin = isFinite(margin) && !isNaN(margin) ? Math.round(margin * 100) / 100 : 0;
+    //     const margin = ((revenue - spend) / spend) * 100;
+    //     const roundedMargin = isFinite(margin) && !isNaN(margin) ? Math.round(margin * 100) / 100 : 0;
 
-        if (params.node.group) {
-            params.node.aggData["roi"] = roundedMargin;
-        }
+    //     if (params.node.group) {
+    //         params.node.aggData["roi"] = roundedMargin;
+    //     }
 
-        return roundedMargin;
-    }
+    //     return roundedMargin;
+    // }
     const sanitizeNumericValue = (value) => {
         if (typeof value === 'string') {
             return parseFloat(value.replace(/[%$,]/g, '').trim()) || 0;
         }
         return isNaN(value) || value === undefined || value === null ? 0 : value;
     };
-    const getMargin = (params) => {
-        const data = params.node.group ? params.node.aggData : params.data;
-        if (!data) return 0;
+    // const getMargin = (params) => {
+    //     const data = params.node.group ? params.node.aggData : params.data;
+    //     if (!data) return 0;
 
-        const revenue = sanitizeNumericValue(data.revenue);
-        const spend = sanitizeNumericValue(data.spend);
+    //     const revenue = sanitizeNumericValue(data.revenue);
+    //     const spend = sanitizeNumericValue(data.spend);
 
-        if (isNaN(revenue) || revenue <= 0) return 0;
+    //     if (isNaN(revenue) || revenue <= 0) return 0;
 
-        const margin = ((revenue - spend) / revenue) * 100;
-        const roundedMargin = isFinite(margin) && !isNaN(margin) ? Math.round(margin * 100) / 100 : 0;
+    //     const margin = ((revenue - spend) / revenue) * 100;
+    //     const roundedMargin = isFinite(margin) && !isNaN(margin) ? Math.round(margin * 100) / 100 : 0;
 
-        if (params.node.group) {
-            params.node.aggData["margin"] = roundedMargin;
-        }
+    //     if (params.node.group) {
+    //         params.node.aggData["margin"] = roundedMargin;
+    //     }
 
-        return roundedMargin;
-    };
-    const getMarginAfterTax = (params) => {
-        const data = params.node.group ? params.node.aggData : params.data;
-        if (!data) return 0;
+    //     return roundedMargin;
+    // };
+    const getMargin = ({ node, data }) => {
+        const row = node.group ? node.aggData : data;
+        if (!row) return 0;
 
-        const revenue = sanitizeNumericValue(data.revenue);
-        const spend = sanitizeNumericValue(data.taxSpend);
+        const revenue = Number(sanitizeNumericValue(row.revenue));
+        const spend = Number(sanitizeNumericValue(row.spend));
 
-        if (isNaN(revenue) || revenue <= 0) return 0;
+        if (!Number.isFinite(revenue) || revenue <= 0) return 0;
 
-        const margin = ((revenue - spend) / revenue) * 100;
-        const roundedMargin = isFinite(margin) && !isNaN(margin) ? Math.round(margin * 100) / 100 : 0;
-
-        if (params.node.group) {
-            params.node.aggData["margin"] = roundedMargin;
-        }
-
-        return roundedMargin;
+        return Number((((revenue - spend) / revenue) * 100).toFixed(2));
     };
 
+    const getROI = ({ node, data }) => {
+        const row = node.group ? node.aggData : data;
+        if (!row) return 0;
+
+        const revenue = Number(sanitizeNumericValue(row.revenue));
+        const spend = Number(sanitizeNumericValue(row.spend));
+
+        if (!Number.isFinite(spend) || spend <= 0) return 0;
+
+        return Number((((revenue - spend) / spend) * 100).toFixed(2));
+    };
+    // const getMarginAfterTax = (params) => {
+    //     const data = params.node.group ? params.node.aggData : params.data;
+    //     if (!data) return 0;
+
+    //     const revenue = sanitizeNumericValue(data.revenue);
+    //     const spend = sanitizeNumericValue(data.taxSpend);
+
+    //     if (isNaN(revenue) || revenue <= 0) return 0;
+
+    //     const margin = ((revenue - spend) / revenue) * 100;
+    //     const roundedMargin = isFinite(margin) && !isNaN(margin) ? Math.round(margin * 100) / 100 : 0;
+
+    //     if (params.node.group) {
+    //         params.node.aggData["margin"] = roundedMargin;
+    //     }
+
+    //     return roundedMargin;
+    // };
+    const getMarginAfterTax = ({ node, data }) => {
+        const row = node.group ? node.aggData : data;
+        if (!row) return 0;
+
+        const revenue = Number(sanitizeNumericValue(row.revenue));
+        const taxProfit = Number(sanitizeNumericValue(row.taxProfit));
+
+        if (!Number.isFinite(revenue) || revenue <= 0) return 0;
+        if (!Number.isFinite(taxProfit)) return 0;
+
+        return Number((((taxProfit) / revenue) * 100).toFixed(2));
+    };
+
+    const getROIAfterTax = ({ node, data }) => {
+        const row = node.group ? node.aggData : data;
+        if (!row) return 0;
+
+        const taxProfit = Number(sanitizeNumericValue(row.taxProfit));
+        const taxSpend = Number(sanitizeNumericValue(row.taxSpend));
+
+        if (!Number.isFinite(taxSpend) || taxSpend <= 0) return 0;
+
+        return Number((((taxProfit) / taxSpend) * 100).toFixed(2));
+    };
     const onChangeTime = (value) => {
         setTimeZone(value);
         timeZoneForColumnDefs.current = value;

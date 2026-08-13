@@ -12099,11 +12099,11 @@ const MyTablePage = () => {
                     //     setAdsetInfo(matchedAdset);
                     // }
                     const matchedAdset = Camapignlevelstatus
-                        .find(item =>
-                            String(item.campaign_id) === String(campaignId) &&
-                            String(item.accountNumber) === String(accountNumber)
-                        )?.adsets.find(adset =>
-                            String(adset.adset_id) === String(initialAdsetId)
+                        ?.find(item =>
+                            String(item?.campaign_id) === String(campaignId) &&
+                            String(item?.accountNumber) === String(accountNumber)
+                        )?.adsets?.find(adset =>
+                            String(adset?.adset_id) === String(initialAdsetId)
                         );
                     if (matchedAdset?.budget) {
                         if (Number(matchedAdset.budget.daily_budget) === 0) {
