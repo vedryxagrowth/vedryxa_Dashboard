@@ -5717,7 +5717,7 @@ const AdsetComponent = ({
             label={<span style={{ color: "#B4B4B4" }}>Placements</span>}
             name={["adsets", index, "placements"]}
             rules={[{ required: true, message: "Please select a mode!" }]}
-            initialValue={adset.placements || "Advance"}
+            initialValue={adset.placements || "manual"}
           >
             <Select
               placeholder="Select a mode"
@@ -5726,7 +5726,7 @@ const AdsetComponent = ({
                 } green-border-select`}
             // defaultValue={adset.placements || "Advance"}
             >
-              <Option value="Advance" title={null}>
+              <Option value="Advance" title={null} disabled={network === "FB_Mnet"}>
                 Advance
               </Option>
               <Option value="manual" title={null}>
@@ -5783,6 +5783,10 @@ const AdsetComponent = ({
                           key={option.value}
                           value={option.value}
                           title={null}
+                          disabled={
+                            network === "FB_Mnet" &&
+                            ["messenger", "audience_network"].includes(option.value)
+                          }
                         >
                           {option.label}
                         </Option>
@@ -10744,7 +10748,7 @@ const EditMultipleAdsetCampaignDrawer = ({
               }
             }
           }
-          catch(error) {
+          catch (error) {
             console.error("Facebook upload failed:", error);
 
             mediaHashArray = {
@@ -10867,7 +10871,7 @@ const EditMultipleAdsetCampaignDrawer = ({
               }
             }
           }
-          catch(error) {
+          catch (error) {
             mediaHashArray = {
               filename: s3FileUrl,
               facebookUploadFailed: true,
@@ -11352,7 +11356,7 @@ const EditMultipleAdsetCampaignDrawer = ({
                 } else if (item.videoid) {
                   newUpdatedAd["videoid"] = getItem.videoid;
                   newUpdatedAd["thambnailurl"] = getItem.thambnailurl;
-                }else{
+                } else {
                   newUpdatedAd["facebookUploadFailed"] = getItem.facebookUploadFailed;
                 }
               } else {
@@ -11383,14 +11387,14 @@ const EditMultipleAdsetCampaignDrawer = ({
                     newUpdatedAd["filename"] = updatedFilesDeatils.filename;
                     if (item.Addid) newUpdatedAd["re_lunch"] = true;
                     send_re_launch_status = true;
-                  }else{
+                  } else {
                     newUpdatedAd["filename"] = updatedFilesDeatils.filename;
                     newUpdatedAd["facebookUploadFailed"] = true;
                   }
                 }
               }
               return newUpdatedAd;
-            } 
+            }
             else {
               // console.log("new ad created in adlevel");
               const fileData = await getFilenameDeatials(item.filename);
@@ -11416,7 +11420,7 @@ const EditMultipleAdsetCampaignDrawer = ({
                 newAd["filename"] = fileData.filename;
                 newAd["thambnailurl"] = fileData.thambnailurl;
               }
-              else{
+              else {
                 newAd["filename"] = fileData.filename;
                 newAd["facebookUploadFailed"] = true;
               }

@@ -3,8 +3,8 @@ import { useEffect, useMemo, useState, useRef } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import { Audio } from 'react-loader-spinner';
 import React from 'react';
-import {  Button, Result } from 'antd';
-import { SmileOutlined} from '@ant-design/icons';
+import { Button, Result } from 'antd';
+import { SmileOutlined } from '@ant-design/icons';
 import 'antd/dist/reset.css';
 import '../globals.css';
 import 'ag-grid-enterprise';
@@ -34,23 +34,23 @@ const newtworkCollections = {
     "FB_Tonic1": "Facebook_Tonic1",
     "FB_Sedo": "Facebook_Sedo",
     "FB_Inmobi": "Facebook_Inmobi",
-    "FB_TonicRsoc":"Facebook_TonicRsoc",
+    "FB_TonicRsoc": "Facebook_TonicRsoc",
     "FB_InuvoPrism": "Facebook_InuvoPrism",
     "FB_MWG": "Facebook_Mwg_Daily",
     "FB_Predicto": "Facebook_Predicto_Daily",
     "FB_Botup": "Facebook_Botup_Daily"
 }
 
-const AgencyAndBMNameReports = ({startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, userdetails, refreshComments, refreshpage}) => {
-    const {theme} = useTokenContext();
-    const {apiClient} = useTokenContext();
+const AgencyAndBMNameReports = ({ startDate, taxDetails, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, userdetails, refreshComments, refreshpage }) => {
+    const { theme } = useTokenContext();
+    const { apiClient } = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
 
     const [BMNameData, setBMNameData] = useState([]);
 
     const [apiStatus, setApiStatus] = useState(false);
 
-    
+
 
     const [selectedCells, setSelectedCells] = useState([]);
 
@@ -162,6 +162,93 @@ const AgencyAndBMNameReports = ({startDate, endDate, newaccount, newtime, newRev
             headerClass: 'hide-menu' // Add a custom class
         },
         {
+            headerName: "Tax",
+            field: "tax",
+            minWidth: 105,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+
+            valueGetter: (params) => {
+
+                // =========================
+                // GROUP ROW
+                // =========================
+                if (params.node?.group) {
+                    const children = params.node.allLeafChildren || [];
+
+                    const total = children.reduce((sum, child) => {
+                        const data = child.data;
+                        if (!data) return sum;
+
+                        const accountNumber = data.accountNumber;
+
+                        const accountTax = taxDetails?.find(
+                            item =>
+                                String(item.accountNumber) ===
+                                String(accountNumber)
+                        );
+
+                        const taxRate =
+                            parseFloat(
+                                String(accountTax?.tax || "0").replace("%", "")
+                            ) || 0;
+
+                        const spend =
+                            Number(data.spend) || 0;
+
+                        const taxAmount =
+                            (spend * taxRate) / 100;
+
+                        // Spend + Tax
+                        return sum + spend + taxAmount;
+                    }, 0);
+
+                    return Number(total.toFixed(2));
+                }
+
+                // =========================
+                // NORMAL ROW
+                // =========================
+                const accountNumber =
+                    params.data?.accountNumber;
+
+                if (!accountNumber) return 0;
+
+                const accountTax = taxDetails?.find(
+                    item =>
+                        String(item.accountNumber) ===
+                        String(accountNumber)
+                );
+
+                const taxRate =
+                    parseFloat(
+                        String(accountTax?.tax || "0").replace("%", "")
+                    ) || 0;
+
+                const spend =
+                    Number(params.data?.spend) || 0;
+
+                const taxAmount =
+                    (spend * taxRate) / 100;
+
+                // ✅ Spend + Tax
+                return Number(
+                    (spend + taxAmount).toFixed(2)
+                );
+            },
+
+            valueFormatter: (params) => {
+                const value = Number(params.value || 0);
+                return `$${value.toFixed(2)}`;
+            },
+
+            // comparator: numberComparator,
+
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: "hide-menu",
+        },
+        {
             field: "spend",
             resizable: true,
             sortable: true,
@@ -256,7 +343,7 @@ const AgencyAndBMNameReports = ({startDate, endDate, newaccount, newtime, newRev
     function groupAndCalculateBMNameAndAgency(data) {
         const groupedData = data.reduce((acc, item) => {
             const key = `${item.BMName}-${item.AgencyName}-${item[`${newtime}Date`]}`;
-    
+
             if (!acc[key]) {
                 acc[key] = {
                     BMName: item.BMName,
@@ -270,19 +357,19 @@ const AgencyAndBMNameReports = ({startDate, endDate, newaccount, newtime, newRev
                     accountNumber: item.accountNumber
                 };
             }
-    
+
             acc[key].estimated_revenue += item.estimated_revenue || 0;
             acc[key].spend += parseFloat(item.spend) || 0;
             acc[key].conversions += item.conversions || 0;
             acc[key].fbLeads += parseInt(item.fbLeads) || 0;
             acc[key].adClicks += item.ad_clicks || 0; // Sum ad_clicks separately
-    
+
             return acc;
         }, {});
-    
+
         return Object.values(groupedData).map(item => {
             const finalConversions = item.adClicks > 0 ? item.adClicks : item.conversions; // ✅ Ensure correct conversions
-    
+
             return {
                 ...item,
                 conversions: finalConversions, // ✅ Set correct conversions before using in rpc
@@ -297,39 +384,39 @@ const AgencyAndBMNameReports = ({startDate, endDate, newaccount, newtime, newRev
     //     // Capture all selected cell positions when range is selected
     //     const selected = [];
     //     const rangeSelections = params.api.getCellRanges();
-    
+
     //     if (rangeSelections) {
     //         rangeSelections.forEach((range) => {
     //             const startRow = Math.min(range.startRow.rowIndex, range.endRow.rowIndex);
     //             const endRow = Math.max(range.startRow.rowIndex, range.endRow.rowIndex);
     //             const columns = range.columns.map((col) => col.getColId());
-    
+
     //             for (let rowIndex = startRow; rowIndex <= endRow; rowIndex++) {
     //                 selected.push({ rowIndex, columns });
     //             }
     //         });
     //     }
-    
+
     //     setSelectedCells(selected);
     // };
-    
+
     const onCellKeyDown = (params) => {
         if (params.event.ctrlKey && params.event.key === "c") {
             params.event.preventDefault(); // Prevent default copy behavior
-    
+
             // ✅ Ensure `selectedCells` is not empty
             if (!selectedCells.length) return;
-    
+
             // ✅ Prepare data to copy: Rows separated by \n, Columns by \t
             const copiedText = selectedCells
                 .map(({ rowIndex, columns }) => {
                     if (!columns || !Array.isArray(columns)) {
                         // ✅ Handle case where only one cell is selected
-                        const singleColId = selectedCells[0]?.colId; 
+                        const singleColId = selectedCells[0]?.colId;
                         const row = params.api.getDisplayedRowAtIndex(rowIndex);
                         return row && singleColId ? params.api.getValue(singleColId, row) : "";
                     }
-                    
+
                     // ✅ Multi-cell copying logic
                     return columns
                         .map((colId) => {
@@ -339,30 +426,30 @@ const AgencyAndBMNameReports = ({startDate, endDate, newaccount, newtime, newRev
                         .join("\t");
                 })
                 .join("\n"); // Each row on a new line
-    
+
             // ✅ Copy text to clipboard
             navigator.clipboard.writeText(copiedText).then(() => {
                 // console.log("Copied to clipboard:", copiedText);
             }).catch((err) => {
                 console.error("Clipboard copy failed:", err);
             });
-    
+
             // ✅ Trigger AG Grid’s built-in copy effect (blinking dark blue selection)
             params.api.copySelectedRangeToClipboard();
         }
     };
 
-    const memorizedBMNameData = useMemo(()=> BMNameData, [BMNameData]);
-    const memorizedBMNameColumnDefs = useMemo(()=>BMNameColumnDefs, [BMNameColumnDefs]);
+    const memorizedBMNameData = useMemo(() => BMNameData, [BMNameData]);
+    const memorizedBMNameColumnDefs = useMemo(() => BMNameColumnDefs, [BMNameColumnDefs]);
     // console.log(memorizedBMNameData);
     // console.log(memorizedBMNameColumnDefs);
 
     const functionCall1 = async () => {
-        try{
+        try {
             const collectionName = newRevenuePratner === "FB_DomainActive" ? "Facebook_DActive_Names" : newtworkCollections[newRevenuePratner];
             const fetchData = await apiClient.get(`/reports/data/domainandagency?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${collectionName}`);
             const mainData1 = fetchData.data.data;
-            const mainData =  mainData1.filter(obj => !("ad_clicks" in obj));
+            const mainData = mainData1.filter(obj => !("ad_clicks" in obj));
             let campaignComments = [];
 
             if (fetchData.status === 200 && mainData1.length > 0) {
@@ -386,14 +473,14 @@ const AgencyAndBMNameReports = ({startDate, endDate, newaccount, newtime, newRev
                 ]);
                 // console.log("hihi");
             }
-            else{
+            else {
                 setBMNameData([]);
                 setBMNameFixedFooter([]);
             }
             setLoading(false);
-            fetchData.status === 200 && setApiStatus(false) ;
+            fetchData.status === 200 && setApiStatus(false);
         }
-        catch(error){
+        catch (error) {
             setApiStatus(true);
             setLoading(false);
         }
@@ -404,7 +491,7 @@ const AgencyAndBMNameReports = ({startDate, endDate, newaccount, newtime, newRev
         setApiStatus(false);
     }
     useEffect(() => {
-        if(oneTimeFetch.current){
+        if (oneTimeFetch.current) {
             functionCall1();
             oneTimeFetch.current = false;
         }
@@ -415,9 +502,9 @@ const AgencyAndBMNameReports = ({startDate, endDate, newaccount, newtime, newRev
             handleReFetchData();
         }
     }
-    , [refreshpage]);
+        , [refreshpage]);
     // console.log(BMNameData);
-    return(
+    return (
         <div style={{ height: "100%", marginBottom: '20px' }}>
             <div style={contentStyle}>
                 {isLoading === true ? (
@@ -453,16 +540,16 @@ const AgencyAndBMNameReports = ({startDate, endDate, newaccount, newtime, newRev
                             suppressAggFuncInHeader={true}
                             pinnedBottomRowData={BMNameFixedFooter}
                             enableCharts={true}
-                                        enableRangeSelection={true}
-                                  
+                            enableRangeSelection={true}
+
                             onGridReady={(params) => {
                                 // keep the debug global
                                 window.__top5 = params.api;
                                 // call your existing handler passing the grid id and ref
-                              }}
+                            }}
 
-                                        
-    
+
+
                             // onRangeSelectionChanged={onRangeSelectionChanged} // ✅ Captures range selection
                             onCellKeyDown={onCellKeyDown}
                             getRowStyle={(params) => {
@@ -514,13 +601,13 @@ const AgencyAndBMNameReports = ({startDate, endDate, newaccount, newtime, newRev
 
                     </div>
                 ) : <div style={{ backgroundColor: theme === "dark" && "#333" }}>
-                    {apiStatus === true ? 
+                    {apiStatus === true ?
                         <Result
                             className={theme === 'dark' ? 'dark-result' : 'light-result'}
                             // icon={<SmileOutlined />}
                             title={`API failed to fetch the data. Please click retry button to fetch the data`}
                             extra={<Button type="primary" onClick={handleReFetchData}>Retry</Button>}
-                        /> :(startDate !== endDate ? <Result
+                        /> : (startDate !== endDate ? <Result
                             className={theme === 'dark' ? 'dark-result' : 'light-result'}
                             icon={<SmileOutlined />}
                             title={`No Agency and BMName Data for ${newaccount} from ${startDate} to ${endDate}`}

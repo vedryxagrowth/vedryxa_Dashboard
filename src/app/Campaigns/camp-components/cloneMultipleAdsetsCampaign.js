@@ -5529,7 +5529,7 @@ const AdsetComponent = ({
             label={<span style={{ color: "#B4B4B4" }}>Placements</span>}
             name={["adsets", index, "placements"]}
             rules={[{ required: true, message: "Please select a mode!" }]}
-            initialValue={adset.placements || "Advance"}
+            initialValue={adset.placements || "manual"}
           >
             <Select
               placeholder="Select a mode"
@@ -5538,7 +5538,7 @@ const AdsetComponent = ({
                 } green-border-select`}
             // defaultValue={adset.placements || "Advance"}
             >
-              <Option value="Advance" title={null}>
+              <Option value="Advance" title={null} disabled={network === "FB_Mnet"}>
                 Advance
               </Option>
               <Option value="manual" title={null}>
@@ -5650,6 +5650,10 @@ const AdsetComponent = ({
                           key={option.value}
                           value={option.value}
                           title={null}
+                          disabled={
+                            network === "FB_Mnet" &&
+                            ["messenger", "audience_network"].includes(option.value)
+                          }
                         >
                           {option.label}
                         </Option>

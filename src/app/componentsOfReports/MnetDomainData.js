@@ -39,7 +39,7 @@ const newtworkCollections = {
     "FB_MWG": "Facebook_Mwg_Daily"
 }
 
-const MnetDomainReports = ({ startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, userdetails, refreshComments, refreshpage }) => {
+const MnetDomainReports = ({ startDate, endDate, taxDetails, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, userdetails, refreshComments, refreshpage }) => {
     const { theme } = useTokenContext();
     const { apiClient } = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -430,6 +430,93 @@ const MnetDomainReports = ({ startDate, endDate, newaccount, newtime, newRevenue
 
             menuTabs: [],
             headerClass: 'hide-menu' // Add a custom class
+        },
+         {
+            headerName: "Tax",
+            field: "tax",
+            minWidth: 105,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+
+            valueGetter: (params) => {
+
+                // =========================
+                // GROUP ROW
+                // =========================
+                if (params.node?.group) {
+                    const children = params.node.allLeafChildren || [];
+
+                    const total = children.reduce((sum, child) => {
+                        const data = child.data;
+                        if (!data) return sum;
+
+                        const accountNumber = data.accountNumber;
+
+                        const accountTax = taxDetails?.find(
+                            item =>
+                                String(item.accountNumber) ===
+                                String(accountNumber)
+                        );
+
+                        const taxRate =
+                            parseFloat(
+                                String(accountTax?.tax || "0").replace("%", "")
+                            ) || 0;
+
+                        const spend =
+                            Number(data.spend) || 0;
+
+                        const taxAmount =
+                            (spend * taxRate) / 100;
+
+                        // Spend + Tax
+                        return sum + spend + taxAmount;
+                    }, 0);
+
+                    return Number(total.toFixed(2));
+                }
+
+                // =========================
+                // NORMAL ROW
+                // =========================
+                const accountNumber =
+                    params.data?.accountNumber;
+
+                if (!accountNumber) return 0;
+
+                const accountTax = taxDetails?.find(
+                    item =>
+                        String(item.accountNumber) ===
+                        String(accountNumber)
+                );
+
+                const taxRate =
+                    parseFloat(
+                        String(accountTax?.tax || "0").replace("%", "")
+                    ) || 0;
+
+                const spend =
+                    Number(params.data?.spend) || 0;
+
+                const taxAmount =
+                    (spend * taxRate) / 100;
+
+                // ✅ Spend + Tax
+                return Number(
+                    (spend + taxAmount).toFixed(2)
+                );
+            },
+
+            valueFormatter: (params) => {
+                const value = Number(params.value || 0);
+                return `$${value.toFixed(2)}`;
+            },
+
+            // comparator: numberComparator,
+
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: "hide-menu",
         },
         {
             field: "spend",
