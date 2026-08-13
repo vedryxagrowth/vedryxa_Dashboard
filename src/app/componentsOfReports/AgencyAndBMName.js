@@ -169,49 +169,41 @@ const AgencyAndBMNameReports = ({ startDate, taxDetails, endDate, newaccount, ne
             filter: "agNumberColumnFilter",
 
             valueGetter: (params) => {
+                // Pinned footer
+                if (params.node?.rowPinned) {
+                    return Number(params.data?.tax || 0);
+                }
 
-                // =========================
-                // GROUP ROW
-                // =========================
+                // Group row
                 if (params.node?.group) {
-                    const children = params.node.allLeafChildren || [];
+                    const total = (params.node.allLeafChildren || []).reduce(
+                        (sum, child) => {
+                            const data = child.data;
+                            if (!data) return sum;
 
-                    const total = children.reduce((sum, child) => {
-                        const data = child.data;
-                        if (!data) return sum;
+                            const accountTax = taxDetails?.find(
+                                item =>
+                                    String(item.accountNumber) ===
+                                    String(data.accountNumber)
+                            );
 
-                        const accountNumber = data.accountNumber;
+                            const taxRate =
+                                parseFloat(
+                                    String(accountTax?.tax || "0").replace("%", "")
+                                ) || 0;
 
-                        const accountTax = taxDetails?.find(
-                            item =>
-                                String(item.accountNumber) ===
-                                String(accountNumber)
-                        );
+                            const spend = Number(data.spend) || 0;
 
-                        const taxRate =
-                            parseFloat(
-                                String(accountTax?.tax || "0").replace("%", "")
-                            ) || 0;
-
-                        const spend =
-                            Number(data.spend) || 0;
-
-                        const taxAmount =
-                            (spend * taxRate) / 100;
-
-                        // Spend + Tax
-                        return sum + spend + taxAmount;
-                    }, 0);
+                            return sum + spend + (spend * taxRate) / 100;
+                        },
+                        0
+                    );
 
                     return Number(total.toFixed(2));
                 }
 
-                // =========================
-                // NORMAL ROW
-                // =========================
-                const accountNumber =
-                    params.data?.accountNumber;
-
+                // Normal row
+                const accountNumber = params.data?.accountNumber;
                 if (!accountNumber) return 0;
 
                 const accountTax = taxDetails?.find(
@@ -225,15 +217,10 @@ const AgencyAndBMNameReports = ({ startDate, taxDetails, endDate, newaccount, ne
                         String(accountTax?.tax || "0").replace("%", "")
                     ) || 0;
 
-                const spend =
-                    Number(params.data?.spend) || 0;
+                const spend = Number(params.data?.spend) || 0;
 
-                const taxAmount =
-                    (spend * taxRate) / 100;
-
-                // ✅ Spend + Tax
                 return Number(
-                    (spend + taxAmount).toFixed(2)
+                    (spend + (spend * taxRate) / 100).toFixed(2)
                 );
             },
 
@@ -455,6 +442,22 @@ const AgencyAndBMNameReports = ({ startDate, taxDetails, endDate, newaccount, ne
             if (fetchData.status === 200 && mainData1.length > 0) {
                 const groupAndCalculateBMName1 = groupAndCalculateBMNameAndAgency(mainData1);
                 setBMNameData(groupAndCalculateBMName1);
+                const totalWithTax = groupAndCalculateBMName1?.reduce((acc, curr) => {
+                    const spend = Number(curr.spend) || 0;
+
+                    const accountTax = taxDetails?.find(
+                        item =>
+                            String(item.accountNumber) ===
+                            String(curr.accountNumber)
+                    );
+
+                    const taxRate =
+                        parseFloat(
+                            String(accountTax?.tax || "0").replace("%", "")
+                        ) || 0;
+
+                    return acc + spend + (spend * taxRate) / 100;
+                }, 0);
                 // setBMNameColumnDefs();
                 setBMNameFixedFooter([
                     {
@@ -467,6 +470,7 @@ const AgencyAndBMNameReports = ({ startDate, taxDetails, endDate, newaccount, ne
                         rpc: parseFloat((groupAndCalculateBMName1?.reduce((acc, curr) => acc + parseFloat(curr?.rpc), 0) / groupAndCalculateBMName1?.length).toFixed(2)),
                         cpl: parseFloat((groupAndCalculateBMName1?.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0) / groupAndCalculateBMName1?.length).toFixed(2)),
                         conversions: parseFloat(groupAndCalculateBMName1?.reduce((acc, curr) => acc + parseFloat(curr?.conversions), 0).toFixed(2)),
+                        tax: Number(totalWithTax.toFixed(2)),
                         // clicks: parseFloat(groupAndCalculateBMName1?.reduce((acc, curr) => acc + parseFloat(curr?.clicks), 0).toFixed(2)),
                         // impressions: parseFloat(groupAndCalculateBMName1?.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
                     }
@@ -577,6 +581,22 @@ const AgencyAndBMNameReports = ({ startDate, taxDetails, endDate, newaccount, ne
                                         filteredData.push(node.data);
                                     }
                                 });
+                                const totalWithTax = filteredData?.reduce((acc, curr) => {
+                                    const spend = Number(curr.spend) || 0;
+
+                                    const accountTax = taxDetails?.find(
+                                        item =>
+                                            String(item.accountNumber) ===
+                                            String(curr.accountNumber)
+                                    );
+
+                                    const taxRate =
+                                        parseFloat(
+                                            String(accountTax?.tax || "0").replace("%", "")
+                                        ) || 0;
+
+                                    return acc + spend + (spend * taxRate) / 100;
+                                }, 0);
 
                                 const updatedFooter = [
                                     {
@@ -588,6 +608,7 @@ const AgencyAndBMNameReports = ({ startDate, taxDetails, endDate, newaccount, ne
                                         rpc: parseFloat(
                                             (filteredData.reduce((acc, curr) => acc + parseFloat(curr?.rpc || 0), 0) / filteredData.length || 0).toFixed(2)
                                         ),
+                                        tax: Number(totalWithTax.toFixed(2)),
                                         // cpl: parseFloat(
                                         //     (filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl || 0), 0) / filteredData.length || 0).toFixed(2)
                                         // ),

@@ -64,7 +64,7 @@ const selectTimezone = {
 };
 
 
-const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, activeTab, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, selectedCampaigns, selectedAdsets, accountsAccess, commentsMap, showAdLevel, removeSelectedAds }) => {
+const Daily = ({ context, taxDetails, functionCallForCommnets, functionCallForCampaigns, activeTab, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, selectedCampaigns, selectedAdsets, accountsAccess, commentsMap, showAdLevel, removeSelectedAds }) => {
   const { theme, apiClient } = useTokenContext();
   const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
 
@@ -187,7 +187,22 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
     // // ✅ Compute average of grouped TQ sums
     // const totalGroupedSum = Array.from(groupedTQMap.values()).reduce((acc, val) => acc + val, 0);
     // const tqAvgPerAdname = groupedTQMap.size > 0 ? parseFloat((totalGroupedSum / groupedTQMap.size).toFixed(2)) : 0;    
+    const totalWithTax = memorizedDailyData?.reduce((acc, curr) => {
+      const spend = Number(curr.spend) || 0;
 
+      const accountTax = taxDetails?.find(
+        item =>
+          String(item.accountNumber) ===
+          String(curr.accountNumber)
+      );
+
+      const taxRate =
+        parseFloat(
+          String(accountTax?.tax || "0").replace("%", "")
+        ) || 0;
+
+      return acc + spend + (spend * taxRate) / 100;
+    }, 0);
     setDailyFixedFooter(
       [
         {
@@ -223,6 +238,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
             const totalD = nonZeroD?.reduce((acc, curr) => acc + parseFloat(curr?.D_tq || 0), 0);
             return parseFloat((totalD / (nonZeroD?.length || 1)).toFixed(2));
           })(),
+          tax: Number(totalWithTax.toFixed(2)),
         }
       ]
     );
@@ -4563,7 +4579,22 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                         // Step 2: Compute average of grouped totals
                         // const totalGroupedSum = Array.from(groupedTQMap.values()).reduce((acc, val) => acc + val, 0);
                         // const averageGroupedTQ = groupedTQMap.size > 0 ? (totalGroupedSum / groupedTQMap.size).toFixed(2) : "0.00";
+                        const totalWithTax = filteredData?.reduce((acc, curr) => {
+                          const spend = Number(curr.spend) || 0;
 
+                          const accountTax = taxDetails?.find(
+                            item =>
+                              String(item.accountNumber) ===
+                              String(curr.accountNumber)
+                          );
+
+                          const taxRate =
+                            parseFloat(
+                              String(accountTax?.tax || "0").replace("%", "")
+                            ) || 0;
+
+                          return acc + spend + (spend * taxRate) / 100;
+                        }, 0);
                         const updatedFooter = [
                           {
                             // [`${newtime}Date`]: 'Totals',
@@ -4596,6 +4627,7 @@ const Daily = ({ context, functionCallForCommnets, functionCallForCampaigns, act
                               const total = nonZero.reduce((acc, d) => acc + parseFloat(d.D_tq || 0), 0);
                               return parseFloat((total / (nonZero.length || 1)).toFixed(2));
                             })(),
+                            tax: Number(totalWithTax.toFixed(2)),
                           },
                         ];
 

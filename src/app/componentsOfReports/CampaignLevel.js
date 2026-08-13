@@ -64,7 +64,7 @@ const selectTimezone = {
     CEST: 'CESTDate'
 };
 
-const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, showCampaignLevel, removeSelectedCampaigns, moveToNextTab, accountsAccess, commentsMap }) => {
+const CampaignLevelReports = ({ functionCallForCommnets, context, taxDetails, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, showCampaignLevel, removeSelectedCampaigns, moveToNextTab, accountsAccess, commentsMap }) => {
     // console.log(columnDefs, "columnDefs");
     // console.log("campaign acconts:", newaccount);
     // console.log('accountAccess:', accountsAccess);
@@ -214,6 +214,22 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
     // console.log(rowData, "rowData");
 
     useEffect(() => {
+        const totalWithTax = memorizedRowData?.reduce((acc, curr) => {
+            const spend = Number(curr.spend) || 0;
+
+            const accountTax = taxDetails?.find(
+                item =>
+                    String(item.accountNumber) ===
+                    String(curr.accountNumber)
+            );
+
+            const taxRate =
+                parseFloat(
+                    String(accountTax?.tax || "0").replace("%", "")
+                ) || 0;
+
+            return acc + spend + (spend * taxRate) / 100;
+        }, 0);
         setLiveFixedFooter([
             {
                 campaignName: 'Total',
@@ -234,7 +250,8 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                 fbclicks: parseFloat(memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0).toFixed(2)),
                 fblinkclicks: parseFloat(memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.fblinkclicks), 0).toFixed(2)),
                 impressions: parseFloat(memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
-                ctr: parseFloat((memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
+                ctr: parseFloat((memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2)),
+                tax: Number(totalWithTax.toFixed(2)),
             }
         ])
     }, [memorizedRowData]);
@@ -3123,7 +3140,22 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
 
             setRowData(newFilterData);
             newRowDataForFilter.current = filteredData;
+            const totalWithTax = newFilterData?.reduce((acc, curr) => {
+                const spend = Number(curr.spend) || 0;
 
+                const accountTax = taxDetails?.find(
+                    item =>
+                        String(item.accountNumber) ===
+                        String(curr.accountNumber)
+                );
+
+                const taxRate =
+                    parseFloat(
+                        String(accountTax?.tax || "0").replace("%", "")
+                    ) || 0;
+
+                return acc + spend + (spend * taxRate) / 100;
+            }, 0);
             setLiveFixedFooter([{
                 campaignName: 'Total',
                 actions: "",
@@ -3143,7 +3175,8 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                 fbclicks: parseFloat(newFilterData.reduce((acc, curr) => acc + parseFloat(curr.fbclicks || 0), 0).toFixed(2)),
                 fblinkclicks: parseFloat(newFilterData.reduce((acc, curr) => acc + parseFloat(curr.fblinkclicks || 0), 0).toFixed(2)),
                 impressions: parseFloat(newFilterData.reduce((acc, curr) => acc + parseFloat(curr.impressions || 0), 0).toFixed(2)),
-                ctr: parseFloat((newFilterData.reduce((acc, curr) => acc + parseFloat(curr.fbclicks || 0), 0) / (newFilterData.reduce((acc, curr) => acc + parseFloat(curr.impressions || 0), 0) || 1) * 100).toFixed(2))
+                ctr: parseFloat((newFilterData.reduce((acc, curr) => acc + parseFloat(curr.fbclicks || 0), 0) / (newFilterData.reduce((acc, curr) => acc + parseFloat(curr.impressions || 0), 0) || 1) * 100).toFixed(2)),
+                tax: Number(totalWithTax.toFixed(2)),
             }]);
 
             newRowData.current = filteredData;
@@ -4497,7 +4530,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                     <Dropdown
                                         overlay={
                                             <Menu
-                                                onClick={({ key }) => setTypeFilter(key)}   
+                                                onClick={({ key }) => setTypeFilter(key)}
                                                 items={[
                                                     { key: 'All', label: 'All' },
                                                     { key: 'Daily', label: 'Daily' },
@@ -4696,6 +4729,22 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                                         }
                                                     });
 
+                                                    const totalWithTax = filteredData?.reduce((acc, curr) => {
+                                                        const spend = Number(curr.spend) || 0;
+
+                                                        const accountTax = taxDetails?.find(
+                                                            item =>
+                                                                String(item.accountNumber) ===
+                                                                String(curr.accountNumber)
+                                                        );
+
+                                                        const taxRate =
+                                                            parseFloat(
+                                                                String(accountTax?.tax || "0").replace("%", "")
+                                                            ) || 0;
+
+                                                        return acc + spend + (spend * taxRate) / 100;
+                                                    }, 0);
                                                     const updatedFooter = [
                                                         {
                                                             // [`${newtime}Date`]: 'Totals',
@@ -4717,7 +4766,8 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, functionCallFo
                                                             fbclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0).toFixed(2)),
                                                             fblinkclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fblinkclicks), 0).toFixed(2)),
                                                             impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
-                                                            ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2))
+                                                            ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2)),
+                                                            tax: Number(totalWithTax.toFixed(2)),
                                                         },
                                                     ];
 
