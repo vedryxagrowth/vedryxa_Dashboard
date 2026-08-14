@@ -41,7 +41,8 @@ const newtworkCollections = {
     "FB_Sedo": "Facebook_Sedo",
     "FB_Inmobi": "Facebook_Inmobi",
     "FB_TonicRsoc": "Facebook_TonicRsoc",
-    "FB_InuvoPrism": "Facebook_InuvoPrism"
+    "FB_InuvoPrism": "Facebook_InuvoPrism",
+    "FB_Media": "Facebook_Media"
 }
 const networkCollectionsForAiAssistant = {
     FB_Mnet: 'Facebook_Mnet_Daily',
@@ -60,6 +61,7 @@ const networkCollectionsForAiAssistant = {
     FB_TonicRsoc: 'Facebook_TonicRsoc',
     FB_InuvoPrism: 'Facebook_InuvoPrismDaily',
     FB_CodeFuel: 'Facebook_CodeFuel_Daily',
+    FB_Media: "Facebook_Media_Daily"
 };
 
 const LiveReports = React.lazy(() => import('./Live/Live'));
@@ -70,13 +72,13 @@ const System1KeywordReports = React.lazy(() => import('../componentsOfReports/Sy
 const TonicKeywordReports = React.lazy(() => import('../componentsOfReports/Tonic1Keywords'));
 const TonicRsocKeywordReports = React.lazy(() => import('../componentsOfReports/TonicRsocKeywords'));
 const InmobiKeywordReports = React.lazy(() => import('../componentsOfReports/InmobiKeywords'));
-const AgencyAndBMNameReports = React.lazy(() => import('../componentsOfReports/AgencyAndBMName'));
+const AgencyAndBMNameReports = React.lazy(() => import('../componentsOfReports/BaseReportAgency'));
 const MnetDomainReports = React.lazy(() => import('../componentsOfReports/MnetDomainData'));
 const MnetLiveAdReports = React.lazy(() => import('../componentsOfReports/MnetAdLive'));
 const MnetDailyAdReport = React.lazy(() => import('../componentsOfReports/MnetAdDaily'));
 const CampaignHistoryModal = React.lazy(() => import('../componentsOfReports/ReportsActivityHistory'));
-const HourlyCampaignLevelReports = React.lazy(() => import('../componentsOfReports/HourlyBreakDown'));
-const HourReports = React.lazy(() => import('../componentsOfReports/Hour'));
+const HourlyCampaignLevelReports = React.lazy(() => import('../componentsOfReports/BaseReportHourlyBreakDown'));
+const HourReports = React.lazy(() => import('../componentsOfReports/BaseReportHour'));
 
 
 const MyTablePage = () => {
@@ -20405,14 +20407,14 @@ const MyTablePage = () => {
         { key: '2', label: 'Daily', content: 'Content for Daily data' },
         // { key: '3', label: 'Campaigns', content: 'Content for Campaign data' },
         { key: '4', label: 'Agency', content: 'Content for BMName data' },
-        ...(newRevenuePratner === "FB_Mnet" ? [{ key: '5', label: 'Domain', content: 'Content for Domain data' }] : []),
+        ...(newRevenuePratner === "FB_Mnet"  ||  newRevenuePratner === "FB_Media" ? [{ key: '5', label: 'Domain', content: 'Content for Domain data' }] : []),
         ...(newRevenuePratner === "FB_DomainActive" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : []),
         ...(newRevenuePratner === "FB_System1" ? [{ key: '5', label: 'Domain', content: 'Content for Domain data' }] : []),
         ...(newRevenuePratner === "FB_Tonic1" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : []),
         ...(newRevenuePratner === "FB_Inmobi" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : []),
         ...(newRevenuePratner === "FB_TonicRsoc" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : []),
-        ...(newRevenuePratner === "FB_Mnet" ? [{ key: '6', label: 'Hourly', content: 'Content for hour wise break down' }] : []),
-        ...(newRevenuePratner === "FB_Mnet"
+        ...(newRevenuePratner === "FB_Mnet"  ||  newRevenuePratner === "FB_Media" ? [{ key: '6', label: 'Hourly', content: 'Content for hour wise break down' }] : []),
+        ...(newRevenuePratner === "FB_Mnet" ||  newRevenuePratner === "FB_Media"
             ? [{
                 key: '7',
                 label: 'DayofHour',
@@ -21757,7 +21759,7 @@ const MyTablePage = () => {
                                 />
                             </Tabs.TabPane>
 
-                            {newRevenuePratner === "FB_Mnet" && (
+                            {(newRevenuePratner === "FB_Mnet" ||  newRevenuePratner === "FB_Media") && (
                                 <Tabs.TabPane key="5">
                                     <MnetDomainReports
                                         taxDetails={taxDetails}
@@ -21894,7 +21896,7 @@ const MyTablePage = () => {
                                 </Tabs.TabPane>
 
                             )}
-                            {newRevenuePratner === "FB_Mnet" && (
+                            {(newRevenuePratner === "FB_Mnet"|| newRevenuePratner === "FB_Media" )&& (
                                 <Tabs.TabPane key="6">
                                     <HourlyCampaignLevelReports
                                         startDate={newStartDate}
@@ -21904,6 +21906,7 @@ const MyTablePage = () => {
                                         allProfitLossArray={allProfitLossArray}
                                         // newaccount={newaccount}
                                         newaccount={newaccount}
+                                        taxDetails={taxDetails}
                                         newtime={newtime}
                                         newRevenuePratner={newRevenuePratner}
                                         inputValue={inputValue}
@@ -21951,7 +21954,7 @@ const MyTablePage = () => {
                                     />
                                 </Tabs.TabPane>
                             )}
-                            {newRevenuePratner === "FB_Mnet" && (
+                            {(newRevenuePratner === "FB_Mnet" || newRevenuePratner === "FB_Media") && (
                                 <Tabs.TabPane key="7">
                                     <HourReports
                                         startDate={newStartDate}
@@ -21961,6 +21964,7 @@ const MyTablePage = () => {
                                         allProfitLossArray={allProfitLossArray}
                                         // newaccount={newaccount}
                                         newaccount={newaccount}
+                                        taxDetails={taxDetails}
                                         newtime={newtime}
                                         newRevenuePratner={newRevenuePratner}
                                         inputValue={inputValue}

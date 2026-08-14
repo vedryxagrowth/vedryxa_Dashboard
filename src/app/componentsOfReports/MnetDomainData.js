@@ -36,7 +36,8 @@ const newtworkCollections = {
     "FB_Tonic1": "Facebook_Tonic1",
     "FB_Sedo": "Facebook_Sedo",
     "FB_Inmobi": "Facebook_Inmobi",
-    "FB_MWG": "Facebook_Mwg_Daily"
+    "FB_MWG": "Facebook_Mwg_Daily",
+    "FB_Media": "Facebook_Media_Daily"
 }
 
 const MnetDomainReports = ({ startDate, endDate, taxDetails, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, userdetails, refreshComments, refreshpage }) => {

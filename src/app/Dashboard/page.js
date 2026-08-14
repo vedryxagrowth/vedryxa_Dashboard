@@ -40,7 +40,8 @@ const revenuePartnerNames = {
     "Botup": "FB_Botup",
     "Outbrain_Tonic_Rsoc": "Outbrain_TonicRsoc",
     "MWG": "FB_MWG",
-    "Taboola_Inuvoprism": "Taboola_Inuvoprism"
+    "Taboola_Inuvoprism": "Taboola_Inuvoprism",
+    "Media":"Facebook_Media_Daily"
 };
 
 
@@ -65,7 +66,8 @@ const newtworkCollections = {
     "FB_Botup": "Facebook_Botup_Daily",
     "Outbrain_TonicRsoc": "Outbrain_TonicRsoc",
     "FB_MWG": "Facebook_Mwg_Daily",
-    "Taboola_Inuvoprism": "Taboola_InuvoPrismDaily"
+    "Taboola_Inuvoprism": "Taboola_InuvoPrismDaily",
+    "FB_Media":"FB_Media_Daily"
 }
 
 const NetworkDefaultTimezones = {

@@ -38,7 +38,8 @@ const newtworkCollections = {
     "FB_InuvoPrism": "Facebook_InuvoPrism",
     "FB_MWG": "Facebook_Mwg_Daily",
     "FB_Predicto": "Facebook_Predicto_Daily",
-    "FB_Botup": "Facebook_Botup_Daily"
+    "FB_Botup": "Facebook_Botup_Daily",
+    "FB_Media": "Facebook_Media"
 }
 
 const AgencyAndBMNameReports = ({ startDate, taxDetails, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, userdetails, refreshComments, refreshpage }) => {

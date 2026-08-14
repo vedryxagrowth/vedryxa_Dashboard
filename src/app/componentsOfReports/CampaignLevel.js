@@ -45,7 +45,8 @@ const newtworkCollections = {
     "FB_TonicRsoc": "Facebook_TonicRsoc",
     "FB_InuvoPrism": "Facebook_InuvoPrism",
     "FB_CodeFuel": "Facebook_CodeFuel",
-    "Taboola_Inuvoprism": "Taboola_InuvoprismLive"
+    "Taboola_Inuvoprism": "Taboola_InuvoprismLive",
+    "FB_Media":"Facebook_Media"
 
 }
 const selectTimezone = {

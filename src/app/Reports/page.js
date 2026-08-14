@@ -44,7 +44,8 @@ const newtworkCollections = {
     "FB_TonicRsoc": "Facebook_TonicRsoc",
     "FB_InuvoPrism": "Facebook_InuvoPrism",
     "FB_Botup": "Facebook_Botup",
-    "Taboola_Inuvoprism": "Taboola_InuvoprismLive"
+    "Taboola_Inuvoprism": "Taboola_InuvoprismLive",
+    "FB_Media": "FB_Media"
 }
 
 const networkCollectionsForAiAssistant = {
@@ -67,7 +68,8 @@ const networkCollectionsForAiAssistant = {
     FB_Predicto: 'Facebook_Predicto_Daily',
     FB_Affinity: 'Facebook_Affinity_Daily',
     FB_Botup: "Facebook_Botup_Daily",
-    FB_MWG: "Facebook_Mwg_Daily"
+    FB_MWG: "Facebook_Mwg_Daily",
+    FB_Media: "FB_Media_Daily"
 };
 
 const NetworkDefaultTimezones = {
@@ -91,7 +93,8 @@ const NetworkDefaultTimezones = {
     "FB_Botup": "EDT",
     "Outbrain_TonicRsoc": "EDT",
     "FB_MWG": "UTC",
-    "Taboola_Inuvoprism": "PDT"
+    "Taboola_Inuvoprism": "PDT",
+    "FB_Media": "UTC"
 }
 
 
@@ -22945,11 +22948,11 @@ const MyTablePage = () => {
         // { key: '3', label: 'Campaigns', content: 'Content for Campaign data' },
         { key: '4', label: 'Agency', content: 'Content for BMName data' },
         ...(newRevenuePratner === "FB_Predicto" ? [{ key: '5', label: 'Country', content: 'Content for country data' }] : []),
-        ...(newRevenuePratner === "FB_Mnet" || newRevenuePratner === "FB_MWG" ? [{ key: '5', label: 'Domain', content: 'Content for Domain data' }] : []),
-        ...(newRevenuePratner === "FB_Mnet" ? [{ key: '6', label: 'Hourly', content: 'Content for hour wise break down' }] : []),
+        ...(newRevenuePratner === "FB_Mnet" || newRevenuePratner === "FB_MWG" || newRevenuePratner === "FB_Media" ? [{ key: '5', label: 'Domain', content: 'Content for Domain data' }] : []),
+        ...(newRevenuePratner === "FB_Mnet" || newRevenuePratner === "FB_Media" ? [{ key: '6', label: 'Hourly', content: 'Content for hour wise break down' }] : []),
         ...(newRevenuePratner === "FB_DomainActive" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : []),
         // ...(newRevenuePratner === "FB_Mnet" ? [{ key: '7', label: 'Hour', content: 'Content for Hour data' }] : []),
-        ...(newRevenuePratner === "FB_Mnet"
+        ...(newRevenuePratner === "FB_Mnet" || newRevenuePratner === "FB_Media"
             ? [{
                 key: '7',
                 label: 'DayofHour',
@@ -23979,7 +23982,7 @@ const MyTablePage = () => {
                             </Tooltip> */}
                         </Button>
                     </Col>
-                    {(revenuePratner === "FB_Mnet" || revenuePratner === "FB_MnetBing") && (
+                    {(revenuePratner === "FB_Mnet" || revenuePratner === "FB_MnetBing" || revenuePratner === "FB_Media") && (
                         <Col>
                             {/* <Button
                                 type="primary"
@@ -24621,7 +24624,7 @@ const MyTablePage = () => {
                                 </Tabs.TabPane>
                             }
 
-                            {(newRevenuePratner === "FB_Mnet" || newRevenuePratner === "FB_MWG") && (
+                            {(newRevenuePratner === "FB_Mnet" || newRevenuePratner === "FB_MWG" || newRevenuePratner === "FB_Media") && (
                                 <Tabs.TabPane key="5">
                                     <MnetDomainReports
                                         startDate={newStartDate}
@@ -24758,7 +24761,7 @@ const MyTablePage = () => {
                                 </Tabs.TabPane>
 
                             )}
-                            {newRevenuePratner === "FB_Mnet" && (
+                            {(newRevenuePratner === "FB_Mnet" || newRevenuePratner === "FB_Media") && (
                                 <Tabs.TabPane key="6">
                                     <HourlyCampaignLevelReports
                                         startDate={newStartDate}
@@ -24816,7 +24819,7 @@ const MyTablePage = () => {
                                     />
                                 </Tabs.TabPane>
                             )}
-                            {newRevenuePratner === "FB_Mnet" && (
+                            {(newRevenuePratner === "FB_Mnet" || newRevenuePratner === "FB_Media" ) && (
                                 <Tabs.TabPane key="7">
                                     <HourReports
                                         startDate={newStartDate}
