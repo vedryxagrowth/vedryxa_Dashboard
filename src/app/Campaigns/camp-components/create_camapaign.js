@@ -56,6 +56,7 @@ import { v4 as uuidv4 } from "uuid";
 import dynamic from "next/dynamic";
 import dayjs from "dayjs";
 import MnetUrlBuilder from "./urlbuilder/mnet";
+import MediaUrlBuilder from "./urlbuilder/media";
 import MnetBingUrlBuilder from "./urlbuilder/mnetbing"
 import TonicUrlBuilder from "./urlbuilder/tonic";
 import System1UrlBuilder from "./urlbuilder/system1";
@@ -742,7 +743,7 @@ const AccountForm = ({
       case "FB_Media":
         //defaultValues
         return (
-          <MnetUrlBuilder indexValueForAccount={indexValueForAccount} defaultValues={defaultURLBuilder} accountis={account} onReturnMessage={onReturnUrl} />
+          <MediaUrlBuilder indexValueForAccount={indexValueForAccount} defaultValues={defaultURLBuilder} accountis={account} onReturnMessage={onReturnUrl} />
         );
       case "FB_MnetBing":
         //defaultValues
@@ -2142,7 +2143,7 @@ const AdsetComponent = ({
       case "FB_Media":
         //defaultValues
         return (
-          <MnetUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
+          <MediaUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
         );
       case "FB_MnetBing":
         //defaultValues
@@ -9233,7 +9234,7 @@ const CreateCampaignDrawer = ({
         );
       case "FB_Media":
         return (
-          <MnetUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
+          <MediaUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
         );
       case "FB_MnetBing":
         return (

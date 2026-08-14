@@ -52,7 +52,8 @@ const newtworkCollections = {
     "FB_Predicto": "Facebook_Mnet_AD",
     "FB_Affinity": "Facebook_Mnet_AD",
     "FB_Botup": "Facebook_Mnet_AD",
-    "FB_MWG": "Facebook_Mwg_Daily"
+    "FB_MWG": "Facebook_Mwg_Daily",
+    "FB_Media":"Facebook_Media_Daily"
 }
 const selectTimezone = {
     UTC: 'UTCDate',

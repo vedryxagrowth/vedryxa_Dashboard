@@ -44,7 +44,8 @@ const newtworkCollections = {
   "FB_Inmobi": "Facebook_Inmobi",
   "FB_TonicRsoc": "Facebook_Mnet_AD",
   "FB_InuvoPrism": "Facebook_InuvoPrism",
-  "FB_CodeFuel": "Facebook_Mnet_AD"
+  "FB_CodeFuel": "Facebook_Mnet_AD",
+  "FB_Media": "Facebook_Mnet_AD"
 }
 const selectTimezone = {
   UTC: 'UTCDate',

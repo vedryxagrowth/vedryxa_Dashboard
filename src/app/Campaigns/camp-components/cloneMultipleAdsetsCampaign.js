@@ -49,6 +49,7 @@ import { v4 as uuidv4 } from "uuid";
 import dynamic from "next/dynamic";
 import dayjs from "dayjs";
 import MnetUrlBuilder from "./urlbuilder/mnet";
+import MediaUrlBuilder from "./urlbuilder/media";
 import MnetBingUrlBuilder from "./urlbuilder/mnetbing"
 import TonicUrlBuilder from "./urlbuilder/tonic";
 import System1UrlBuilder from "./urlbuilder/system1";
@@ -812,7 +813,7 @@ const AddComponent = ({
         );
       case "FB_Media":
         return (
-          <MnetUrlBuilder
+          <MediaUrlBuilder
             defaultValues={websiteURL}
             accountis={accountis}
             onReturnMessage={onReturnUrl}
@@ -3620,7 +3621,7 @@ const AdsetComponent = ({
         );
       case "FB_Media":
         return (
-          <MnetUrlBuilder
+          <MediaUrlBuilder
             defaultValues={websiteURL}
             accountis={accountis}
             onReturnMessage={onReturnUrl}
@@ -9043,7 +9044,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
         );
       case "FB_Media":
         return (
-          <MnetUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
+          <MediaUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
         );
       case "FB_MnetBing":
         return (

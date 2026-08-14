@@ -53,7 +53,8 @@ const newtworkCollections = {
   "FB_Affinity": "Facebook_Affinity_Daily",
   "FB_Botup": "Facebook_Botup_Daily",
   "FB_MWG": "Facebook_Mwg_Daily",
-  "Taboola_Inuvoprism": "Taboola_InuvoPrismDaily"
+  "Taboola_Inuvoprism": "Taboola_InuvoPrismDaily",
+  "FB_Media":"Facebook_Media_Daily"
 }
 const selectTimezone = {
   UTC: 'UTCDate',
