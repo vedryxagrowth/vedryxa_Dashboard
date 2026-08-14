@@ -500,7 +500,7 @@ const HourlyCampaignLevelReports = ({ functionCallForCommnets, context, taxDetai
             .map(item => parseInt(item.updatedHour.split(":")[0], 10));
         return hours.length > 0 ? Math.max(...hours) : null;
     }
-    const getLatestHour = async () => {
+    const getLatestHour = async (functionCall1) => {
 
         const collectionName =
             newRevenuePratner === "FB_DomainActive"
@@ -518,11 +518,12 @@ const HourlyCampaignLevelReports = ({ functionCallForCommnets, context, taxDetai
                 }
             );
             setLatestHour(resp?.data?.latestHour ?? 0);
+            functionCall1(resp?.data?.latestHour ?? 0)
         } catch (error) {
             console.log(error);
         }
     };
-    const functionCall1 = async () => {
+    const functionCall1 = async (UpdatedHour) => {
         try {
             setLoading(true);
 
@@ -677,26 +678,15 @@ const HourlyCampaignLevelReports = ({ functionCallForCommnets, context, taxDetai
             //     : null;
             const filteredData =
                 mainData && mainData.length > 0
-                    ? Object.values(
-                        mainData
-                            // 1️⃣ only rows with mnet-hour
-                            .filter(eachData => eachData.updatedHour)
-                            // 2️⃣ DEDUPLICATE by account + campaign + hour
-                            .reduce((acc, eachData) => {
-                                const key = `${eachData.accountNumber}_${eachData.campaign_id}_${eachData.updatedHour}`;
-
-                                // keep latest entry (override duplicates)
-                                acc[key] = eachData;
-                                return acc;
-                            }, {})
-                    )
-                        // 3️⃣ map unique rows
+                    ? mainData
+                        .filter(eachData => Number(eachData.hour) <= Number(UpdatedHour))
                         .map(eachData => {
 
                             let revenueData = 0;
                             if (
                                 eachData.estimated_revenue !== null &&
                                 eachData.estimated_revenue !== undefined &&
+                                eachData.estimated_revenue !== 0 &&
                                 !isNaN(eachData.estimated_revenue)
                             ) {
                                 revenueData = parseFloat(eachData.estimated_revenue);
@@ -979,8 +969,8 @@ const HourlyCampaignLevelReports = ({ functionCallForCommnets, context, taxDetai
         gridOptions.api.setColumnDefs(columnDefs);
     });
     const handleReFetchData = () => {
-        getLatestHour();
-        functionCall1();
+        getLatestHour(functionCall1);
+        // functionCall1();
         setApiStatus(false);
     }
 
@@ -993,8 +983,8 @@ const HourlyCampaignLevelReports = ({ functionCallForCommnets, context, taxDetai
 
     useEffect(() => {
         if (campaignStatusFilter && Camapignlevelstatus.length > 0) {
-            getLatestHour();
-            functionCall1();
+            getLatestHour(functionCall1);
+            // functionCall1();
         }
     }, [showAllHours]);
 
@@ -1621,7 +1611,7 @@ const HourlyCampaignLevelReports = ({ functionCallForCommnets, context, taxDetai
                                         </Button>
                                     </Dropdown>
                                 </Col> */}
-                                <Col>
+                                {/* <Col>
                                     <Switch
                                         checked={showAllHours}
                                         onChange={(checked) => setShowAllHours(checked)}
@@ -1631,7 +1621,7 @@ const HourlyCampaignLevelReports = ({ functionCallForCommnets, context, taxDetai
                                             backgroundColor: showAllHours ? "#91c25f" : undefined
                                         }}
                                     />
-                                </Col>
+                                </Col> */}
                                 <Col xs={24} sm={24} md={4} lg={2} style={{ flex: "0.2 0 auto" }}>
                                     <Tooltip
                                         title={
