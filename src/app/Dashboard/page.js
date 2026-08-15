@@ -1945,7 +1945,9 @@ const Dashboard = () => {
                     newKey = "Facebook_DActive_Names"
                 } else if (key === "FB_Mnet") {
                     newKey = "Facebook_Mnet_Daily"
-                } else if (key === "FB_MnetBing") {
+                } else if (key === "FB_Media") {
+                    newKey = "Facebook_Media_Daily"
+                }else if (key === "FB_MnetBing") {
                     newKey = "Facebook_MnetBing_Daily"
                 } else if (key === "FB_InuvoPrism") {
                     newKey = "Facebook_InuvoPrismDaily"

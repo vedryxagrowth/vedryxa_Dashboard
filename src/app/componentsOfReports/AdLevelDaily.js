@@ -2977,6 +2977,9 @@ const Daily = ({ context, taxDetails, functionCallForCommnets, functionCallForCa
         case "FB_Mnet":
           networkCollection = "Facebook_AD_Daily";
           break;
+        case "FB_Media":
+          networkCollection = "Facebook_AD_Daily";
+          break;
         case "FB_MnetBing":
           networkCollection = "Facebook_AD_Daily";
           break;
