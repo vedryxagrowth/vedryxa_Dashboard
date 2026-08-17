@@ -40,7 +40,8 @@ const revenuePartnerNames = {
     "Botup": "FB_Botup",
     "Outbrain_Tonic_Rsoc": "Outbrain_TonicRsoc",
     "MWG": "FB_MWG",
-    "Taboola_Inuvoprism":"Taboola_Inuvoprism"
+    "Taboola_Inuvoprism": "Taboola_Inuvoprism",
+    "Media":"Facebook_Media_Daily"
 };
 
 
@@ -65,7 +66,8 @@ const newtworkCollections = {
     "FB_Botup": "Facebook_Botup_Daily",
     "Outbrain_TonicRsoc": "Outbrain_TonicRsoc",
     "FB_MWG": "Facebook_Mwg_Daily",
-    "Taboola_Inuvoprism":"Taboola_InuvoPrismDaily"
+    "Taboola_Inuvoprism": "Taboola_InuvoPrismDaily",
+    "FB_Media":"FB_Media_Daily"
 }
 
 const NetworkDefaultTimezones = {
@@ -89,7 +91,7 @@ const NetworkDefaultTimezones = {
     "FB_Botup": "EDT",
     "Outbrain_TonicRsoc": "EDT",
     "FB_MWG": "UTC",
-    "Taboola_Inuvoprism":"PDT"
+    "Taboola_Inuvoprism": "PDT"
 }
 
 import { DatePicker, Space, ConfigProvider, Flex, Spin, Skeleton } from 'antd';
@@ -316,31 +318,131 @@ const RevenuePartnerDashboard = () => {
 
         return 0;
     };
+    // const getROI = (params) => {
+    //     const data = params.node.group ? params.node.aggData : params.data;
+    //     if (!data) return 0;
+
+    //     const revenue = sanitizeNumericValue(data.revenue);
+    //     const spend = sanitizeNumericValue(data.spend);
+
+    //     if (isNaN(spend) || spend <= 0) return 0;
+
+    //     const margin = ((revenue - spend) / spend) * 100;
+    //     const roundedMargin = isFinite(margin) && !isNaN(margin) ? Math.round(margin * 100) / 100 : 0;
+
+    //     if (params.node.group) {
+    //         params.node.aggData["roi"] = roundedMargin;
+    //     }
+
+    //     return roundedMargin;
+    // }
+    // const getROIAfterTax = (params) => {
+    //     const data = params.node.group ? params.node.aggData : params.data;
+    //     if (!data) return 0;
+
+    //     const revenue = sanitizeNumericValue(data.revenue);
+    //     const spend = sanitizeNumericValue(data.taxSpend);
+
+    //     if (isNaN(spend) || spend <= 0) return 0;
+
+    //     const margin = ((revenue - spend) / spend) * 100;
+    //     const roundedMargin = isFinite(margin) && !isNaN(margin) ? Math.round(margin * 100) / 100 : 0;
+
+    //     if (params.node.group) {
+    //         params.node.aggData["roi"] = roundedMargin;
+    //     }
+
+    //     return roundedMargin;
+    // }
     const sanitizeNumericValue = (value) => {
         if (typeof value === 'string') {
             return parseFloat(value.replace(/[%$,]/g, '').trim()) || 0;
         }
         return isNaN(value) || value === undefined || value === null ? 0 : value;
     };
-    const getMargin = (params) => {
-        const data = params.node.group ? params.node.aggData : params.data;
-        if (!data) return 0;
+    // const getMargin = (params) => {
+    //     const data = params.node.group ? params.node.aggData : params.data;
+    //     if (!data) return 0;
 
-        const revenue = sanitizeNumericValue(data.revenue);
-        const spend = sanitizeNumericValue(data.spend);
+    //     const revenue = sanitizeNumericValue(data.revenue);
+    //     const spend = sanitizeNumericValue(data.spend);
 
-        if (isNaN(revenue) || revenue <= 0) return 0;
+    //     if (isNaN(revenue) || revenue <= 0) return 0;
 
-        const margin = ((revenue - spend) / revenue) * 100;
-        const roundedMargin = isFinite(margin) && !isNaN(margin) ? Math.round(margin * 100) / 100 : 0;
+    //     const margin = ((revenue - spend) / revenue) * 100;
+    //     const roundedMargin = isFinite(margin) && !isNaN(margin) ? Math.round(margin * 100) / 100 : 0;
 
-        if (params.node.group) {
-            params.node.aggData["margin"] = roundedMargin;
-        }
+    //     if (params.node.group) {
+    //         params.node.aggData["margin"] = roundedMargin;
+    //     }
 
-        return roundedMargin;
+    //     return roundedMargin;
+    // };
+    const getMargin = ({ node, data }) => {
+        const row = node.group ? node.aggData : data;
+        if (!row) return 0;
+
+        const revenue = Number(sanitizeNumericValue(row.revenue));
+        const spend = Number(sanitizeNumericValue(row.spend));
+
+        if (!Number.isFinite(revenue) || revenue <= 0) return 0;
+
+        return Number((((revenue - spend) / revenue) * 100).toFixed(2));
     };
 
+    const getROI = ({ node, data }) => {
+        const row = node.group ? node.aggData : data;
+        if (!row) return 0;
+
+        const revenue = Number(sanitizeNumericValue(row.revenue));
+        const spend = Number(sanitizeNumericValue(row.spend));
+
+        if (!Number.isFinite(spend) || spend <= 0) return 0;
+
+        return Number((((revenue - spend) / spend) * 100).toFixed(2));
+    };
+    // const getMarginAfterTax = (params) => {
+    //     const data = params.node.group ? params.node.aggData : params.data;
+    //     if (!data) return 0;
+
+    //     const revenue = sanitizeNumericValue(data.revenue);
+    //     const spend = sanitizeNumericValue(data.taxSpend);
+
+    //     if (isNaN(revenue) || revenue <= 0) return 0;
+
+    //     const margin = ((revenue - spend) / revenue) * 100;
+    //     const roundedMargin = isFinite(margin) && !isNaN(margin) ? Math.round(margin * 100) / 100 : 0;
+
+    //     if (params.node.group) {
+    //         params.node.aggData["margin"] = roundedMargin;
+    //     }
+
+    //     return roundedMargin;
+    // };
+    const getMarginAfterTax = ({ node, data }) => {
+        const row = node.group ? node.aggData : data;
+        if (!row) return 0;
+
+        const revenue = Number(sanitizeNumericValue(row.revenue));
+        const taxProfit = Number(sanitizeNumericValue(row.taxProfit));
+
+        if (!Number.isFinite(revenue) || revenue <= 0) return 0;
+        if (!Number.isFinite(taxProfit)) return 0;
+
+        return Number((((taxProfit) / revenue) * 100).toFixed(2));
+    };
+
+    const getROIAfterTax = ({ node, data }) => {
+        const row = node.group ? node.aggData : data;
+        if (!row) return 0;
+
+        const taxProfit = Number(sanitizeNumericValue(row.taxProfit));
+        const taxSpend = Number(sanitizeNumericValue(row.taxSpend));
+
+        if (!Number.isFinite(taxSpend) || taxSpend <= 0) return 0;
+
+        return Number((((taxProfit) / taxSpend) * 100).toFixed(2));
+    };
     const onChangeTime = (value) => {
         setTimeZone(value);
         timeZoneForColumnDefs.current = value;
@@ -533,9 +635,10 @@ const RevenuePartnerDashboard = () => {
                 field: "spend",
                 resizable: true,
                 sortable: true,
-                minWidth: 150,
+                minWidth: 105,
                 aggFunc: spender,
                 valueFormatter: currencyFormatter,
+                filter: 'agNumberColumnFilter',
                 suppressMenu: true,
                 menuTabs: [],
                 headerClass: 'hide-menu',
@@ -544,9 +647,10 @@ const RevenuePartnerDashboard = () => {
                 field: "revenue",
                 resizable: true,
                 sortable: true,
-                minWidth: 150,
+                minWidth: 105,
                 aggFunc: spender,
                 valueFormatter: currencyFormatter,
+                filter: 'agNumberColumnFilter',
                 suppressMenu: true,
                 menuTabs: [],
                 headerClass: 'hide-menu',
@@ -555,20 +659,89 @@ const RevenuePartnerDashboard = () => {
                 field: 'profit',
                 resizable: true,
                 sortable: true,
-                minWidth: 150,
+                minWidth: 105,
                 aggFunc: spender,
                 cellClassRules: {
                     'font-red': p => p.value < 0,
                     'font-green': params => params.value > 0,
                 },
                 valueFormatter: currencyFormatter,
+                filter: 'agNumberColumnFilter',
                 suppressMenu: true,
                 menuTabs: [],
                 headerClass: 'hide-menu',
             },
             {
+                field: "taxSpend",
+                headerName: "Spend-Tax",
+                resizable: true,
+                sortable: true,
+                minWidth: 115,
+                aggFunc: spender,
+                valueFormatter: currencyFormatter,
+                filter: 'agNumberColumnFilter',
+                suppressMenu: true,
+                menuTabs: [],
+                headerClass: 'hide-menu',
+                headerTooltip: "Spend after tax",
+            },
+            {
+                field: "taxProfit",
+                headerName: "Profit-Tax",
+                resizable: true,
+                sortable: true,
+                minWidth: 112,
+                cellClassRules: {
+                    'font-red': p => p.value < 0,
+                    'font-green': params => params.value > 0,
+                },
+                aggFunc: spender,
+                valueFormatter: currencyFormatter,
+                filter: 'agNumberColumnFilter',
+                suppressMenu: true,
+                menuTabs: [],
+                headerClass: 'hide-menu',
+                headerTooltip: "Profit after tax",
+            },
+            {
+                field: "taxMargin",
+                headerName: "Margin-Tax",
+                // aggFunc: average,
+                valueGetter: getMarginAfterTax,
+                sortable: true,
+                headerTooltip: '(Profit/Revenue)*100',
+                filter: 'agNumberColumnFilter',
+                cellClassRules: {
+                    'font-red': p => p.value < 0
+                },
+                minWidth: 120,
+                valueFormatter: marginFormatter,
+                suppressMenu: true,
+                menuTabs: [],
+                headerClass: 'hide-menu',
+                headerTooltip: "Margin after tax",
+            },
+            {
+                field: "taxROI",
+                headerName: "ROI-Tax",
+                // aggFunc: average,
+                valueGetter: getROIAfterTax,
+                sortable: true,
+                headerTooltip: '(Profit/Revenue)*100',
+                filter: 'agNumberColumnFilter',
+                cellClassRules: {
+                    'font-red': p => p.value < 0
+                },
+                minWidth: 100,
+                valueFormatter: marginFormatter,
+                suppressMenu: true,
+                menuTabs: [],
+                headerClass: 'hide-menu',
+                headerTooltip: "ROI after tax",
+            },
+            {
                 field: "margin",
-                headerName: "Margin(%)",
+                headerName: "Margin",
                 // aggFunc: average,
                 valueGetter: getMargin,
                 sortable: true,
@@ -577,7 +750,7 @@ const RevenuePartnerDashboard = () => {
                 cellClassRules: {
                     'font-red': p => p.value < 0
                 },
-                minWidth: 150,
+                minWidth: 105,
                 valueFormatter: marginFormatter,
                 suppressMenu: true,
                 menuTabs: [],
@@ -588,7 +761,7 @@ const RevenuePartnerDashboard = () => {
                 headerName: 'RPC',
                 // aggFunc: avgRpcCpl,
                 // valueFormatter: rpcCplFormatter,
-                minWidth: 100,
+                minWidth: 75,
                 // flex: 3,
                 // suppressMenu: true,
                 // menuTabs: [],
@@ -607,11 +780,28 @@ const RevenuePartnerDashboard = () => {
                 headerName: 'CPL',
                 sortable: true,
                 valueGetter: getCpl,
+                minWidth: 75,
                 filter: "agNumberColumnFilter",
                 suppressMenu: true,
                 menuTabs: [],
                 headerClass: 'hide-menu', // Add a custom class
                 headerTooltip: "CPL = Spend / FBLeads",
+            },
+            {
+                field: 'roi',
+                headerName: 'ROI',
+                sortable: true,
+                valueGetter: getROI,
+                filter: 'agNumberColumnFilter',
+                cellClassRules: {
+                    'font-red': p => p.value < 0
+                },
+                minWidth: 105,
+                valueFormatter: marginFormatter,
+                suppressMenu: true,
+                menuTabs: [],
+                headerClass: 'hide-menu', // Add a custom class
+                headerTooltip: "ROI = ((Revenue - Spend) / Spend) * 100",
             },
             {
                 field: "leads",
@@ -644,13 +834,26 @@ const RevenuePartnerDashboard = () => {
                 spend: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.spend), 0).toFixed(2)),
                 revenue: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0).toFixed(2)),
                 profit: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0).toFixed(2)),
-                margin: parseFloat((response?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / response?.reduce((acc, curr) => acc + parseFloat(curr.revenue), 0) * 100).toFixed(2)),
+                margin: parseFloat((response?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / response?.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) * 100).toFixed(2)),
                 rpc: parseFloat((response?.reduce((acc, curr) => acc + parseFloat(curr?.rpc), 0) / response?.length).toFixed(2)),
                 cpl: parseFloat((response?.reduce((acc, curr) => acc + parseFloat(curr?.cpl), 0) / response?.length).toFixed(2)),
+                roi: (() => {
+                    const spend = response?.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0);
+                    const revenue = response?.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0);
+                    return spend > 0 ? parseFloat((((revenue - spend) / spend) * 100).toFixed(2)) : 0;
+                })(),
                 conversions: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.conversions), 0).toFixed(2)),
                 clicks: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.clicks), 0).toFixed(2)),
                 leads: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.leads), 0).toFixed(2)),
                 impressions: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
+                taxSpend: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.taxSpend), 0).toFixed(2)),
+                taxProfit: parseFloat(response?.reduce((acc, curr) => acc + parseFloat(curr?.taxProfit), 0).toFixed(2)),
+                taxMargin: parseFloat((response?.reduce((acc, curr) => acc + parseFloat(curr?.taxProfit), 0) / response?.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) * 100).toFixed(2)),
+                taxROI: (() => {
+                    const spend = response?.reduce((acc, curr) => acc + parseFloat(curr?.taxSpend || 0), 0);
+                    const revenue = response?.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0);
+                    return spend > 0 ? parseFloat((((revenue - spend) / spend) * 100).toFixed(2)) : 0;
+                })(),
             }
         ]);
     };
@@ -864,7 +1067,7 @@ const RevenuePartnerDashboard = () => {
 
     const autoGroupColumnDefRevPartner = {
         headerName: 'Projects', // Display name for the grouped column
-        minWidth: 250, // Set width for grouped rows
+        minWidth: 220, // Set width for grouped rows
         resizable: true, // Enable resizing
         sortable: true, // Enable sorting
         cellRendererParams: {
@@ -1030,28 +1233,96 @@ const RevenuePartnerDashboard = () => {
                                         return null;
                                     }}
                                     onFilterChanged={(params) => {
-                                        const api = params.api;
                                         const filteredData = [];
-                                        api.forEachNodeAfterFilterAndSort((node) => {
-                                            if (!node.rowPinned) {
+
+                                        params.api.forEachNodeAfterFilterAndSort((node) => {
+                                            if (!node.rowPinned && node.data) {
                                                 filteredData.push(node.data);
                                             }
                                         });
 
+                                        const totals = filteredData.reduce(
+                                            (acc, curr) => {
+                                                acc.spend += Number(curr?.spend) || 0;
+                                                acc.revenue += Number(curr?.revenue) || 0;
+                                                acc.profit += Number(curr?.profit) || 0;
+                                                acc.taxSpend += Number(curr?.taxSpend) || 0;
+                                                acc.taxProfit += Number(curr?.taxProfit) || 0;
+                                                acc.impressions += Number(curr?.impressions) || 0;
+                                                acc.conversions += Number(curr?.conversions) || 0;
+                                                acc.leads += Number(curr?.leads) || 0;
+
+                                                return acc;
+                                            },
+                                            {
+                                                spend: 0,
+                                                revenue: 0,
+                                                profit: 0,
+                                                taxSpend: 0,
+                                                taxProfit: 0,
+                                                impressions: 0,
+                                                conversions: 0,
+                                                leads: 0,
+                                            }
+                                        );
+
+                                        // RPC = Total Revenue / Total Conversions
+                                        const rpc = totals.conversions
+                                            ? totals.revenue / totals.conversions
+                                            : 0;
+
+                                        // CPL = Total Spend / Total Leads
+                                        const cpl = totals.leads
+                                            ? totals.spend / totals.leads
+                                            : 0;
+
+                                        // Margin = Total Profit / Total Revenue × 100
+                                        const margin = totals.revenue
+                                            ? (totals.profit / totals.revenue) * 100
+                                            : 0;
+
+                                        // Tax Margin = Total Tax Profit / Total Revenue × 100
+                                        const taxMargin = totals.revenue
+                                            ? (totals.taxProfit / totals.revenue) * 100
+                                            : 0;
+                                        const roi = totals.spend
+                                            ? ((totals.revenue - totals.spend) / totals.spend) * 100
+                                            : 0;
+                                        const taxROI = totals.taxSpend
+                                            ? ((totals.revenue - totals.taxSpend) / totals.taxSpend) * 100
+                                            : 0;
+
                                         const updatedFooter = [
                                             {
-                                                [`${timeZoneForColumnDefs.current}Date`]: 'Total',
-                                                spend: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.spend || 0), 0).toFixed(2)),
-                                                revenue: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.revenue || 0), 0).toFixed(2)),
-                                                profit: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.profit || 0), 0).toFixed(2)),
-                                                margin: parseFloat((filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.profit), 0) / filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.revenue), 0) * 100).toFixed(2)),
-                                                rpc: parseFloat(
-                                                    (filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.rpc || 0), 0) / filteredData?.length || 0).toFixed(2)
-                                                ),
-                                                cpl: parseFloat(
-                                                    (filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.cpl || 0), 0) / filteredData?.length || 0).toFixed(2)
-                                                ),
-                                                impressions: parseFloat(filteredData?.reduce((acc, curr) => acc + parseFloat(curr?.impressions || 0), 0).toFixed(2)),
+                                                [`${timeZoneForColumnDefs.current}Date`]: "Total",
+
+                                                spend: Number(totals.spend.toFixed(2)),
+
+                                                revenue: Number(totals.revenue.toFixed(2)),
+
+                                                profit: Number(totals.profit.toFixed(2)),
+
+                                                margin: Number(margin.toFixed(2)),
+
+                                                roi: Number(roi.toFixed(2)),
+
+                                                rpc: Number(rpc.toFixed(2)),
+
+                                                cpl: Number(cpl.toFixed(2)),
+
+                                                impressions: Number(totals.impressions.toFixed(2)),
+
+                                                conversions: totals.conversions,
+
+                                                leads: totals.leads,
+
+                                                taxSpend: Number(totals.taxSpend.toFixed(2)),
+
+                                                taxProfit: Number(totals.taxProfit.toFixed(2)),
+
+                                                taxMargin: Number(taxMargin.toFixed(2)),
+
+                                                taxROI: Number(taxROI.toFixed(2)),
                                             },
                                         ];
 
@@ -1674,7 +1945,9 @@ const Dashboard = () => {
                     newKey = "Facebook_DActive_Names"
                 } else if (key === "FB_Mnet") {
                     newKey = "Facebook_Mnet_Daily"
-                } else if (key === "FB_MnetBing") {
+                } else if (key === "FB_Media") {
+                    newKey = "Facebook_Media_Daily"
+                }else if (key === "FB_MnetBing") {
                     newKey = "Facebook_MnetBing_Daily"
                 } else if (key === "FB_InuvoPrism") {
                     newKey = "Facebook_InuvoPrismDaily"
@@ -1693,7 +1966,7 @@ const Dashboard = () => {
                     newKey = "Outbrain_TonicRsoc"
                 } else if (key === "FB_MWG") {
                     newKey = "Facebook_Mwg_Daily"
-                }else if (key === "Taboola_Inuvoprism") {
+                } else if (key === "Taboola_Inuvoprism") {
                     newKey = "Taboola_InuvoPrismDaily"
                 }
                 else { newKey = "Facebook_" + splitKey[1]; }
@@ -2258,13 +2531,13 @@ const Dashboard = () => {
                         specifiedDate,
                         domain,
                         accountNumber,
-                        spend:  0,
-                        estimated_revenue:  0,
-                        fbLeads:  0,
-                        conversions:  0,
-                        fbClicks:  0,
+                        spend: 0,
+                        estimated_revenue: 0,
+                        fbLeads: 0,
+                        conversions: 0,
+                        fbClicks: 0,
                         fbLinkClicks: 0, //new
-                        impressions:  0, // new
+                        impressions: 0, // new
                         revenuePartner: obj.revenuePartner,
                         mediaBuyerName: obj.MediaBuyerName,
                         holder: obj.Holder,
@@ -2306,13 +2579,13 @@ const Dashboard = () => {
                         specifiedDate,
                         BMName,
                         AgencyName,
-                        spend:  0,
-                        estimated_revenue:  0,
-                        fbLeads:  0,
-                        conversions:  0,
-                        fbClicks:  0,
-                        fbLinkClicks:  0, //new
-                        impressions:  0, // new
+                        spend: 0,
+                        estimated_revenue: 0,
+                        fbLeads: 0,
+                        conversions: 0,
+                        fbClicks: 0,
+                        fbLinkClicks: 0, //new
+                        impressions: 0, // new
                         accountNumber,
                         accountName: userdetails?.adAccounts[revenuePartnerNames[revenuePartner]]?.find(each => each.accountNumber === accountNumber)?.accountName
                     };

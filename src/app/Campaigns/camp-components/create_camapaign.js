@@ -56,6 +56,7 @@ import { v4 as uuidv4 } from "uuid";
 import dynamic from "next/dynamic";
 import dayjs from "dayjs";
 import MnetUrlBuilder from "./urlbuilder/mnet";
+import MediaUrlBuilder from "./urlbuilder/media";
 import MnetBingUrlBuilder from "./urlbuilder/mnetbing"
 import TonicUrlBuilder from "./urlbuilder/tonic";
 import System1UrlBuilder from "./urlbuilder/system1";
@@ -738,6 +739,11 @@ const AccountForm = ({
         //defaultValues
         return (
           <MnetUrlBuilder indexValueForAccount={indexValueForAccount} defaultValues={defaultURLBuilder} accountis={account} onReturnMessage={onReturnUrl} />
+        );
+      case "FB_Media":
+        //defaultValues
+        return (
+          <MediaUrlBuilder indexValueForAccount={indexValueForAccount} defaultValues={defaultURLBuilder} accountis={account} onReturnMessage={onReturnUrl} />
         );
       case "FB_MnetBing":
         //defaultValues
@@ -2133,6 +2139,11 @@ const AdsetComponent = ({
         //defaultValues
         return (
           <MnetUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
+        );
+      case "FB_Media":
+        //defaultValues
+        return (
+          <MediaUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
         );
       case "FB_MnetBing":
         //defaultValues
@@ -5186,7 +5197,7 @@ const AdsetComponent = ({
             label={<span style={{ color: "#B4B4B4" }}>Placements</span>}
             name={["adsets", index, "placements"]}
             rules={[{ required: true, message: "Please select a mode!" }]}
-            initialValue={adset.placements || "Advance"}
+            initialValue={adset.placements || "manual"}
           >
             <Select
               placeholder="Select a mode"
@@ -5195,7 +5206,7 @@ const AdsetComponent = ({
                 } green-border-select`}
             // defaultValue={adset.placements || "Advance"}
             >
-              <Option value="Advance" title={null}>
+              <Option value="Advance" title={null} disabled={network === "FB_Mnet"}>
                 Advance
               </Option>
               <Option value="manual" title={null}>
@@ -5298,7 +5309,10 @@ const AdsetComponent = ({
                       className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
                     >
                       {publisherOptions.map((option) => (
-                        <Option key={option.value} value={option.value} title={null}>
+                        <Option key={option.value} value={option.value} title={null} disabled={
+                          network === "FB_Mnet" &&
+                          ["messenger", "audience_network"].includes(option.value)
+                        }>
                           {option.label}
                         </Option>
                       ))}
@@ -9217,6 +9231,10 @@ const CreateCampaignDrawer = ({
       case "FB_Mnet":
         return (
           <MnetUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
+        );
+      case "FB_Media":
+        return (
+          <MediaUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
         );
       case "FB_MnetBing":
         return (

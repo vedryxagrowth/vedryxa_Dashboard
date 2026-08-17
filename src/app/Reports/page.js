@@ -24,6 +24,7 @@ import { FaRobot } from 'react-icons/fa';
 import { Audio } from 'react-loader-spinner';
 import { TiTickOutline, TiTimesOutline } from "react-icons/ti";
 import { Account } from 'aws-sdk';
+import ReportSwitch from "../componentsOfReports/ReportSwitch.js";
 
 
 const newtworkCollections = {
@@ -43,7 +44,8 @@ const newtworkCollections = {
     "FB_TonicRsoc": "Facebook_TonicRsoc",
     "FB_InuvoPrism": "Facebook_InuvoPrism",
     "FB_Botup": "Facebook_Botup",
-    "Taboola_Inuvoprism": "Taboola_InuvoprismLive"
+    "Taboola_Inuvoprism": "Taboola_InuvoprismLive",
+    "FB_Media": "FB_Media"
 }
 
 const networkCollectionsForAiAssistant = {
@@ -66,7 +68,8 @@ const networkCollectionsForAiAssistant = {
     FB_Predicto: 'Facebook_Predicto_Daily',
     FB_Affinity: 'Facebook_Affinity_Daily',
     FB_Botup: "Facebook_Botup_Daily",
-    FB_MWG: "Facebook_Mwg_Daily"
+    FB_MWG: "Facebook_Mwg_Daily",
+    FB_Media: "FB_Media_Daily"
 };
 
 const NetworkDefaultTimezones = {
@@ -90,7 +93,8 @@ const NetworkDefaultTimezones = {
     "FB_Botup": "EDT",
     "Outbrain_TonicRsoc": "EDT",
     "FB_MWG": "UTC",
-    "Taboola_Inuvoprism": "PDT"
+    "Taboola_Inuvoprism": "PDT",
+    "FB_Media": "UTC"
 }
 
 
@@ -110,10 +114,12 @@ const MnetDailyAdReport = React.lazy(() => import('../componentsOfReports/MnetAd
 const CampaignHistoryModal = React.lazy(() => import('../componentsOfReports/ReportsActivityHistory'));
 const HourlyCampaignLevelReports = React.lazy(() => import('../componentsOfReports/HourlyBreakDown'));
 const HourReports = React.lazy(() => import('../componentsOfReports/Hour'));
+const PredictoCountryWiseReport = React.lazy(() => import("../componentsOfReports/PredictoCountryWiseReports"))
 
 const MyTablePage = () => {
     const router = useRouter();
     const { userdetails, theme, apiClient } = useTokenContext();
+    console.log(userdetails, "usedetails");
     const params = new URLSearchParams(window.location.search);
 
     const networkFromDashboard = params.get('network');
@@ -180,7 +186,8 @@ const MyTablePage = () => {
         "adname",
         "adid",
         "accountNumber",
-        "history"
+        "history",
+        "tax"
     ];
 
     const storedData = localStorage.getItem("storedData") && localStorage.getItem("storedData") !== "undefined" && localStorage.getItem("storedData") !== "null" ? JSON.parse(localStorage.getItem("storedData")) : null;
@@ -252,9 +259,26 @@ const MyTablePage = () => {
     const [historyOpen, setHistoryOpen] = useState(false);
     const [selectedCampaignIdForHistory, setSelectedCampaignIdForHistory] = useState(null);
     const [selectedAccountForHistory, setSelectedAccountForHistory] = useState(null);
+    const [taxDetails, setTaxDetails] = useState([]);
 
     // console.log(campaignComments, "test");
 
+    useEffect(() => {
+        if (!userdetails?.adAccounts) return;
+
+        const details = Object.entries(userdetails.adAccounts).flatMap(
+            ([network, accounts]) =>
+                accounts.map((account) => ({
+                    network,
+                    accountNumber: account.accountNumber,
+                    accountName: account.accountName,
+                    tax: account.tax,
+                }))
+        );
+
+        setTaxDetails(details);
+    }, [userdetails]);
+    console.log(taxDetails, "taxdetails")
     useEffect(() => {
         const fetchNetworksData = async () => {
             try {
@@ -1677,6 +1701,93 @@ const MyTablePage = () => {
             aggFunc: liveSpender,
             hide: true
         },
+        tax: {
+            headerName: "Tax",
+            field: "tax",
+            minWidth: 105,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+
+            valueGetter: (params) => {
+
+                // =========================
+                // GROUP ROW
+                // =========================
+                if (params.node?.group) {
+                    const children = params.node.allLeafChildren || [];
+
+                    const total = children.reduce((sum, child) => {
+                        const data = child.data;
+                        if (!data) return sum;
+
+                        const accountNumber = data.accountNumber;
+
+                        const accountTax = taxDetails?.find(
+                            item =>
+                                String(item.accountNumber) ===
+                                String(accountNumber)
+                        );
+
+                        const taxRate =
+                            parseFloat(
+                                String(accountTax?.tax || "0").replace("%", "")
+                            ) || 0;
+
+                        const spend =
+                            Number(data.spend) || 0;
+
+                        const taxAmount =
+                            (spend * taxRate) / 100;
+
+                        // Spend + Tax
+                        return sum + spend + taxAmount;
+                    }, 0);
+
+                    return Number(total.toFixed(2));
+                }
+
+                // =========================
+                // NORMAL ROW
+                // =========================
+                const accountNumber =
+                    params.data?.accountNumber;
+
+                if (!accountNumber) return 0;
+
+                const accountTax = taxDetails?.find(
+                    item =>
+                        String(item.accountNumber) ===
+                        String(accountNumber)
+                );
+
+                const taxRate =
+                    parseFloat(
+                        String(accountTax?.tax || "0").replace("%", "")
+                    ) || 0;
+
+                const spend =
+                    Number(params.data?.spend) || 0;
+
+                const taxAmount =
+                    (spend * taxRate) / 100;
+
+                // ✅ Spend + Tax
+                return Number(
+                    (spend + taxAmount).toFixed(2)
+                );
+            },
+
+            valueFormatter: (params) => {
+                const value = Number(params.value || 0);
+                return `$${value.toFixed(2)}`;
+            },
+
+            comparator: numberComparator,
+
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: "hide-menu",
+        },
         D_tq: {
             headerName: 'D_TQ',
             field: 'D_tq',
@@ -2994,6 +3105,93 @@ const MyTablePage = () => {
             sortable: true,
             aggFunc: liveSpender,
             hide: true
+        },
+        tax: {
+            headerName: "Tax",
+            field: "tax",
+            minWidth: 105,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+
+            valueGetter: (params) => {
+
+                // =========================
+                // GROUP ROW
+                // =========================
+                if (params.node?.group) {
+                    const children = params.node.allLeafChildren || [];
+
+                    const total = children.reduce((sum, child) => {
+                        const data = child.data;
+                        if (!data) return sum;
+
+                        const accountNumber = data.accountNumber;
+
+                        const accountTax = taxDetails?.find(
+                            item =>
+                                String(item.accountNumber) ===
+                                String(accountNumber)
+                        );
+
+                        const taxRate =
+                            parseFloat(
+                                String(accountTax?.tax || "0").replace("%", "")
+                            ) || 0;
+
+                        const spend =
+                            Number(data.spend) || 0;
+
+                        const taxAmount =
+                            (spend * taxRate) / 100;
+
+                        // Spend + Tax
+                        return sum + spend + taxAmount;
+                    }, 0);
+
+                    return Number(total.toFixed(2));
+                }
+
+                // =========================
+                // NORMAL ROW
+                // =========================
+                const accountNumber =
+                    params.data?.accountNumber;
+
+                if (!accountNumber) return 0;
+
+                const accountTax = taxDetails?.find(
+                    item =>
+                        String(item.accountNumber) ===
+                        String(accountNumber)
+                );
+
+                const taxRate =
+                    parseFloat(
+                        String(accountTax?.tax || "0").replace("%", "")
+                    ) || 0;
+
+                const spend =
+                    Number(params.data?.spend) || 0;
+
+                const taxAmount =
+                    (spend * taxRate) / 100;
+
+                // ✅ Spend + Tax
+                return Number(
+                    (spend + taxAmount).toFixed(2)
+                );
+            },
+
+            valueFormatter: (params) => {
+                const value = Number(params.value || 0);
+                return `$${value.toFixed(2)}`;
+            },
+
+            comparator: numberComparator,
+
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: "hide-menu",
         },
         D_tq: {
             headerName: 'D_TQ',
@@ -5209,6 +5407,80 @@ const MyTablePage = () => {
                 return firstChild?.data?.accountNumber || null;
             },
             // hide: true,
+        },
+        tax: {
+            headerName: "Tax",
+            field: "tax",
+            minWidth: 105,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+
+            valueGetter: (params) => {
+                // Pinned footer
+                if (params.node?.rowPinned) {
+                    return Number(params.data?.tax || 0);
+                }
+
+                // Group row
+                if (params.node?.group) {
+                    const total = (params.node.allLeafChildren || []).reduce(
+                        (sum, child) => {
+                            const data = child.data;
+                            if (!data) return sum;
+
+                            const accountTax = taxDetails?.find(
+                                item =>
+                                    String(item.accountNumber) ===
+                                    String(data.accountNumber)
+                            );
+
+                            const taxRate =
+                                parseFloat(
+                                    String(accountTax?.tax || "0").replace("%", "")
+                                ) || 0;
+
+                            const spend = Number(data.spend) || 0;
+
+                            return sum + spend + (spend * taxRate) / 100;
+                        },
+                        0
+                    );
+
+                    return Number(total.toFixed(2));
+                }
+
+                // Normal row
+                const accountNumber = params.data?.accountNumber;
+                if (!accountNumber) return 0;
+
+                const accountTax = taxDetails?.find(
+                    item =>
+                        String(item.accountNumber) ===
+                        String(accountNumber)
+                );
+
+                const taxRate =
+                    parseFloat(
+                        String(accountTax?.tax || "0").replace("%", "")
+                    ) || 0;
+
+                const spend = Number(params.data?.spend) || 0;
+
+                return Number(
+                    (spend + (spend * taxRate) / 100).toFixed(2)
+                );
+            },
+
+            valueFormatter: (params) => {
+                const value = Number(params.value || 0);
+                return `$${value.toFixed(2)}`;
+            },
+
+            comparator: numberComparator,
+
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: "hide-menu",
         },
         M_tq: {
             headerName: 'M_TQ',
@@ -8365,6 +8637,147 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu',
         },
+        tax: {
+            headerName: "Tax",
+            field: "tax",
+            minWidth: 105,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+
+            // valueGetter: (params) => {
+
+            //     // =========================
+            //     // GROUP ROW
+            //     // =========================
+            //     if (params.node?.group) {
+            //         const children = params.node.allLeafChildren || [];
+
+            //         const total = children.reduce((sum, child) => {
+            //             const data = child.data;
+            //             if (!data) return sum;
+
+            //             const accountNumber = data.accountNumber;
+
+            //             const accountTax = taxDetails?.find(
+            //                 item =>
+            //                     String(item.accountNumber) ===
+            //                     String(accountNumber)
+            //             );
+
+            //             const taxRate =
+            //                 parseFloat(
+            //                     String(accountTax?.tax || "0").replace("%", "")
+            //                 ) || 0;
+
+            //             const spend =
+            //                 Number(data.spend) || 0;
+
+            //             const taxAmount =
+            //                 (spend * taxRate) / 100;
+
+            //             // Spend + Tax
+            //             return sum + spend + taxAmount;
+            //         }, 0);
+
+            //         return Number(total.toFixed(2));
+            //     }
+
+            //     // =========================
+            //     // NORMAL ROW
+            //     // =========================
+            //     const accountNumber =
+            //         params.data?.accountNumber;
+
+            //     if (!accountNumber) return 0;
+
+            //     const accountTax = taxDetails?.find(
+            //         item =>
+            //             String(item.accountNumber) ===
+            //             String(accountNumber)
+            //     );
+
+            //     const taxRate =
+            //         parseFloat(
+            //             String(accountTax?.tax || "0").replace("%", "")
+            //         ) || 0;
+
+            //     const spend =
+            //         Number(params.data?.spend) || 0;
+
+            //     const taxAmount =
+            //         (spend * taxRate) / 100;
+
+            //     // ✅ Spend + Tax
+            //     return Number(
+            //         (spend + taxAmount).toFixed(2)
+            //     );
+            // },
+            valueGetter: (params) => {
+                // Pinned footer
+                if (params.node?.rowPinned) {
+                    return Number(params.data?.tax || 0);
+                }
+
+                // Group row
+                if (params.node?.group) {
+                    const total = (params.node.allLeafChildren || []).reduce(
+                        (sum, child) => {
+                            const data = child.data;
+                            if (!data) return sum;
+
+                            const accountTax = taxDetails?.find(
+                                item =>
+                                    String(item.accountNumber) ===
+                                    String(data.accountNumber)
+                            );
+
+                            const taxRate =
+                                parseFloat(
+                                    String(accountTax?.tax || "0").replace("%", "")
+                                ) || 0;
+
+                            const spend = Number(data.spend) || 0;
+
+                            return sum + spend + (spend * taxRate) / 100;
+                        },
+                        0
+                    );
+
+                    return Number(total.toFixed(2));
+                }
+
+                // Normal row
+                const accountNumber = params.data?.accountNumber;
+                if (!accountNumber) return 0;
+
+                const accountTax = taxDetails?.find(
+                    item =>
+                        String(item.accountNumber) ===
+                        String(accountNumber)
+                );
+
+                const taxRate =
+                    parseFloat(
+                        String(accountTax?.tax || "0").replace("%", "")
+                    ) || 0;
+
+                const spend = Number(params.data?.spend) || 0;
+
+                return Number(
+                    (spend + (spend * taxRate) / 100).toFixed(2)
+                );
+            },
+            valueFormatter: (params) => {
+                const value = Number(params.value || 0);
+                return `$${value.toFixed(2)}`;
+            },
+
+            comparator: numberComparator,
+
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: "hide-menu",
+        },
         profitloss: {
             headerName: 'P/L',
             field: 'profitloss',
@@ -8847,6 +9260,147 @@ const MyTablePage = () => {
             //     const firstChild = params.node?.childrenAfterGroup?.[0];
             //     return firstChild?.data?.accountNumber || '';
             // },
+        },
+        tax: {
+            headerName: "Tax",
+            field: "tax",
+            minWidth: 105,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+
+            // valueGetter: (params) => {
+
+            //     // =========================
+            //     // GROUP ROW
+            //     // =========================
+            //     if (params.node?.group) {
+            //         const children = params.node.allLeafChildren || [];
+
+            //         const total = children.reduce((sum, child) => {
+            //             const data = child.data;
+            //             if (!data) return sum;
+
+            //             const accountNumber = data.accountNumber;
+
+            //             const accountTax = taxDetails?.find(
+            //                 item =>
+            //                     String(item.accountNumber) ===
+            //                     String(accountNumber)
+            //             );
+
+            //             const taxRate =
+            //                 parseFloat(
+            //                     String(accountTax?.tax || "0").replace("%", "")
+            //                 ) || 0;
+
+            //             const spend =
+            //                 Number(data.spend) || 0;
+
+            //             const taxAmount =
+            //                 (spend * taxRate) / 100;
+
+            //             // Spend + Tax
+            //             return sum + spend + taxAmount;
+            //         }, 0);
+
+            //         return Number(total.toFixed(2));
+            //     }
+
+            //     // =========================
+            //     // NORMAL ROW
+            //     // =========================
+            //     const accountNumber =
+            //         params.data?.accountNumber;
+
+            //     if (!accountNumber) return 0;
+
+            //     const accountTax = taxDetails?.find(
+            //         item =>
+            //             String(item.accountNumber) ===
+            //             String(accountNumber)
+            //     );
+
+            //     const taxRate =
+            //         parseFloat(
+            //             String(accountTax?.tax || "0").replace("%", "")
+            //         ) || 0;
+
+            //     const spend =
+            //         Number(params.data?.spend) || 0;
+
+            //     const taxAmount =
+            //         (spend * taxRate) / 100;
+
+            //     // ✅ Spend + Tax
+            //     return Number(
+            //         (spend + taxAmount).toFixed(2)
+            //     );
+            // },
+            valueGetter: (params) => {
+                // Pinned footer
+                if (params.node?.rowPinned) {
+                    return Number(params.data?.tax || 0);
+                }
+
+                // Group row
+                if (params.node?.group) {
+                    const total = (params.node.allLeafChildren || []).reduce(
+                        (sum, child) => {
+                            const data = child.data;
+                            if (!data) return sum;
+
+                            const accountTax = taxDetails?.find(
+                                item =>
+                                    String(item.accountNumber) ===
+                                    String(data.accountNumber)
+                            );
+
+                            const taxRate =
+                                parseFloat(
+                                    String(accountTax?.tax || "0").replace("%", "")
+                                ) || 0;
+
+                            const spend = Number(data.spend) || 0;
+
+                            return sum + spend + (spend * taxRate) / 100;
+                        },
+                        0
+                    );
+
+                    return Number(total.toFixed(2));
+                }
+
+                // Normal row
+                const accountNumber = params.data?.accountNumber;
+                if (!accountNumber) return 0;
+
+                const accountTax = taxDetails?.find(
+                    item =>
+                        String(item.accountNumber) ===
+                        String(accountNumber)
+                );
+
+                const taxRate =
+                    parseFloat(
+                        String(accountTax?.tax || "0").replace("%", "")
+                    ) || 0;
+
+                const spend = Number(params.data?.spend) || 0;
+
+                return Number(
+                    (spend + (spend * taxRate) / 100).toFixed(2)
+                );
+            },
+            valueFormatter: (params) => {
+                const value = Number(params.value || 0);
+                return `$${value.toFixed(2)}`;
+            },
+
+            comparator: numberComparator,
+
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: "hide-menu",
         },
         M_tq: {
             headerName: 'M_TQ',
@@ -10451,6 +11005,80 @@ const MyTablePage = () => {
             //     return firstChild?.data?.accountNumber || '';
             // },
         },
+        tax: {
+            headerName: "Tax",
+            field: "tax",
+            minWidth: 105,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+
+            valueGetter: (params) => {
+                // Pinned footer
+                if (params.node?.rowPinned) {
+                    return Number(params.data?.tax || 0);
+                }
+
+                // Group row
+                if (params.node?.group) {
+                    const total = (params.node.allLeafChildren || []).reduce(
+                        (sum, child) => {
+                            const data = child.data;
+                            if (!data) return sum;
+
+                            const accountTax = taxDetails?.find(
+                                item =>
+                                    String(item.accountNumber) ===
+                                    String(data.accountNumber)
+                            );
+
+                            const taxRate =
+                                parseFloat(
+                                    String(accountTax?.tax || "0").replace("%", "")
+                                ) || 0;
+
+                            const spend = Number(data.spend) || 0;
+
+                            return sum + spend + (spend * taxRate) / 100;
+                        },
+                        0
+                    );
+
+                    return Number(total.toFixed(2));
+                }
+
+                // Normal row
+                const accountNumber = params.data?.accountNumber;
+                if (!accountNumber) return 0;
+
+                const accountTax = taxDetails?.find(
+                    item =>
+                        String(item.accountNumber) ===
+                        String(accountNumber)
+                );
+
+                const taxRate =
+                    parseFloat(
+                        String(accountTax?.tax || "0").replace("%", "")
+                    ) || 0;
+
+                const spend = Number(params.data?.spend) || 0;
+
+                return Number(
+                    (spend + (spend * taxRate) / 100).toFixed(2)
+                );
+            },
+
+            valueFormatter: (params) => {
+                const value = Number(params.value || 0);
+                return `$${value.toFixed(2)}`;
+            },
+
+            comparator: numberComparator,
+
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: "hide-menu",
+        },
         M_tq: {
             headerName: 'M_TQ',
             field: 'M_tq',
@@ -11040,6 +11668,147 @@ const MyTablePage = () => {
                 return firstChild?.data?.accountNumber || null;
             },
         },
+        tax: {
+            headerName: "Tax",
+            field: "tax",
+            minWidth: 105,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+
+            // valueGetter: (params) => {
+
+            //     // =========================
+            //     // GROUP ROW
+            //     // =========================
+            //     if (params.node?.group) {
+            //         const children = params.node.allLeafChildren || [];
+
+            //         const total = children.reduce((sum, child) => {
+            //             const data = child.data;
+            //             if (!data) return sum;
+
+            //             const accountNumber = data.accountNumber;
+
+            //             const accountTax = taxDetails?.find(
+            //                 item =>
+            //                     String(item.accountNumber) ===
+            //                     String(accountNumber)
+            //             );
+
+            //             const taxRate =
+            //                 parseFloat(
+            //                     String(accountTax?.tax || "0").replace("%", "")
+            //                 ) || 0;
+
+            //             const spend =
+            //                 Number(data.spend) || 0;
+
+            //             const taxAmount =
+            //                 (spend * taxRate) / 100;
+
+            //             // Spend + Tax
+            //             return sum + spend + taxAmount;
+            //         }, 0);
+
+            //         return Number(total.toFixed(2));
+            //     }
+
+            //     // =========================
+            //     // NORMAL ROW
+            //     // =========================
+            //     const accountNumber =
+            //         params.data?.accountNumber;
+
+            //     if (!accountNumber) return 0;
+
+            //     const accountTax = taxDetails?.find(
+            //         item =>
+            //             String(item.accountNumber) ===
+            //             String(accountNumber)
+            //     );
+
+            //     const taxRate =
+            //         parseFloat(
+            //             String(accountTax?.tax || "0").replace("%", "")
+            //         ) || 0;
+
+            //     const spend =
+            //         Number(params.data?.spend) || 0;
+
+            //     const taxAmount =
+            //         (spend * taxRate) / 100;
+
+            //     // ✅ Spend + Tax
+            //     return Number(
+            //         (spend + taxAmount).toFixed(2)
+            //     );
+            // },
+            valueGetter: (params) => {
+                // Pinned footer
+                if (params.node?.rowPinned) {
+                    return Number(params.data?.tax || 0);
+                }
+
+                // Group row
+                if (params.node?.group) {
+                    const total = (params.node.allLeafChildren || []).reduce(
+                        (sum, child) => {
+                            const data = child.data;
+                            if (!data) return sum;
+
+                            const accountTax = taxDetails?.find(
+                                item =>
+                                    String(item.accountNumber) ===
+                                    String(data.accountNumber)
+                            );
+
+                            const taxRate =
+                                parseFloat(
+                                    String(accountTax?.tax || "0").replace("%", "")
+                                ) || 0;
+
+                            const spend = Number(data.spend) || 0;
+
+                            return sum + spend + (spend * taxRate) / 100;
+                        },
+                        0
+                    );
+
+                    return Number(total.toFixed(2));
+                }
+
+                // Normal row
+                const accountNumber = params.data?.accountNumber;
+                if (!accountNumber) return 0;
+
+                const accountTax = taxDetails?.find(
+                    item =>
+                        String(item.accountNumber) ===
+                        String(accountNumber)
+                );
+
+                const taxRate =
+                    parseFloat(
+                        String(accountTax?.tax || "0").replace("%", "")
+                    ) || 0;
+
+                const spend = Number(params.data?.spend) || 0;
+
+                return Number(
+                    (spend + (spend * taxRate) / 100).toFixed(2)
+                );
+            },
+            valueFormatter: (params) => {
+                const value = Number(params.value || 0);
+                return `$${value.toFixed(2)}`;
+            },
+
+            comparator: numberComparator,
+
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: "hide-menu",
+        },
         M_tq: {
             headerName: 'M_TQ',
             field: 'M_tq',
@@ -11333,11 +12102,11 @@ const MyTablePage = () => {
                     //     setAdsetInfo(matchedAdset);
                     // }
                     const matchedAdset = Camapignlevelstatus
-                        .find(item =>
-                            String(item.campaign_id) === String(campaignId) &&
-                            String(item.accountNumber) === String(accountNumber)
-                        )?.adsets.find(adset =>
-                            String(adset.adset_id) === String(initialAdsetId)
+                        ?.find(item =>
+                            String(item?.campaign_id) === String(campaignId) &&
+                            String(item?.accountNumber) === String(accountNumber)
+                        )?.adsets?.find(adset =>
+                            String(adset?.adset_id) === String(initialAdsetId)
                         );
                     if (matchedAdset?.budget) {
                         if (Number(matchedAdset.budget.daily_budget) === 0) {
@@ -12920,6 +13689,7 @@ const MyTablePage = () => {
                 return firstChild?.data?.accountNumber || null;
             },
         },
+
         M_tq: {
             headerName: 'M_TQ',
             field: 'M_tq',
@@ -15491,6 +16261,147 @@ const MyTablePage = () => {
             menuTabs: [],
             headerClass: 'hide-menu',
         },
+        tax: {
+            headerName: "Tax",
+            field: "tax",
+            minWidth: 105,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+
+            // valueGetter: (params) => {
+
+            //     // =========================
+            //     // GROUP ROW
+            //     // =========================
+            //     if (params.node?.group) {
+            //         const children = params.node.allLeafChildren || [];
+
+            //         const total = children.reduce((sum, child) => {
+            //             const data = child.data;
+            //             if (!data) return sum;
+
+            //             const accountNumber = data.accountNumber;
+
+            //             const accountTax = taxDetails?.find(
+            //                 item =>
+            //                     String(item.accountNumber) ===
+            //                     String(accountNumber)
+            //             );
+
+            //             const taxRate =
+            //                 parseFloat(
+            //                     String(accountTax?.tax || "0").replace("%", "")
+            //                 ) || 0;
+
+            //             const spend =
+            //                 Number(data.spend) || 0;
+
+            //             const taxAmount =
+            //                 (spend * taxRate) / 100;
+
+            //             // Spend + Tax
+            //             return sum + spend + taxAmount;
+            //         }, 0);
+
+            //         return Number(total.toFixed(2));
+            //     }
+
+            //     // =========================
+            //     // NORMAL ROW
+            //     // =========================
+            //     const accountNumber =
+            //         params.data?.accountNumber;
+
+            //     if (!accountNumber) return 0;
+
+            //     const accountTax = taxDetails?.find(
+            //         item =>
+            //             String(item.accountNumber) ===
+            //             String(accountNumber)
+            //     );
+
+            //     const taxRate =
+            //         parseFloat(
+            //             String(accountTax?.tax || "0").replace("%", "")
+            //         ) || 0;
+
+            //     const spend =
+            //         Number(params.data?.spend) || 0;
+
+            //     const taxAmount =
+            //         (spend * taxRate) / 100;
+
+            //     // ✅ Spend + Tax
+            //     return Number(
+            //         (spend + taxAmount).toFixed(2)
+            //     );
+            // },
+            valueGetter: (params) => {
+                // Pinned footer
+                if (params.node?.rowPinned) {
+                    return Number(params.data?.tax || 0);
+                }
+
+                // Group row
+                if (params.node?.group) {
+                    const total = (params.node.allLeafChildren || []).reduce(
+                        (sum, child) => {
+                            const data = child.data;
+                            if (!data) return sum;
+
+                            const accountTax = taxDetails?.find(
+                                item =>
+                                    String(item.accountNumber) ===
+                                    String(data.accountNumber)
+                            );
+
+                            const taxRate =
+                                parseFloat(
+                                    String(accountTax?.tax || "0").replace("%", "")
+                                ) || 0;
+
+                            const spend = Number(data.spend) || 0;
+
+                            return sum + spend + (spend * taxRate) / 100;
+                        },
+                        0
+                    );
+
+                    return Number(total.toFixed(2));
+                }
+
+                // Normal row
+                const accountNumber = params.data?.accountNumber;
+                if (!accountNumber) return 0;
+
+                const accountTax = taxDetails?.find(
+                    item =>
+                        String(item.accountNumber) ===
+                        String(accountNumber)
+                );
+
+                const taxRate =
+                    parseFloat(
+                        String(accountTax?.tax || "0").replace("%", "")
+                    ) || 0;
+
+                const spend = Number(params.data?.spend) || 0;
+
+                return Number(
+                    (spend + (spend * taxRate) / 100).toFixed(2)
+                );
+            },
+            valueFormatter: (params) => {
+                const value = Number(params.value || 0);
+                return `$${value.toFixed(2)}`;
+            },
+
+            comparator: numberComparator,
+
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: "hide-menu",
+        },
         // from: {
         //     // headerName: 'Start',
         //     // field: 'from',
@@ -17513,6 +18424,147 @@ const MyTablePage = () => {
                 return firstChild?.data?.accountNumber || null;
             },
         },
+        tax: {
+            headerName: "Tax",
+            field: "tax",
+            minWidth: 105,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+
+            // valueGetter: (params) => {
+
+            //     // =========================
+            //     // GROUP ROW
+            //     // =========================
+            //     if (params.node?.group) {
+            //         const children = params.node.allLeafChildren || [];
+
+            //         const total = children.reduce((sum, child) => {
+            //             const data = child.data;
+            //             if (!data) return sum;
+
+            //             const accountNumber = data.accountNumber;
+
+            //             const accountTax = taxDetails?.find(
+            //                 item =>
+            //                     String(item.accountNumber) ===
+            //                     String(accountNumber)
+            //             );
+
+            //             const taxRate =
+            //                 parseFloat(
+            //                     String(accountTax?.tax || "0").replace("%", "")
+            //                 ) || 0;
+
+            //             const spend =
+            //                 Number(data.spend) || 0;
+
+            //             const taxAmount =
+            //                 (spend * taxRate) / 100;
+
+            //             // Spend + Tax
+            //             return sum + spend + taxAmount;
+            //         }, 0);
+
+            //         return Number(total.toFixed(2));
+            //     }
+
+            //     // =========================
+            //     // NORMAL ROW
+            //     // =========================
+            //     const accountNumber =
+            //         params.data?.accountNumber;
+
+            //     if (!accountNumber) return 0;
+
+            //     const accountTax = taxDetails?.find(
+            //         item =>
+            //             String(item.accountNumber) ===
+            //             String(accountNumber)
+            //     );
+
+            //     const taxRate =
+            //         parseFloat(
+            //             String(accountTax?.tax || "0").replace("%", "")
+            //         ) || 0;
+
+            //     const spend =
+            //         Number(params.data?.spend) || 0;
+
+            //     const taxAmount =
+            //         (spend * taxRate) / 100;
+
+            //     // ✅ Spend + Tax
+            //     return Number(
+            //         (spend + taxAmount).toFixed(2)
+            //     );
+            // },
+            valueGetter: (params) => {
+                // Pinned footer
+                if (params.node?.rowPinned) {
+                    return Number(params.data?.tax || 0);
+                }
+
+                // Group row
+                if (params.node?.group) {
+                    const total = (params.node.allLeafChildren || []).reduce(
+                        (sum, child) => {
+                            const data = child.data;
+                            if (!data) return sum;
+
+                            const accountTax = taxDetails?.find(
+                                item =>
+                                    String(item.accountNumber) ===
+                                    String(data.accountNumber)
+                            );
+
+                            const taxRate =
+                                parseFloat(
+                                    String(accountTax?.tax || "0").replace("%", "")
+                                ) || 0;
+
+                            const spend = Number(data.spend) || 0;
+
+                            return sum + spend + (spend * taxRate) / 100;
+                        },
+                        0
+                    );
+
+                    return Number(total.toFixed(2));
+                }
+
+                // Normal row
+                const accountNumber = params.data?.accountNumber;
+                if (!accountNumber) return 0;
+
+                const accountTax = taxDetails?.find(
+                    item =>
+                        String(item.accountNumber) ===
+                        String(accountNumber)
+                );
+
+                const taxRate =
+                    parseFloat(
+                        String(accountTax?.tax || "0").replace("%", "")
+                    ) || 0;
+
+                const spend = Number(params.data?.spend) || 0;
+
+                return Number(
+                    (spend + (spend * taxRate) / 100).toFixed(2)
+                );
+            },
+            valueFormatter: (params) => {
+                const value = Number(params.value || 0);
+                return `$${value.toFixed(2)}`;
+            },
+
+            comparator: numberComparator,
+
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: "hide-menu",
+        },
         M_tq: {
             headerName: 'M_TQ',
             field: 'M_tq',
@@ -19448,6 +20500,80 @@ const MyTablePage = () => {
             sortable: true,
             aggFunc: liveSpender,
             hide: true
+        },
+        tax: {
+            headerName: "Tax",
+            field: "tax",
+            minWidth: 105,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+
+            valueGetter: (params) => {
+                // Pinned footer
+                if (params.node?.rowPinned) {
+                    return Number(params.data?.tax || 0);
+                }
+
+                // Group row
+                if (params.node?.group) {
+                    const total = (params.node.allLeafChildren || []).reduce(
+                        (sum, child) => {
+                            const data = child.data;
+                            if (!data) return sum;
+
+                            const accountTax = taxDetails?.find(
+                                item =>
+                                    String(item.accountNumber) ===
+                                    String(data.accountNumber)
+                            );
+
+                            const taxRate =
+                                parseFloat(
+                                    String(accountTax?.tax || "0").replace("%", "")
+                                ) || 0;
+
+                            const spend = Number(data.spend) || 0;
+
+                            return sum + spend + (spend * taxRate) / 100;
+                        },
+                        0
+                    );
+
+                    return Number(total.toFixed(2));
+                }
+
+                // Normal row
+                const accountNumber = params.data?.accountNumber;
+                if (!accountNumber) return 0;
+
+                const accountTax = taxDetails?.find(
+                    item =>
+                        String(item.accountNumber) ===
+                        String(accountNumber)
+                );
+
+                const taxRate =
+                    parseFloat(
+                        String(accountTax?.tax || "0").replace("%", "")
+                    ) || 0;
+
+                const spend = Number(params.data?.spend) || 0;
+
+                return Number(
+                    (spend + (spend * taxRate) / 100).toFixed(2)
+                );
+            },
+
+            valueFormatter: (params) => {
+                const value = Number(params.value || 0);
+                return `$${value.toFixed(2)}`;
+            },
+
+            comparator: numberComparator,
+
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: "hide-menu",
         },
         D_tq: {
             headerName: 'D_TQ',
@@ -21821,11 +22947,12 @@ const MyTablePage = () => {
         { key: '2', label: 'Daily', content: 'Content for Daily data' },
         // { key: '3', label: 'Campaigns', content: 'Content for Campaign data' },
         { key: '4', label: 'Agency', content: 'Content for BMName data' },
-        ...(newRevenuePratner === "FB_Mnet" || newRevenuePratner === "FB_MWG" ? [{ key: '5', label: 'Domain', content: 'Content for Domain data' }] : []),
-        ...(newRevenuePratner === "FB_Mnet" ? [{ key: '6', label: 'Hourly', content: 'Content for hour wise break down' }] : []),
+        ...(newRevenuePratner === "FB_Predicto" ? [{ key: '5', label: 'Country', content: 'Content for country data' }] : []),
+        ...(newRevenuePratner === "FB_Mnet" || newRevenuePratner === "FB_MWG" || newRevenuePratner === "FB_Media" ? [{ key: '5', label: 'Domain', content: 'Content for Domain data' }] : []),
+        ...(newRevenuePratner === "FB_Mnet" || newRevenuePratner === "FB_Media" ? [{ key: '6', label: 'Hourly', content: 'Content for hour wise break down' }] : []),
         ...(newRevenuePratner === "FB_DomainActive" ? [{ key: '5', label: 'Keywords', content: 'Content for Keyword data' }] : []),
         // ...(newRevenuePratner === "FB_Mnet" ? [{ key: '7', label: 'Hour', content: 'Content for Hour data' }] : []),
-        ...(newRevenuePratner === "FB_Mnet"
+        ...(newRevenuePratner === "FB_Mnet" || newRevenuePratner === "FB_Media"
             ? [{
                 key: '7',
                 label: 'DayofHour',
@@ -22855,9 +23982,9 @@ const MyTablePage = () => {
                             </Tooltip> */}
                         </Button>
                     </Col>
-                    {(revenuePratner === "FB_Mnet" || revenuePratner === "FB_MnetBing") && (
+                    {(revenuePratner === "FB_Mnet" || revenuePratner === "FB_MnetBing" || revenuePratner === "FB_Media") && (
                         <Col>
-                            <Button
+                            {/* <Button
                                 type="primary"
                                 onMouseEnter={() => setRHovered(true)}
                                 onMouseLeave={() => setRHovered(false)}
@@ -22877,19 +24004,19 @@ const MyTablePage = () => {
                                     gap: "8px",
                                     transition: "all 0.15s ease-in-out",
                                 }}
-                            >
-                                <Tooltip
-                                    title="Revenue base report"
-                                    styles={{
-                                        body: {
-                                            backgroundColor: theme === 'dark' ? '#111' : '#fff',
-                                            color: theme === 'dark' ? '#fff' : '#000',
-                                            border: '1px solid #ccc',
-                                            borderRadius: 6,
-                                        }
-                                        // fontWeight: 500,
-                                    }}>
-                                    <span
+                            > */}
+                            <Tooltip
+                                title="Revenue base report"
+                                styles={{
+                                    body: {
+                                        backgroundColor: theme === 'dark' ? '#111' : '#fff',
+                                        color: theme === 'dark' ? '#fff' : '#000',
+                                        border: '1px solid #ccc',
+                                        borderRadius: 6,
+                                    }
+                                    // fontWeight: 500,
+                                }}>
+                                {/* <span
                                         onClick={(e) => {
                                             // e.stopPropagation();
                                             router.push("/Basereport");
@@ -22901,9 +24028,12 @@ const MyTablePage = () => {
                                         }}
                                     >
                                         R
-                                    </span>
-                                </Tooltip>
-                            </Button>
+                                    </span> */}
+                                <ReportSwitch
+                                    theme={theme}
+                                />
+                            </Tooltip>
+                            {/* </Button> */}
                         </Col>
                     )}
 
@@ -23264,6 +24394,7 @@ const MyTablePage = () => {
                                     endDate={newendDate}
                                     columnStructure={mainData}
                                     allCampaignData={allCampaignData}
+                                    taxDetails={taxDetails}
                                     allProfitLossArray={allProfitLossArray}
                                     // newaccount={newaccount}
                                     newaccount={newaccount}
@@ -23325,6 +24456,7 @@ const MyTablePage = () => {
                                         newtime={newtime}
                                         newRevenuePratner={newRevenuePratner}
                                         inputValue={inputValue}
+                                        taxDetails={taxDetails}
                                         newAccountName={newAccountName}
                                         columnDefs={columnDefs1}
                                         columnDefs1={columnDefsAdsetLevelDaily}
@@ -23458,6 +24590,7 @@ const MyTablePage = () => {
                                     startDate={newStartDate}
                                     endDate={newendDate}
                                     newaccount={newaccount}
+                                    taxDetails={taxDetails}
                                     newtime={newtime}
                                     newRevenuePratner={newRevenuePratner}
                                     inputValue={inputValue}
@@ -23471,13 +24604,34 @@ const MyTablePage = () => {
                                 />
                             </Tabs.TabPane>
 
-                            {newRevenuePratner === "FB_Mnet" || newRevenuePratner === "FB_MWG" && (
+                            {newRevenuePratner === "FB_Predicto" &&
+                                <Tabs.TabPane key="5">
+                                    <PredictoCountryWiseReport
+                                        startDate={newStartDate}
+                                        endDate={newendDate}
+                                        newaccount={newaccount}
+                                        newtime={newtime}
+                                        newRevenuePratner={newRevenuePratner}
+                                        inputValue={inputValue}
+                                        newAccountName={newAccountName}
+                                        campaignComments={campaignComments}
+                                        Camapignlevelstatus={Camapignlevelstatus}
+                                        userdetails={userdetails}
+                                        refreshComments={refreshComments}
+                                        refreshpage={refreshContent}
+                                        getMainMenuItems={getMainMenuItems}
+                                    />
+                                </Tabs.TabPane>
+                            }
+
+                            {(newRevenuePratner === "FB_Mnet" || newRevenuePratner === "FB_MWG" || newRevenuePratner === "FB_Media") && (
                                 <Tabs.TabPane key="5">
                                     <MnetDomainReports
                                         startDate={newStartDate}
                                         endDate={newendDate}
                                         newaccount={newaccount}
                                         newtime={newtime}
+                                        taxDetails={taxDetails}
                                         newRevenuePratner={newRevenuePratner}
                                         inputValue={inputValue}
                                         newAccountName={newAccountName}
@@ -23607,7 +24761,7 @@ const MyTablePage = () => {
                                 </Tabs.TabPane>
 
                             )}
-                            {newRevenuePratner === "FB_Mnet" && (
+                            {(newRevenuePratner === "FB_Mnet" || newRevenuePratner === "FB_Media") && (
                                 <Tabs.TabPane key="6">
                                     <HourlyCampaignLevelReports
                                         startDate={newStartDate}
@@ -23616,6 +24770,7 @@ const MyTablePage = () => {
                                         allCampaignData={allCampaignData}
                                         allProfitLossArray={allProfitLossArray}
                                         // newaccount={newaccount}
+                                        taxDetails={taxDetails}
                                         newaccount={newaccount}
                                         newtime={newtime}
                                         newRevenuePratner={newRevenuePratner}
@@ -23664,7 +24819,7 @@ const MyTablePage = () => {
                                     />
                                 </Tabs.TabPane>
                             )}
-                            {newRevenuePratner === "FB_Mnet" && (
+                            {(newRevenuePratner === "FB_Mnet" || newRevenuePratner === "FB_Media" ) && (
                                 <Tabs.TabPane key="7">
                                     <HourReports
                                         startDate={newStartDate}
@@ -23672,6 +24827,7 @@ const MyTablePage = () => {
                                         columnStructure={mainData}
                                         allCampaignData={allCampaignData}
                                         allProfitLossArray={allProfitLossArray}
+                                        taxDetails={taxDetails}
                                         // newaccount={newaccount}
                                         newaccount={newaccount}
                                         newtime={newtime}

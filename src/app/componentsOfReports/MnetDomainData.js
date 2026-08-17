@@ -36,10 +36,11 @@ const newtworkCollections = {
     "FB_Tonic1": "Facebook_Tonic1",
     "FB_Sedo": "Facebook_Sedo",
     "FB_Inmobi": "Facebook_Inmobi",
-    "FB_MWG": "Facebook_Mwg_Daily"
+    "FB_MWG": "Facebook_Mwg_Daily",
+    "FB_Media": "Facebook_Media_Daily"
 }
 
-const MnetDomainReports = ({ startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, userdetails, refreshComments, refreshpage }) => {
+const MnetDomainReports = ({ startDate, endDate, taxDetails, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, Camapignlevelstatus, userdetails, refreshComments, refreshpage }) => {
     const { theme } = useTokenContext();
     const { apiClient } = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
@@ -432,6 +433,147 @@ const MnetDomainReports = ({ startDate, endDate, newaccount, newtime, newRevenue
             headerClass: 'hide-menu' // Add a custom class
         },
         {
+            headerName: "Tax",
+            field: "tax",
+            minWidth: 105,
+            sortable: true,
+            filter: "agNumberColumnFilter",
+
+            // valueGetter: (params) => {
+
+            //     // =========================
+            //     // GROUP ROW
+            //     // =========================
+            //     if (params.node?.group) {
+            //         const children = params.node.allLeafChildren || [];
+
+            //         const total = children.reduce((sum, child) => {
+            //             const data = child.data;
+            //             if (!data) return sum;
+
+            //             const accountNumber = data.accountNumber;
+
+            //             const accountTax = taxDetails?.find(
+            //                 item =>
+            //                     String(item.accountNumber) ===
+            //                     String(accountNumber)
+            //             );
+
+            //             const taxRate =
+            //                 parseFloat(
+            //                     String(accountTax?.tax || "0").replace("%", "")
+            //                 ) || 0;
+
+            //             const spend =
+            //                 Number(data.spend) || 0;
+
+            //             const taxAmount =
+            //                 (spend * taxRate) / 100;
+
+            //             // Spend + Tax
+            //             return sum + spend + taxAmount;
+            //         }, 0);
+
+            //         return Number(total.toFixed(2));
+            //     }
+
+            //     // =========================
+            //     // NORMAL ROW
+            //     // =========================
+            //     const accountNumber =
+            //         params.data?.accountNumber;
+
+            //     if (!accountNumber) return 0;
+
+            //     const accountTax = taxDetails?.find(
+            //         item =>
+            //             String(item.accountNumber) ===
+            //             String(accountNumber)
+            //     );
+
+            //     const taxRate =
+            //         parseFloat(
+            //             String(accountTax?.tax || "0").replace("%", "")
+            //         ) || 0;
+
+            //     const spend =
+            //         Number(params.data?.spend) || 0;
+
+            //     const taxAmount =
+            //         (spend * taxRate) / 100;
+
+            //     // ✅ Spend + Tax
+            //     return Number(
+            //         (spend + taxAmount).toFixed(2)
+            //     );
+            // },
+            valueGetter: (params) => {
+                // Pinned footer
+                if (params.node?.rowPinned) {
+                    return Number(params.data?.tax || 0);
+                }
+
+                // Group row
+                if (params.node?.group) {
+                    const total = (params.node.allLeafChildren || []).reduce(
+                        (sum, child) => {
+                            const data = child.data;
+                            if (!data) return sum;
+
+                            const accountTax = taxDetails?.find(
+                                item =>
+                                    String(item.accountNumber) ===
+                                    String(data.accountNumber)
+                            );
+
+                            const taxRate =
+                                parseFloat(
+                                    String(accountTax?.tax || "0").replace("%", "")
+                                ) || 0;
+
+                            const spend = Number(data.spend) || 0;
+
+                            return sum + spend + (spend * taxRate) / 100;
+                        },
+                        0
+                    );
+
+                    return Number(total.toFixed(2));
+                }
+
+                // Normal row
+                const accountNumber = params.data?.accountNumber;
+                if (!accountNumber) return 0;
+
+                const accountTax = taxDetails?.find(
+                    item =>
+                        String(item.accountNumber) ===
+                        String(accountNumber)
+                );
+
+                const taxRate =
+                    parseFloat(
+                        String(accountTax?.tax || "0").replace("%", "")
+                    ) || 0;
+
+                const spend = Number(params.data?.spend) || 0;
+
+                return Number(
+                    (spend + (spend * taxRate) / 100).toFixed(2)
+                );
+            },
+            valueFormatter: (params) => {
+                const value = Number(params.value || 0);
+                return `$${value.toFixed(2)}`;
+            },
+
+            // comparator: numberComparator,
+
+            suppressMenu: true,
+            menuTabs: [],
+            headerClass: "hide-menu",
+        },
+        {
             field: "spend",
             resizable: true,
             sortable: true,
@@ -719,6 +861,22 @@ const MnetDomainReports = ({ startDate, endDate, newaccount, newtime, newRevenue
 
             if (fetchData.status === 200 && mainData1.length > 0) {
                 const groupAndCalculateProfit1 = groupAndCalculateProfit(mainData1);
+                const totalWithTax = groupAndCalculateProfit1?.reduce((acc, curr) => {
+                    const spend = Number(curr.spend) || 0;
+
+                    const accountTax = taxDetails?.find(
+                        item =>
+                            String(item.accountNumber) ===
+                            String(curr.accountNumber)
+                    );
+
+                    const taxRate =
+                        parseFloat(
+                            String(accountTax?.tax || "0").replace("%", "")
+                        ) || 0;
+
+                    return acc + spend + (spend * taxRate) / 100;
+                }, 0);
 
                 setDomainData(groupAndCalculateProfit1);
                 setDomainFixedFooter([
@@ -737,6 +895,7 @@ const MnetDomainReports = ({ startDate, endDate, newaccount, newtime, newRevenue
                         fbClicks: parseFloat(groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr?.fbClicks), 0).toFixed(2)),
                         fbLeads: parseFloat(groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr?.fbLeads), 0).toFixed(2)),
                         clicks: parseFloat(groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr?.clicks), 0).toFixed(2)),
+                        tax: Number(totalWithTax.toFixed(2)),
                         // impressions: parseFloat(groupAndCalculateProfit1?.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
                     }
                 ]);
@@ -888,6 +1047,22 @@ const MnetDomainReports = ({ startDate, endDate, newaccount, newtime, newRevenue
                                         filteredData.push(node.data);
                                     }
                                 });
+                                const totalWithTax = filteredData?.reduce((acc, curr) => {
+                                    const spend = Number(curr?.spend) || 0;
+
+                                    const accountTax = taxDetails?.find(
+                                        item =>
+                                            String(item?.accountNumber) ===
+                                            String(curr?.accountNumber)
+                                    );
+
+                                    const taxRate =
+                                        parseFloat(
+                                            String(accountTax?.tax || "0").replace("%", "")
+                                        ) || 0;
+
+                                    return acc + spend + (spend * taxRate) / 100;
+                                }, 0);
 
                                 const updatedFooter = [
                                     {
@@ -902,16 +1077,17 @@ const MnetDomainReports = ({ startDate, endDate, newaccount, newtime, newRevenue
                                         cpl: parseFloat(
                                             (filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpl || 0), 0) || 0).toFixed(2)
                                         ),
-                                        impressions: groupAndCalculateProfit1?.reduce(
+                                        impressions: filteredData?.reduce(
                                             (acc, curr) => acc + parseInt(curr?.impressions || 0),
                                             0
                                         ),
-                                        fbClicks: groupAndCalculateProfit1?.reduce(
+                                        fbClicks: filteredData?.reduce(
                                             (acc, curr) => acc + parseInt(curr?.fbClicks || 0),
                                             0),
                                         cpc: parseFloat(
                                             (filteredData.reduce((acc, curr) => acc + parseFloat(curr?.cpc || 0), 0) || 0).toFixed(2)
                                         ),
+                                        tax: Number(totalWithTax.toFixed(2)),
                                     },
                                 ];
 

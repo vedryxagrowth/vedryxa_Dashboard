@@ -44,7 +44,8 @@ const newtworkCollections = {
   "FB_Inmobi": "Facebook_Inmobi",
   "FB_TonicRsoc": "Facebook_Mnet_AD",
   "FB_InuvoPrism": "Facebook_InuvoPrism",
-  "FB_CodeFuel": "Facebook_Mnet_AD"
+  "FB_CodeFuel": "Facebook_Mnet_AD",
+  "FB_Media": "Facebook_Mnet_AD"
 }
 const selectTimezone = {
   UTC: 'UTCDate',
@@ -62,7 +63,7 @@ const selectTimezone = {
   CEST: 'CESTDate'
 };
 
-const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, selectedCampaigns, selectedAdsets, accountsAccess, commentsMap, showAdLevel, removeSelectedAds }) => {
+const AdLevelReports = ({ context, taxDetails, functionCallForCommnets, activeTab, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, selectedCampaigns, selectedAdsets, accountsAccess, commentsMap, showAdLevel, removeSelectedAds }) => {
   // console.log(columnDefs, "columnDefs");
   // console.log(accountsAccess)
   // console.log(campaignComments);
@@ -185,6 +186,22 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
   const [campaignIds, setCampaignIds] = useState([]);
   const [adLevelCreatives, setAdLevelCreatives] = useState([]);
   useEffect(() => {
+    const totalWithTax = memorizedRowData?.reduce((acc, curr) => {
+      const spend = Number(curr.spend) || 0;
+
+      const accountTax = taxDetails?.find(
+        item =>
+          String(item.accountNumber) ===
+          String(curr.accountNumber)
+      );
+
+      const taxRate =
+        parseFloat(
+          String(accountTax?.tax || "0").replace("%", "")
+        ) || 0;
+
+      return acc + spend + (spend * taxRate) / 100;
+    }, 0);
     setLiveFixedFooter([
       {
         campaignName: 'Total',
@@ -205,7 +222,8 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
         fbclicks: parseFloat(memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0).toFixed(2)),
         fblinkclicks: parseFloat(memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.fblinkclicks), 0).toFixed(2)),
         impressions: parseFloat(memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
-        ctr: parseFloat((memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
+        ctr: parseFloat((memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2)),
+        tax: Number(totalWithTax.toFixed(2)),
       }
     ])
   }, [memorizedRowData]);
@@ -4614,6 +4632,22 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                             }
                           }
                         });
+                        const totalWithTax = filteredData?.reduce((acc, curr) => {
+                          const spend = Number(curr.spend) || 0;
+
+                          const accountTax = taxDetails?.find(
+                            item =>
+                              String(item.accountNumber) ===
+                              String(curr.accountNumber)
+                          );
+
+                          const taxRate =
+                            parseFloat(
+                              String(accountTax?.tax || "0").replace("%", "")
+                            ) || 0;
+
+                          return acc + spend + (spend * taxRate) / 100;
+                        }, 0);
 
                         const updatedFooter = [
                           {
@@ -4636,7 +4670,8 @@ const AdLevelReports = ({ context, functionCallForCommnets, activeTab, startDate
                             fbclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0).toFixed(2)),
                             fblinkclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fblinkclicks), 0).toFixed(2)),
                             impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
-                            ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2))
+                            ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2)),
+                            tax: Number(totalWithTax.toFixed(2)),
                           },
                         ];
 

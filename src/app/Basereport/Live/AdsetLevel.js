@@ -44,7 +44,8 @@ const newtworkCollections = {
     "FB_Inmobi": "Facebook_Inmobi",
     "FB_TonicRsoc": "Facebook_TonicRsoc",
     "FB_InuvoPrism": "Facebook_InuvoPrism",
-    "FB_CodeFuel": "Facebook_CodeFuel"
+    "FB_CodeFuel": "Facebook_CodeFuel",
+    "FB_Media":"Facebook_Media"
 
 }
 const selectTimezone = {
@@ -63,7 +64,7 @@ const selectTimezone = {
     CEST: 'CESTDate'
 };
 
-const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, selectedAdsets, showAdsetLevel, removeSelectedAdsets, selectedCampaigns, moveToNextTab, accountsAccess, commentsMap }) => {
+const AdsetLevelReports = ({ functionCallForCampaigns, taxDetails, context, activeTab, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, selectedAdsets, showAdsetLevel, removeSelectedAdsets, selectedCampaigns, moveToNextTab, accountsAccess, commentsMap }) => {
     const { theme, apiClient } = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
     const getRowStyleTheme = theme === 'dark' ? { backgroundColor: '#1e1e1f', color: '#ffffff' } : { backgroundColor: '#ffffff', color: '#000000' };
@@ -205,6 +206,22 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
     // console.log(rowData, "rowData");
 
     useEffect(() => {
+        const totalWithTax = memorizedRowData?.reduce((acc, curr) => {
+            const spend = Number(curr.spend) || 0;
+
+            const accountTax = taxDetails?.find(
+                item =>
+                    String(item.accountNumber) ===
+                    String(curr.accountNumber)
+            );
+
+            const taxRate =
+                parseFloat(
+                    String(accountTax?.tax || "0").replace("%", "")
+                ) || 0;
+
+            return acc + spend + (spend * taxRate) / 100;
+        }, 0);
         setLiveFixedFooter([
             {
                 campaignName: 'Total',
@@ -225,7 +242,8 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                 fbclicks: parseFloat(memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0).toFixed(2)),
                 fblinkclicks: parseFloat(memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.fblinkclicks), 0).toFixed(2)),
                 impressions: parseFloat(memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0).toFixed(2)),
-                ctr: parseFloat((memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
+                ctr: parseFloat((memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / memorizedRowData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2)),
+                tax: Number(totalWithTax.toFixed(2)),
             }
         ])
     }, [memorizedRowData]);
@@ -4563,6 +4581,22 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                                                         }
                                                     }
                                                 });
+                                                const totalWithTax = filteredData?.reduce((acc, curr) => {
+                                                    const spend = Number(curr.spend) || 0;
+
+                                                    const accountTax = taxDetails?.find(
+                                                        item =>
+                                                            String(item.accountNumber) ===
+                                                            String(curr.accountNumber)
+                                                    );
+
+                                                    const taxRate =
+                                                        parseFloat(
+                                                            String(accountTax?.tax || "0").replace("%", "")
+                                                        ) || 0;
+
+                                                    return acc + spend + (spend * taxRate) / 100;
+                                                }, 0);
 
                                                 const updatedFooter = [
                                                     {
@@ -4585,7 +4619,8 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, activeTab, funct
                                                         fbclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0).toFixed(2)),
                                                         fblinkclicks: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fblinkclicks), 0).toFixed(2)),
                                                         impressions: parseFloat(filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0).toFixed(2)),
-                                                        ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2))
+                                                        ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2)),
+                                                        tax: Number(totalWithTax.toFixed(2)),
                                                     },
                                                 ];
 

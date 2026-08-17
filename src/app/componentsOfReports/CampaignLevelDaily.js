@@ -53,7 +53,8 @@ const newtworkCollections = {
   "FB_Affinity": "Facebook_Affinity_Daily",
   "FB_Botup": "Facebook_Botup_Daily",
   "FB_MWG": "Facebook_Mwg_Daily",
-  "Taboola_Inuvoprism": "Taboola_InuvoPrismDaily"
+  "Taboola_Inuvoprism": "Taboola_InuvoPrismDaily",
+  "FB_Media":"Facebook_Media_Daily"
 }
 const selectTimezone = {
   UTC: 'UTCDate',
@@ -72,7 +73,7 @@ const selectTimezone = {
 };
 
 
-const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, showCampaignLevel, removeSelectedCampaigns, moveToNextTab, accountsAccess, commentsMap }) => {
+const Daily = ({ functionCallForCampaigns, context, taxDetails, functionCallForCommnets, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, showCampaignLevel, removeSelectedCampaigns, moveToNextTab, accountsAccess, commentsMap }) => {
   const { theme, apiClient } = useTokenContext();
   const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
 
@@ -268,6 +269,22 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
   };
 
   useEffect(() => {
+    const totalWithTax = memorizedDailyData?.reduce((acc, curr) => {
+      const spend = Number(curr.spend) || 0;
+
+      const accountTax = taxDetails?.find(
+        item =>
+          String(item.accountNumber) ===
+          String(curr.accountNumber)
+      );
+
+      const taxRate =
+        parseFloat(
+          String(accountTax?.tax || "0").replace("%", "")
+        ) || 0;
+
+      return acc + spend + (spend * taxRate) / 100;
+    }, 0);
     setDailyFixedFooter(
       [
         {
@@ -296,6 +313,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
               return acc + (isNaN(tqValue) ? 0 : tqValue);
             }, 0).toFixed(2)
           ),
+          tax: Number(totalWithTax.toFixed(2)),
         }
       ]
     );
@@ -4674,6 +4692,22 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
                             }
                           }
                         });
+                        const totalWithTax = filteredData?.reduce((acc, curr) => {
+                          const spend = Number(curr.spend) || 0;
+
+                          const accountTax = taxDetails?.find(
+                            item =>
+                              String(item.accountNumber) ===
+                              String(curr.accountNumber)
+                          );
+
+                          const taxRate =
+                            parseFloat(
+                              String(accountTax?.tax || "0").replace("%", "")
+                            ) || 0;
+
+                          return acc + spend + (spend * taxRate) / 100;
+                        }, 0);
 
                         const updatedFooter = [
                           {
@@ -4702,6 +4736,8 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
                                 return acc + (isNaN(tqValue) ? 0 : tqValue);
                               }, 0).toFixed(2)
                             ),
+
+                            tax: Number(totalWithTax.toFixed(2)),
                           },
                         ];
 
@@ -4816,6 +4852,22 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
                             }
                           }
                         });
+                        const totalWithTax = filteredData?.reduce((acc, curr) => {
+                          const spend = Number(curr.spend) || 0;
+
+                          const accountTax = taxDetails?.find(
+                            item =>
+                              String(item.accountNumber) ===
+                              String(curr.accountNumber)
+                          );
+
+                          const taxRate =
+                            parseFloat(
+                              String(accountTax?.tax || "0").replace("%", "")
+                            ) || 0;
+
+                          return acc + spend + (spend * taxRate) / 100;
+                        }, 0);
 
                         const updatedFooter = [
                           {
@@ -4844,6 +4896,7 @@ const Daily = ({ functionCallForCampaigns, context, functionCallForCommnets, sta
                                 return acc + (isNaN(tqValue) ? 0 : tqValue);
                               }, 0).toFixed(2)
                             ),
+                            tax: Number(totalWithTax.toFixed(2)),
                           },
                         ];
 

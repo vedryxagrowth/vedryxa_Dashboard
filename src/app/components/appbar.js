@@ -185,6 +185,7 @@ const Appbar = ({ children, usersDataForLogin }) => {
   const { userdetails } = useTokenContext();
   const [isUserActivitiesComplete, setIsUserActivitiesComplete] = useState(false);
   const [moveForward, setMoveForward] = useState(false);
+  const [reportPath, setReportPath] = useState("/Reports");
 
   const handleUserActivitiesComplete = () => {
     setIsUserActivitiesComplete(true);
@@ -220,6 +221,9 @@ const Appbar = ({ children, usersDataForLogin }) => {
   // }, []); // Empty dependency array to run only once when component mounts
 
   useEffect(() => {
+    setReportPath(localStorage.getItem("reportPage") || "/Reports");
+  }, [pathname]);
+  useEffect(() => {
     const handleResize = () => {
       setHeight(window.innerHeight); // Set the height to the viewport height
     };
@@ -233,7 +237,8 @@ const Appbar = ({ children, usersDataForLogin }) => {
   }, []);
   const menuItems = [
     usersDataForLogin[0]?.role !== 'Network_Partner' && usersDataForLogin[0]?.email !== "careers@adsgoat.in" && getItem('Dashboard', '/Dashboard', <AppstoreOutlined className={pathname === '/Dashboard' && 'black-icon'} />, 'Dashboard'),
-    usersDataForLogin[0]?.role !== 'Network_Partner' && usersDataForLogin[0]?.email !== "careers@adsgoat.in" && usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Reports', '/Reports', <BarChartOutlined className={pathname === '/Reports' && 'black-icon'} />, 'Reports'),
+    // usersDataForLogin[0]?.role !== 'Network_Partner' && usersDataForLogin[0]?.email !== "careers@adsgoat.in" && usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Reports', '/Reports', <BarChartOutlined className={pathname === '/Reports' && 'black-icon'} />, 'Reports'),
+     usersDataForLogin[0]?.role !== 'Network_Partner' && usersDataForLogin[0]?.email !== "careers@adsgoat.in" && usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Reports', reportPath , <BarChartOutlined className={pathname === reportPath && 'black-icon'} />, 'Reports'),
     usersDataForLogin[0]?.role !== 'Network_Partner' && usersDataForLogin[0]?.email !== "careers@adsgoat.in" && usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Creatives', '/Creatives', <PictureOutlined className={pathname === '/Creatives' && 'black-icon'} />, 'Creatives'),
     usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Campaigns', '/Campaigns', <LineChartOutlined className={pathname === '/Campaigns' && 'black-icon'} />, 'Campaigns'),
     // getItem('Users', '/Users', <ContainerOutlined />),
@@ -500,7 +505,7 @@ const Appbar = ({ children, usersDataForLogin }) => {
                       : '#000',
 
                     backgroundColor:
-                      item.text === pathname.split("/")[1]
+                      item.text === pathname.split("/")[1]  
                         ? '#91C25F'
                         : 'transparent',
 

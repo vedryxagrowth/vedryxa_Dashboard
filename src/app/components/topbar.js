@@ -122,6 +122,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
   // inside your notifications component
   const [previewUrl, setPreviewUrl] = useState(null);   // store clicked image url
   const [isPreviewVisible, setIsPreviewVisible] = useState(false);  // control modal
+  const [reportPath, setReportPath] = useState("/Reports");
 
 
 
@@ -157,6 +158,10 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
       fetchNotificationSound();
     }
   }, [userdetails?.email]);
+
+  useEffect(() => {
+    setReportPath(localStorage.getItem("reportPage") || "/Reports");
+  }, [pathname]);
 
   // Toggle mute
   const toggleMute = async (e) => {
@@ -682,10 +687,21 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
       label,
     };
   }
-
+  // console.log("reportPath:", reportPath);
   const menuItems = [
     getItem('Dashboard', '/Dashboard', <HomeOutlined className={pathname === '/Dashboard' && 'black-icon'} />),
-    status === 'authenticated' && (usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Reports', '/Reports', <DatabaseOutlined className={pathname === '/Reports' && 'black-icon'} />)),
+    // status === 'authenticated' && (usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Reports', '/Reports', <DatabaseOutlined className={pathname === '/Reports' && 'black-icon'} />)),
+    status === 'authenticated' && (usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem(
+      "Reports",
+      reportPath,
+      <DatabaseOutlined
+        className={
+          pathname === reportPath
+            ? "black-icon"
+            : ""
+        }
+      />
+    )),
     status === 'authenticated' && (usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Creatives', '/Creatives', <PieChartOutlined className={pathname === '/Creatives' && 'black-icon'} />)),
     status === 'authenticated' && (usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Campaigns', '/Campaigns', <DesktopOutlined className={pathname === '/Campaigns' && 'black-icon'} />)),
     // getItem('Users', '/Users', <ContainerOutlined />),
@@ -693,6 +709,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
     status === 'authenticated' && (usersDataForLogin[0]?.role === 'Admin' && getItem('Activities', '/Activities', <LaptopOutlined className={pathname === '/Activities' && 'black-icon'} />)),
   ].filter(Boolean);
 
+  console.log("menuItems:", menuItems);
   useLayoutEffect(() => {
     if (visible && containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();

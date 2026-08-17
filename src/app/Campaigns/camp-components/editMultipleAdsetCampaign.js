@@ -49,6 +49,7 @@ import { v4 as uuidv4 } from "uuid";
 import dynamic from "next/dynamic";
 import dayjs from "dayjs";
 import MnetUrlBuilder from "./urlbuilder/mnet";
+import MediaUrlBuilder from "./urlbuilder/media";
 import MnetBingUrlBuilder from "./urlbuilder/mnetbing"
 import TonicUrlBuilder from "./urlbuilder/tonic";
 import System1UrlBuilder from "./urlbuilder/system1";
@@ -808,6 +809,14 @@ const AddComponent = ({
       case "FB_Mnet":
         return (
           <MnetUrlBuilder
+            defaultValues={websiteURL}
+            accountis={accountis}
+            onReturnMessage={onReturnUrl}
+          />
+        );
+      case "FB_Media":
+        return (
+          <MediaUrlBuilder
             defaultValues={websiteURL}
             accountis={accountis}
             onReturnMessage={onReturnUrl}
@@ -3472,6 +3481,14 @@ const AdsetComponent = ({
       case "FB_Mnet":
         return (
           <MnetUrlBuilder
+            defaultValues={websiteURL}
+            accountis={accountis}
+            onReturnMessage={onReturnUrl}
+          />
+        );
+      case "FB_Media":
+        return (
+          <MediaUrlBuilder
             defaultValues={websiteURL}
             accountis={accountis}
             onReturnMessage={onReturnUrl}
@@ -9330,6 +9347,10 @@ const EditMultipleAdsetCampaignDrawer = ({
         return (
           <MnetUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
         );
+      case "FB_Media":
+        return (
+          <MediaUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
+        );
       case "FB_MnetBing":
         return (
           <MnetBingUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
@@ -10744,7 +10765,7 @@ const EditMultipleAdsetCampaignDrawer = ({
               }
             }
           }
-          catch(error) {
+          catch (error) {
             console.error("Facebook upload failed:", error);
 
             mediaHashArray = {
@@ -10867,7 +10888,7 @@ const EditMultipleAdsetCampaignDrawer = ({
               }
             }
           }
-          catch(error) {
+          catch (error) {
             mediaHashArray = {
               filename: s3FileUrl,
               facebookUploadFailed: true,
@@ -11352,7 +11373,7 @@ const EditMultipleAdsetCampaignDrawer = ({
                 } else if (item.videoid) {
                   newUpdatedAd["videoid"] = getItem.videoid;
                   newUpdatedAd["thambnailurl"] = getItem.thambnailurl;
-                }else{
+                } else {
                   newUpdatedAd["facebookUploadFailed"] = getItem.facebookUploadFailed;
                 }
               } else {
@@ -11383,17 +11404,17 @@ const EditMultipleAdsetCampaignDrawer = ({
                     newUpdatedAd["filename"] = updatedFilesDeatils.filename;
                     if (item.Addid) newUpdatedAd["re_lunch"] = true;
                     send_re_launch_status = true;
-                  }else{
+                  } else {
                     newUpdatedAd["filename"] = updatedFilesDeatils.filename;
                     newUpdatedAd["facebookUploadFailed"] = true;
                   }
                 }
               }
               return newUpdatedAd;
-            } 
+            }
             else {
               // console.log("new ad created in adlevel");
-              const fileData = await getFilenameDeatials(item.filename);
+              const fileData = await f(item.filename);
               re_lunch = true;
               send_re_launch_status = true;
 
@@ -11416,7 +11437,7 @@ const EditMultipleAdsetCampaignDrawer = ({
                 newAd["filename"] = fileData.filename;
                 newAd["thambnailurl"] = fileData.thambnailurl;
               }
-              else{
+              else {
                 newAd["filename"] = fileData.filename;
                 newAd["facebookUploadFailed"] = true;
               }

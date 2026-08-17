@@ -49,10 +49,11 @@ const newtworkCollections = {
     "FB_TonicRsoc": "Facebook_TonicRsoc",
     "FB_InuvoPrism": "Facebook_InuvoPrismDaily",
     "FB_CodeFuel": "Facebook_CodeFuel_Daily",
-    "FB_Predicto": "Facebook_Predicto_Daily",
-    "FB_Affinity": "Facebook_Affinity_Daily",
-    "FB_Botup": "Facebook_Botup_Daily",
-    "FB_MWG": "Facebook_Mwg_Daily"
+    "FB_Predicto": "Facebook_Mnet_AD",
+    "FB_Affinity": "Facebook_Mnet_AD",
+    "FB_Botup": "Facebook_Mnet_AD",
+    "FB_MWG": "Facebook_Mwg_Daily",
+    "FB_Media":"Facebook_Media_Daily"
 }
 const selectTimezone = {
     UTC: 'UTCDate',
@@ -71,7 +72,7 @@ const selectTimezone = {
 };
 
 
-const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, selectedAdsets, showAdsetLevel, removeSelectedAdsets, selectedCampaigns, moveToNextTab, accountsAccess, commentsMap }) => {
+const Daily = ({ functionCallForCommnets, context, taxDetails, activeTab, functionCallForCampaigns, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, setCamapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, selectedAdsets, showAdsetLevel, removeSelectedAdsets, selectedCampaigns, moveToNextTab, accountsAccess, commentsMap }) => {
     const { theme, apiClient } = useTokenContext();
     const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
 
@@ -204,6 +205,22 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
     // }, [inputValue, selectedAdset, dailyData]);
 
     useEffect(() => {
+        const totalWithTax = memorizedDailyData?.reduce((acc, curr) => {
+            const spend = Number(curr.spend) || 0;
+
+            const accountTax = taxDetails?.find(
+                item =>
+                    String(item.accountNumber) ===
+                    String(curr.accountNumber)
+            );
+
+            const taxRate =
+                parseFloat(
+                    String(accountTax?.tax || "0").replace("%", "")
+                ) || 0;
+
+            return acc + spend + (spend * taxRate) / 100;
+        }, 0);
         setDailyFixedFooter(
             [
                 {
@@ -231,7 +248,8 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                             return acc + (isNaN(tqValue) ? 0 : tqValue);
                         }, 0).toFixed(2)
                     ),
-                    ctr: parseFloat((memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2))
+                    ctr: parseFloat((memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.fbclicks), 0) / memorizedDailyData?.reduce((acc, curr) => acc + parseFloat(curr.impressions), 0) * 100).toFixed(2)),
+                    tax: Number(totalWithTax.toFixed(2)),
                 }
             ]
         );
@@ -1272,12 +1290,12 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                     //     matchedAdset = commentForCampaign.AdsetLevel;
                     // }
                     // return matchedAdset ? matchedAdset.status === "ACTIVE" : true; // default ACTIVE
-                    const campaignForAccount = Camapignlevelstatus.find(obj =>
-                        String(obj.campaign_id) === String(campaignid) &&
-                        String(obj.accountNumber) === String(rowAccount)
+                    const campaignForAccount = Camapignlevelstatus?.find(obj =>
+                        String(obj?.campaign_id) === String(campaignid) &&
+                        String(obj?.accountNumber) === String(rowAccount)
                     );
                     const arrayOfAdsets = campaignForAccount?.adsets || [];
-                    const matchedAdset = arrayOfAdsets.find(a => String(a.adset_id) === String(adsetid));
+                    const matchedAdset = arrayOfAdsets?.find(a => String(a?.adset_id) === String(adsetid));
                     return matchedAdset ? matchedAdset.status === "ACTIVE" : true; // default ACTIVE
                 });
 
@@ -3082,6 +3100,8 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
             cronStatus.current = getValidField('cronStatus');
             accountStatus.current = getValidField('accountStatus');
 
+            console.log(mainData,"main")
+
 
             timezone.current = mainData.length > 0 ? mainData[0].accountTimezone : "";
             let totalSpend = 0;
@@ -3140,11 +3160,11 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                     const category = campaignComments.find(campaign => campaign.campaignid === eachData.campaign_id && campaign.Account === eachData.accountNumber && campaign.level === "campaign");
                     const campaign_date = Camapignlevelstatus.find(campaign => campaign.campaign_id === eachData.campaign_id && campaign.accountNumber === eachData.accountNumber);
                     const adsetObjectStatus = Camapignlevelstatus
-                        .find(item =>
-                            String(item.campaign_id) === String(eachData.campaign_id) &&
-                            String(item.accountNumber) === String(eachData.accountNumber)
-                        )?.adsets.find(adset =>
-                            String(adset.adset_id) === String(eachData.adset_id)
+                        ?.find(item =>
+                            String(item?.campaign_id) === String(eachData?.campaign_id) &&
+                            String(item?.accountNumber) === String(eachData?.accountNumber)
+                        )?.adsets?.find(adset =>
+                            String(adset?.adset_id) === String(eachData?.adset_id)
                         );
                     // console.log(eachData.campaign_name, "campaign_name");
                     return (
@@ -3195,6 +3215,8 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                 }) : null;
 
             const fullData = filteredData?.length > 0 ? [...filteredData] : [];
+
+            console.log(filteredData,"filteredData")
 
             let newFilterData;
             if (campaignStatusFilter !== "All") {
@@ -3293,12 +3315,12 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
             // setTrue(false);
             setLoading1(false);
         } catch (error) {
-            // console.log(error);
+            console.log(error);
             // if(error.response.status === 500){
             //     apiStatus.current = true;
             // }
             // console.log(error);
-            setApiStatus(true);
+            setApiStatus(false);
             setLoading1(false);
         }
     }
@@ -4406,6 +4428,22 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                                                             }
                                                         }
                                                     });
+                                                    const totalWithTax = filteredData?.reduce((acc, curr) => {
+                                                        const spend = Number(curr.spend) || 0;
+
+                                                        const accountTax = taxDetails?.find(
+                                                            item =>
+                                                                String(item.accountNumber) ===
+                                                                String(curr.accountNumber)
+                                                        );
+
+                                                        const taxRate =
+                                                            parseFloat(
+                                                                String(accountTax?.tax || "0").replace("%", "")
+                                                            ) || 0;
+
+                                                        return acc + spend + (spend * taxRate) / 100;
+                                                    }, 0);
 
                                                     const updatedFooter = [
                                                         {
@@ -4433,7 +4471,8 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                                                                     return acc + (isNaN(tqValue) ? 0 : tqValue);
                                                                 }, 0).toFixed(2)
                                                             ),
-                                                            ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2))
+                                                            ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2)),
+                                                            tax: Number(totalWithTax.toFixed(2)),
                                                         },
                                                     ];
 
@@ -4544,6 +4583,22 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                                                         }
                                                     }
                                                 });
+                                                const totalWithTax = filteredData?.reduce((acc, curr) => {
+                                                    const spend = Number(curr.spend) || 0;
+
+                                                    const accountTax = taxDetails?.find(
+                                                        item =>
+                                                            String(item.accountNumber) ===
+                                                            String(curr.accountNumber)
+                                                    );
+
+                                                    const taxRate =
+                                                        parseFloat(
+                                                            String(accountTax?.tax || "0").replace("%", "")
+                                                        ) || 0;
+
+                                                    return acc + spend + (spend * taxRate) / 100;
+                                                }, 0);
 
                                                 const updatedFooter = [
                                                     {
@@ -4571,7 +4626,8 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                                                                 return acc + (isNaN(tqValue) ? 0 : tqValue);
                                                             }, 0).toFixed(2)
                                                         ),
-                                                        ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2))
+                                                        ctr: parseFloat((filteredData.reduce((acc, curr) => acc + parseFloat(curr?.fbclicks), 0) / filteredData.reduce((acc, curr) => acc + parseFloat(curr?.impressions), 0) * 100).toFixed(2)),
+                                                        tax: Number(totalWithTax.toFixed(2)),
                                                     },
                                                 ];
 
