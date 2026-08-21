@@ -236,6 +236,16 @@ const App = () => {
   const [loadingCampaignDetails, setLoadingCampaignDetails] = useState({});
   const [openComponentForCreateArticle, setOpenComponentForCreateArticle] = useState(false);
   const lastUpdatedDateandTime = useRef("");
+  const [isCloneModalOpen, setIsCloneModalOpen] = useState(false);
+  const [cloneCampaigns, setCloneCampaigns] = useState([]);
+  const [cloneLoading, setCloneLoading] = useState(false);
+  const [cloneProject, setCloneProject] = useState(null);
+  const [cloneAccount, setCloneAccount] = useState(null);
+  const [cloneSelectedKey, setCloneSelectedKey] = useState(undefined);
+  const [cloneIsOpen, setCloneIsOpen] = useState(false);
+  const [cloneSelectedValue, setCloneSelectedValue] = useState([]);
+  const [cloneSearchText, setCloneSearchText] = useState("");
+
   // console.log(checkedRowRecords);
   // console.log(multipleAdsetCampaignData);
   // const [isOpen, setIsOpen] = useState(false);
@@ -1006,7 +1016,32 @@ const App = () => {
   };
 
   const allowFetchOnSelectRef = useRef(false);
+  const handleCloneKeyChange = (value) => {
+    setCloneSelectedKey(value);
 
+    setShowPredictoadStatus(false);
+    setShowTaboolaStatus(false);
+    setShowPredictoKeywordStatus(false);
+    // If changing network should clear selected accounts
+    setCloneSelectedValue([]);
+  };
+
+  const handleCloneSearch = (value) => {
+    setCloneSearchText(value);
+  };
+
+  const handleCloneDropdownVisibleChange = (open) => {
+    setCloneIsOpen(open);
+  };
+
+  const closeCloneModal = () => {
+    setIsCloneModalOpen(false);
+
+    setCloneSelectedKey(undefined);
+    setCloneSelectedValue([]);
+    setCloneSearchText("");
+    setCloneIsOpen(false);
+  };
   const handleKeyChange = (key) => {
     setSelectedKey(key);
     setSelectedValue([]);
@@ -1586,6 +1621,71 @@ const App = () => {
   //     message.error("Error updating status");
   //   }
   // };
+  const handleCloneSubmit = async () => {
+    if (!cloneCampaigns?.length) {
+      message.warning("Please select at least one campaign");
+      return;
+    }
+
+    if (!cloneSelectedValue?.length) {
+      message.warning("Please select at least one account");
+      return;
+    }
+
+    try {
+      setCloneLoading(true);
+
+      console.log("=================================");
+      console.log("FULL CAMPAIGNS:", cloneCampaigns);
+      console.log("TARGET ACCOUNTS:", cloneSelectedValue);
+      console.log(
+        "TOTAL CAMPAIGNS:",
+        cloneCampaigns.length * cloneSelectedValue.length
+      );
+      console.log("=================================");
+
+      const response = await axios.post(
+        "https://fblaunching.vyaktimetrics.com/open/campaigns/cloneMutlipeCampaigns",
+        {
+          campaigns: cloneCampaigns,
+          accountNumbers: cloneSelectedValue,
+          username:userdetails?.userName
+        },
+        {
+          headers: {
+            Authorization: token,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      console.log("CLONE RESPONSE:", response?.data);
+
+      message.success(
+        response?.data?.message ||
+        "Campaigns cloned successfully"
+      );
+
+      setIsCloneModalOpen(false);
+
+      setCloneSelectedValue([]);
+      setCloneSelectedKey(undefined);
+      setCloneSearchText("");
+
+    } catch (error) {
+      console.error(
+        "Clone campaign error:",
+        error?.response?.data || error
+      );
+
+      message.error(
+        error?.response?.data?.message ||
+        "Failed to clone campaigns"
+      );
+    } finally {
+      setCloneLoading(false);
+    }
+  };
 
   const onToggleStatusForMultipleAdsets = async (record, checked) => {
     try {
@@ -5284,7 +5384,372 @@ const App = () => {
       </>
     );
   };
+  const renderCloneAccountsCheckboxes = (theme) => {
+    const accounts =
+      userdetails?.adAccounts?.[cloneSelectedKey] || [];
 
+    // Search accounts
+    const filteredAccounts = accounts.filter((account) =>
+      String(account?.accountNumber || "")
+        .toLowerCase()
+        .includes(cloneSearchText.toLowerCase())
+    );
+
+    // Only valid account numbers
+    const accountNumbers = filteredAccounts
+      .map((account) => account?.accountNumber)
+      .filter(Boolean);
+
+    // Check whether all currently visible accounts are selected
+    const allSelected =
+      accountNumbers.length > 0 &&
+      accountNumbers.every((accountNumber) =>
+        cloneSelectedValue.includes(accountNumber)
+      );
+
+    // Check whether some accounts are selected
+    const someSelected =
+      accountNumbers.some((accountNumber) =>
+        cloneSelectedValue.includes(accountNumber)
+      );
+
+    // ==============================
+    // SELECT / UNSELECT ALL
+    // ==============================
+    const handleSelectAllCloneAccounts = () => {
+      // Only ACTIVE accounts
+      const activeAccountNumbers = filteredAccounts
+        .filter(
+          (account) =>
+            account?.status === "Active" ||
+            account?.status === "ACTIVE"
+        )
+        .map((account) => account?.accountNumber)
+        .filter(Boolean);
+
+      const allActiveSelected =
+        activeAccountNumbers.length > 0 &&
+        activeAccountNumbers.every((accountNumber) =>
+          cloneSelectedValue.includes(accountNumber)
+        );
+
+      if (allActiveSelected) {
+        // Unselect only active accounts
+        setCloneSelectedValue((prev) =>
+          prev.filter(
+            (accountNumber) =>
+              !activeAccountNumbers.includes(accountNumber)
+          )
+        );
+      } else {
+        // Select only active accounts
+        setCloneSelectedValue((prev) => [
+          ...new Set([
+            ...prev,
+            ...activeAccountNumbers,
+          ]),
+        ]);
+      }
+    };
+
+    // ==============================
+    // NO ACCOUNTS
+    // ==============================
+    if (!cloneSelectedKey) {
+      return (
+        <div
+          style={{
+            padding: "10px",
+            textAlign: "center",
+            color:
+              theme === "dark"
+                ? "#aaa"
+                : "#999",
+          }}
+        >
+          Please select a network
+        </div>
+      );
+    }
+
+    if (accounts.length === 0) {
+      return (
+        <div
+          style={{
+            padding: "10px",
+            textAlign: "center",
+            color:
+              theme === "dark"
+                ? "#aaa"
+                : "#999",
+          }}
+        >
+          No accounts available
+        </div>
+      );
+    }
+
+    return (
+      <div>
+        {/* ================================= */}
+        {/* ALL ACCOUNTS */}
+        {/* ================================= */}
+
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "8px 4px",
+            marginBottom: 5,
+            borderBottom:
+              theme === "dark"
+                ? "1px solid #444"
+                : "1px solid #ddd",
+            cursor: "pointer",
+          }}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            handleSelectAllCloneAccounts();
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <Checkbox
+              checked={allSelected}
+              indeterminate={
+                !allSelected && someSelected
+              }
+              onChange={(e) => {
+                e.stopPropagation();
+
+                handleSelectAllCloneAccounts();
+              }}
+            />
+
+            <span
+              style={{
+                marginLeft: 8,
+                fontWeight: 600,
+                color:
+                  theme === "dark"
+                    ? "#fff"
+                    : undefined,
+              }}
+            >
+              All Accounts
+            </span>
+          </div>
+        </div>
+
+        {/* ================================= */}
+        {/* ACCOUNTS */}
+        {/* ================================= */}
+
+        {filteredAccounts.length === 0 ? (
+          <div
+            style={{
+              padding: "10px",
+              textAlign: "center",
+              color:
+                theme === "dark"
+                  ? "#aaa"
+                  : "#999",
+            }}
+          >
+            No accounts found
+          </div>
+        ) : (
+          filteredAccounts.map((account) => {
+            const accountNumber =
+              account?.accountNumber;
+
+            if (!accountNumber) {
+              return null;
+            }
+
+            const checked =
+              cloneSelectedValue.includes(
+                accountNumber
+              );
+
+            const isActive =
+              account?.status === "Active" ||
+              account?.status === "ACTIVE";
+
+            return (
+              <div
+                key={accountNumber}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  width: "100%",
+                  padding: "7px 4px",
+                  cursor: "pointer",
+                  borderRadius: "4px",
+                }}
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+
+                  setCloneSelectedValue((prev) => {
+                    if (
+                      prev.includes(accountNumber)
+                    ) {
+                      return prev.filter(
+                        (item) =>
+                          item !== accountNumber
+                      );
+                    }
+
+                    return [
+                      ...prev,
+                      accountNumber,
+                    ];
+                  });
+                }}
+              >
+                {/* ========================= */}
+                {/* LEFT SIDE */}
+                {/* ========================= */}
+
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    minWidth: 0,
+                    flex: 1,
+                  }}
+                >
+                  <Checkbox
+                    checked={checked}
+                    onChange={(e) => {
+                      e.stopPropagation();
+
+                      setCloneSelectedValue(
+                        (prev) => {
+                          if (
+                            e.target.checked
+                          ) {
+                            return prev.includes(
+                              accountNumber
+                            )
+                              ? prev
+                              : [
+                                ...prev,
+                                accountNumber,
+                              ];
+                          }
+
+                          return prev.filter(
+                            (item) =>
+                              item !==
+                              accountNumber
+                          );
+                        }
+                      );
+                    }}
+                  />
+
+                  <div
+                    style={{
+                      marginLeft: 8,
+                      minWidth: 0,
+                      display: "flex",
+                      flexDirection: "column",
+                    }}
+                  >
+                    {/* ACCOUNT NUMBER */}
+                    <span
+                      style={{
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow:
+                          "ellipsis",
+                        color:
+                          theme === "dark"
+                            ? "#fff"
+                            : undefined,
+                      }}
+                    >
+                      {accountNumber}
+                    </span>
+
+                    {/* ACCOUNT NAME */}
+                    {account?.accountName && (
+                      <span
+                        style={{
+                          fontSize: 12,
+                          marginTop: 2,
+                          whiteSpace:
+                            "nowrap",
+                          overflow:
+                            "hidden",
+                          textOverflow:
+                            "ellipsis",
+                          color:
+                            theme === "dark"
+                              ? "#aaa"
+                              : "#888",
+                        }}
+                      >
+                        {account.accountName}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* ========================= */}
+                {/* STATUS */}
+                {/* ========================= */}
+
+                <div
+                  style={{
+                    marginLeft: 10,
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  {isActive ? (
+                    <CheckCircleFilled
+                      style={{
+                        color: "#91C25F",
+                        fontSize: 15,
+                      }}
+                      className="black-icon-active-1"
+                    />
+                  ) : (
+                    <CloseCircleFilled
+                      style={{
+                        color: "#EC7117",
+                        fontSize: 15,
+                      }}
+                      className="black-icon-pause-1"
+                    />
+                  )}
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+    );
+  };
   const fetchInitialData = async () => {
     try {
       const response = await axios.get(
@@ -7242,6 +7707,64 @@ const App = () => {
                             setIsModalVisiblesForBulkComments(true);
                           }}
                         />
+                        <FaClone
+                          style={{
+                            cursor: hasData ? "pointer" : "not-allowed",
+                            opacity: hasData ? 1 : 0.4,
+                          }}
+                          onClick={async (e) => {
+                            e.stopPropagation();
+
+                            if (!hasData) {
+                              message.warning("Please select at least one campaign");
+                              return;
+                            }
+
+                            try {
+                              setCloneLoading(true);
+
+                              const completeCampaigns = [];
+
+                              for (const record of checkedRowRecords) {
+                                console.log("Fetching campaign:", record.campaign_name);
+
+                                const response = await axios.get(
+                                  `https://fblaunching.vyaktimetrics.com/open/campaigns/view/${record.identifier}`,
+                                  {
+                                    headers: {
+                                      Authorization: token,
+                                    },
+                                  }
+                                );
+
+                                const completeCampaignDetails =
+                                  response?.data?.data?.[0];
+
+                                if (completeCampaignDetails) {
+                                  completeCampaigns.push(completeCampaignDetails);
+                                }
+                              }
+
+                              console.log(
+                                "COMPLETE CAMPAIGNS FOR CLONE:",
+                                completeCampaigns
+                              );
+
+                              setCloneCampaigns(completeCampaigns);
+                              setIsCloneModalOpen(true);
+
+                            } catch (error) {
+                              console.error(
+                                "Error fetching complete campaign details:",
+                                error?.response?.data || error
+                              );
+
+                              message.error("Failed to fetch campaign details");
+                            } finally {
+                              setCloneLoading(false);
+                            }
+                          }}
+                        />
                       </div>
                     ),
                   }}
@@ -7321,8 +7844,313 @@ const App = () => {
           </Tabs>
         </div>
       )}
+      <Modal
+        title="Clone Campaign"
+        open={isCloneModalOpen}
+        onCancel={() => {
+          setIsCloneModalOpen(false);
+          setCloneSelectedKey(undefined);
+          setCloneSelectedValue([]);
+          setCloneSearchText("");
+          setCloneIsOpen(false);
+        }}
+        width={500}
+        footer={null}
+      >
+        {cloneLoading ? (
+          <div
+            style={{
+              textAlign: "center",
+              padding: "30px",
+            }}
+          >
+            <Spin />
+          </div>
+        ) : (
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+            onMouseDown={(e) => {
+              e.stopPropagation();
+            }}
+          >
+            {/* ============================= */}
+            {/* NETWORK + ACCOUNT */}
+            {/* ============================= */}
 
+            <div
+              style={{
+                display: "flex",
+                gap: 20,
+                width: "100%",
+                alignItems: "flex-start",
+              }}
+            >
 
+              {/* ================= NETWORK ================= */}
+
+              <div
+                style={{
+                  flex: 1,
+                }}
+              >
+                <div
+                  style={{
+                    marginBottom: 8,
+                    fontWeight: 500,
+                  }}
+                >
+                  Network
+                </div>
+
+                <Select
+                  showSearch
+                  placeholder="Select Projects"
+                  style={{
+                    width: "100%",
+                  }}
+                  value={cloneSelectedKey}
+                  onChange={(value) => {
+                    setCloneSelectedKey(value);
+
+                    // Important:
+                    // Network changed → clear ONLY clone accounts
+                    setCloneSelectedValue([]);
+                  }}
+                  dropdownClassName={
+                    theme === "dark"
+                      ? "custom-dropdown"
+                      : ""
+                  }
+                  className={`${theme === "dark"
+                    ? "dark-theme"
+                    : "light-theme"
+                    } green-border-select`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                  onMouseDown={(e) => {
+                    e.stopPropagation();
+                  }}
+                >
+                  {options
+                    .slice()
+                    .sort((a, b) => {
+                      const aActive =
+                        networksWithStatus.find(
+                          (n) =>
+                            n.Network === a.label
+                        )?.Status === "Active"
+                          ? 1
+                          : 0;
+
+                      const bActive =
+                        networksWithStatus.find(
+                          (n) =>
+                            n.Network === b.label
+                        )?.Status === "Active"
+                          ? 1
+                          : 0;
+
+                      return bActive - aActive;
+                    })
+                    .map((option) => {
+                      const isActive =
+                        networksWithStatus.find(
+                          (n) =>
+                            n.Network === option.label
+                        )?.Status === "Active";
+
+                      return (
+                        <Option
+                          key={option.value}
+                          value={option.value}
+                        >
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 6,
+                            }}
+                          >
+                            {isActive ? (
+                              <CheckCircleFilled
+                                style={{
+                                  color: "#91C25F",
+                                  fontSize: 15,
+                                }}
+                                className="black-icon-active-1"
+                              />
+                            ) : (
+                              <CloseCircleFilled
+                                style={{
+                                  color: "#EC7117",
+                                  fontSize: 15,
+                                }}
+                                className="black-icon-pause-1"
+                              />
+                            )}
+
+                            <span>
+                              {option.label}
+                            </span>
+                          </div>
+                        </Option>
+                      );
+                    })}
+                </Select>
+              </div>
+
+              {/* ================= ACCOUNT ================= */}
+
+              <div
+                style={{
+                  flex: 1,
+                }}
+              >
+                <div
+                  style={{
+                    marginBottom: 8,
+                    fontWeight: 500,
+                  }}
+                >
+                  Account
+                </div>
+
+                <Select
+                  showSearch
+                  placeholder="Select Account"
+
+                  onSearch={(value) => {
+                    setCloneSearchText(value);
+                  }}
+
+                  searchValue={cloneSearchText}
+
+                  open={cloneIsOpen}
+
+                  onDropdownVisibleChange={(open) => {
+                    setCloneIsOpen(open);
+                  }}
+
+                  value={
+                    cloneSelectedValue.length === 0
+                      ? undefined
+                      : cloneSelectedValue.length === 1
+                        ? cloneSelectedValue[0]
+                        : `${cloneSelectedValue[0]}, +${cloneSelectedValue.length - 1
+                        } more`
+                  }
+
+                  dropdownClassName={
+                    theme === "dark"
+                      ? "custom-dropdown"
+                      : ""
+                  }
+
+                  className={
+                    theme === "dark"
+                      ? "dark-theme"
+                      : "light-theme"
+                  }
+
+                  style={{
+                    width: "100%",
+                    whiteSpace: "nowrap",
+                    color:
+                      theme === "dark"
+                        ? "white"
+                        : undefined,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    border: "1px solid #4CAF50",
+                    borderRadius: "6px",
+                  }}
+
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+
+                  onMouseDown={(e) => {
+                    e.stopPropagation();
+                  }}
+
+                  dropdownRender={() => (
+                    <div
+                      style={{
+                        maxHeight: 300,
+                        overflowY: "auto",
+                        padding: 8,
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
+                      onMouseDown={(e) => {
+                        e.stopPropagation();
+                      }}
+                    >
+                      {cloneSelectedKey ? (
+                        renderCloneAccountsCheckboxes(
+                          theme
+                        )
+                      ) : (
+                        <div
+                          style={{
+                            padding: 10,
+                            color: "#999",
+                          }}
+                        >
+                          Please select a network
+                        </div>
+                      )}
+                    </div>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* ================= BUTTONS ================= */}
+
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: 10,
+                marginTop: 30,
+              }}
+            >
+              <Button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsCloneModalOpen(false);
+                }}
+                disabled={cloneLoading}
+              >
+                Cancel
+              </Button>
+
+              <Button
+                type="primary"
+                loading={cloneLoading}
+                disabled={
+                  !cloneSelectedKey ||
+                  cloneSelectedValue.length === 0 ||
+                  cloneCampaigns.length === 0
+                }
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+
+                  handleCloneSubmit();
+                }}
+              >
+                Submit
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
       {!restrictedEmails.includes(userdetails.email) && (
         <Drawer
           title={adsetcampaigndata?.campaign_name || ""}
