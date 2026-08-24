@@ -11435,7 +11435,7 @@ const EditMultipleAdsetCampaignDrawer = ({
             }
             else {
               // console.log("new ad created in adlevel");
-              const fileData = await f(item.filename);
+              const fileData = await (item.filename);
               re_lunch = true;
               send_re_launch_status = true;
 
