@@ -49,6 +49,7 @@ import { v4 as uuidv4 } from "uuid";
 import dynamic from "next/dynamic";
 import dayjs from "dayjs";
 import MnetUrlBuilder from "./urlbuilder/mnet";
+import LycosUrlBuilder from "./urlbuilder/lycos";
 import MediaUrlBuilder from "./urlbuilder/media";
 import MnetBingUrlBuilder from "./urlbuilder/mnetbing"
 import TonicUrlBuilder from "./urlbuilder/tonic";
@@ -806,6 +807,14 @@ const AddComponent = ({
       case "FB_Mnet":
         return (
           <MnetUrlBuilder
+            defaultValues={websiteURL}
+            accountis={accountis}
+            onReturnMessage={onReturnUrl}
+          />
+        );
+      case "FB_Lycos":
+        return (
+          <LycosUrlBuilder
             defaultValues={websiteURL}
             accountis={accountis}
             onReturnMessage={onReturnUrl}
@@ -3614,6 +3623,14 @@ const AdsetComponent = ({
       case "FB_Mnet":
         return (
           <MnetUrlBuilder
+            defaultValues={websiteURL}
+            accountis={accountis}
+            onReturnMessage={onReturnUrl}
+          />
+        );
+      case "FB_Lycos":
+        return (
+          <LycosUrlBuilder
             defaultValues={websiteURL}
             accountis={accountis}
             onReturnMessage={onReturnUrl}
@@ -9041,6 +9058,10 @@ const CloneMultipleAdsetCampaignDrawer = ({
       case "FB_Mnet":
         return (
           <MnetUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
+        );
+      case "FB_Lycos":
+        return (
+          <LycosUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
         );
       case "FB_Media":
         return (
