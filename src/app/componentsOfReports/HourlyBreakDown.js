@@ -500,7 +500,7 @@ const HourlyCampaignLevelReports = ({ functionCallForCommnets, context, taxDetai
             .map(item => parseInt(item.updatedHour.split(":")[0], 10));
         return hours.length > 0 ? Math.max(...hours) : null;
     }
-    const getLatestHour = async () => {
+    const getLatestHour = async (functionCall1) => {
 
         const collectionName =
             newRevenuePratner === "FB_DomainActive"
@@ -518,11 +518,12 @@ const HourlyCampaignLevelReports = ({ functionCallForCommnets, context, taxDetai
                 }
             );
             setLatestHour(resp?.data?.latestHour ?? 0);
+            await functionCall1(resp?.data?.latestHour);
         } catch (error) {
             console.log(error);
         }
     };
-    const functionCall1 = async () => {
+    const functionCall1 = async (latestHour) => {
         try {
             setLoading(true);
 
@@ -708,7 +709,7 @@ const HourlyCampaignLevelReports = ({ functionCallForCommnets, context, taxDetai
             //         return fbHour <= revenueHour;
             //     });
             // }
-            if (showAllHours) {
+            if (!showAllHours) {
                 newFilterData = newFilterData.filter((item) => {
                     const fbHour = Number(item["fb-hour"]);
 
@@ -885,8 +886,8 @@ const HourlyCampaignLevelReports = ({ functionCallForCommnets, context, taxDetai
         gridOptions.api.setColumnDefs(columnDefs);
     });
     const handleReFetchData = () => {
-        getLatestHour();
-        functionCall1();
+        getLatestHour(functionCall1);
+        // functionCall1();
         setApiStatus(false);
     }
 
@@ -899,8 +900,8 @@ const HourlyCampaignLevelReports = ({ functionCallForCommnets, context, taxDetai
 
     useEffect(() => {
         if (campaignStatusFilter && Camapignlevelstatus.length > 0) {
-            getLatestHour();
-            functionCall1();
+            getLatestHour(functionCall1);
+            // functionCall1();
         }
     }, [showAllHours]);
 

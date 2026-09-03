@@ -2,7 +2,7 @@
 import React from 'react';
 import axios from 'axios';
 // import { SessionProvider, useSession, signIn, signOut } from 'next-auth/react';
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import { Audio } from 'react-loader-spinner';
 import moment from 'moment-timezone';
@@ -553,7 +553,7 @@ export default function AdNameAndAccount({ params }) {
     }
 
     const getHistoryData = async () => {
-        const fetchData = await apiClient.get(`/reports/dailyhistory/adhistory?AdId=${AdId}&accountNumber=${accountNumber}&timezone=${timeZone}&network=${network}`);
+        const fetchData = await apiClient.get(`http://localhost:4000/reports/dailyhistory/adhistory?AdId=${AdId}&accountNumber=${accountNumber}&timezone=${timeZone}&network=${network}`);
         const url = `http://localhost:8000/MnetLiveCampaignHistory?adsetName=${decodedString}&accountNumber=${accountNumber}&timezone=${timeZone}`
 
         const mainData = fetchData.data.data;
@@ -1322,11 +1322,11 @@ export default function AdNameAndAccount({ params }) {
         return valueA.localeCompare(valueB);
     };
 
-    const defaultColDef = {
-        comparator: defaultComparator, // Use the universal comparator for sorting
-        sortable: true,  // Enable sorting for all columns
-        filter: true,    // Enable filtering for all columns
-    };
+    const defaultColDef = useMemo(() => ({
+        comparator: defaultComparator,
+        sortable: true,
+        filter: true,
+    }), []);
 
     const onCellKeyDown = (params) => {
         if (params.event.ctrlKey && params.event.key === "c") {
