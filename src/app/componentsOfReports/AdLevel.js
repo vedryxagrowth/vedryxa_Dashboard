@@ -66,7 +66,6 @@ const selectTimezone = {
 const AdLevelReports = ({ context, taxDetails, functionCallForCommnets, activeTab, startDate, endDate, newaccount, newtime, newRevenuePratner, inputValue, newAccountName, columnDefs, campaignComments, setCampaignComments, Camapignlevelstatus, changeRRefrst, debouncedHandleColumnMove, userdetails, refreshComments, refreshpage, getMainMenuItems, toggleStatus, handleChangeToggle, tabStatus, selectedCampaigns, selectedAdsets, accountsAccess, commentsMap, showAdLevel, removeSelectedAds }) => {
   // console.log(columnDefs, "columnDefs");
   // console.log(accountsAccess)
-  // console.log(campaignComments);
   const { theme, apiClient } = useTokenContext();
   const gridThemeClass = theme === 'dark' ? 'ag-theme-alpine-dark' : 'ag-theme-alpine';
   const getRowStyleTheme = theme === 'dark' ? { backgroundColor: '#1e1e1f', color: '#ffffff' } : { backgroundColor: '#ffffff', color: '#000000' };
