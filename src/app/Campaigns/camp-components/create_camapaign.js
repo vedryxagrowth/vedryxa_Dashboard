@@ -59,6 +59,7 @@ import MnetUrlBuilder from "./urlbuilder/mnet";
 import MediaUrlBuilder from "./urlbuilder/media";
 import MnetBingUrlBuilder from "./urlbuilder/mnetbing"
 import TonicUrlBuilder from "./urlbuilder/tonic";
+import LycosUrlBuilder from "./urlbuilder/lycos";
 import System1UrlBuilder from "./urlbuilder/system1";
 import DActiveUrlBuilder from "./urlbuilder/dactive";
 import AffinityUrlBuilder from "./urlbuilder/affinity";
@@ -765,28 +766,20 @@ const AccountForm = ({
 
       case "FB_Tonic1":
         return (
-          <TonicUrlBuilder
-            indexValueForAccount={indexValueForAccount}
-            defaultValues={defaultURLBuilder}
-            accountis={account}
-            onReturnMessage={onReturnUrl}
-          />
+          <TonicUrlBuilder indexValueForAccount={indexValueForAccount} defaultValues={defaultURLBuilder} accountis={account} onReturnMessage={onReturnUrl} />
         );
       case "FB_System1":
         return (
-          <System1UrlBuilder
-            indexValueForAccount={indexValueForAccount}
-            defaultValues={defaultURLBuilder}
-            accountis={account}
-            onReturnMessage={onReturnUrl}
-          />
+          <System1UrlBuilder indexValueForAccount={indexValueForAccount} defaultValues={defaultURLBuilder} accountis={account} onReturnMessage={onReturnUrl} />
         );
       case "FB_DomainActive":
         return (
-          <DActiveUrlBuilder
-            accountis={account}
-            onReturnMessage={onReturnUrl}
-          />
+          <DActiveUrlBuilder accountis={account} onReturnMessage={onReturnUrl} />
+        );
+      case "FB_Lycos":
+        //defaultValues
+        return (
+          <LycosUrlBuilder indexValueForAccount={indexValueForAccount} defaultValues={defaultURLBuilder} accountis={account} onReturnMessage={onReturnUrl} />
         );
     }
   }
@@ -2170,6 +2163,11 @@ const AdsetComponent = ({
             accountis={accountis}
             onReturnMessage={onReturnUrl}
           />
+        );
+      case "FB_Lycos":
+        //defaultValues
+        return (
+          <LycosUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
         );
     }
     // }
@@ -9260,6 +9258,10 @@ const CreateCampaignDrawer = ({
             accountis={accountis}
             onReturnMessage={onReturnUrl}
           />
+        );
+      case "FB_Lycos":
+        return (
+          <LycosUrlBuilder accountis={accountis} onReturnMessage={onReturnUrl} />
         );
     }
   }, [network, accountis, onReturnUrl]);

@@ -3016,7 +3016,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, context, taxDetails, fu
             setCampaignIds(campaignsByAccount);
 
             // --- keep your existing logic below this line unchanged ---
-            const mainData = mainData1;
+            const mainData = mainData1?.filter(item => item?.hour || item?.estimated_revenue > 0);
             const specifiedTimeZone = selectTimezone[newtime];
 
             const filteredData = mainData && mainData.length > 0 ?
