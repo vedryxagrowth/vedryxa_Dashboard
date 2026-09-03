@@ -2965,7 +2965,7 @@ const AdsetLevelReports = ({ functionCallForCampaigns, context, taxDetails, acti
 
             // You had a filter to skip rows where ad_clicks > 0
             const mainData1 = resp.data.data || [];
-            const mainData = mainData1;
+            const mainData = mainData1?.filter(item => item?.hour || item?.estimated_revenue > 0);
 
             const campaignsByAccount = {};
 

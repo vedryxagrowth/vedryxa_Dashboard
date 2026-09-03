@@ -43,7 +43,7 @@ const newtworkCollections = {
   "FB_Sedo": "Facebook_Sedo",
   "FB_Inmobi": "Facebook_Inmobi",
   "FB_TonicRsoc": "Facebook_Mnet_AD",
-  "FB_InuvoPrism": "Facebook_InuvoPrism",
+  "FB_InuvoPrism": "Facebook_Mnet_AD",
   "FB_CodeFuel": "Facebook_Mnet_AD",
   "FB_Media": "Facebook_Mnet_AD"
 }
@@ -2957,7 +2957,7 @@ const AdLevelReports = ({ context, taxDetails, functionCallForCommnets, activeTa
         }
       );
       const mainData1 = fetchData.data.data || [];
-      const mainData = tabStatus === "Live" ? mainData1.filter(obj => !("ad_clicks" in obj)) : mainData;
+      const mainData = tabStatus === "Live" ? mainData1?.filter(item => item?.hour || item?.estimated_revenue > 0) : mainData;
       // console.log(mainData1, "mainData1");
       // console.log(mainData, "mainData");
 
