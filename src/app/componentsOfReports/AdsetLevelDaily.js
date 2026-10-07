@@ -47,7 +47,7 @@ const newtworkCollections = {
     "FB_Sedo": "Facebook_Sedo",
     "FB_Inmobi": "Facebook_Inmobi",
     "FB_TonicRsoc": "Facebook_TonicRsoc",
-    "FB_InuvoPrism": "Facebook_InuvoPrismDaily",
+    "FB_InuvoPrism": "Facebook_InuvoPrism_Daily",
     "FB_CodeFuel": "Facebook_CodeFuel_Daily",
     "FB_Predicto": "Facebook_Mnet_AD",
     "FB_Affinity": "Facebook_Mnet_AD",
@@ -3044,7 +3044,7 @@ const Daily = ({ functionCallForCommnets, context, taxDetails, activeTab, functi
                 : [];
             // console.log(campaigns, "campaigns");
             const api = newRevenuePratner === "FB_DomainActive" ? "Daily/CampaignName" : "Daily";
-            const collectionName = newRevenuePratner === "FB_DomainActive" ? "Facebook_DActive_Names" : newRevenuePratner === "FB_InuvoPrism" ? "Facebook_InuvoPrismDaily" : newtworkCollections[newRevenuePratner];
+            const collectionName = newRevenuePratner === "FB_DomainActive" ? "Facebook_DActive_Names" : newRevenuePratner === "FB_InuvoPrism" ? "Facebook_InuvoPrism_Daily" : newtworkCollections[newRevenuePratner];
             // const fetchData = await apiClient.get(`/${api}?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&network=${newtworkCollections[newRevenuePratner]}`);
             // const fetchData = await apiClient.post(`/AdsetLevel?dateStart=${startDate}&dateEnd=${endDate}&accountNumber=${newaccount}&timezone=${newtime}&status=Daily&network=${collectionName}`, { campaignids: campaigns });
             // const mainData = fetchData.data;
