@@ -47,7 +47,7 @@ const newtworkCollections = {
   "FB_Sedo": "Facebook_Sedo",
   "FB_Inmobi": "Facebook_Inmobi",
   "FB_TonicRsoc": "Facebook_TonicRsoc",
-  "FB_InuvoPrism": "Facebook_InuvoPrismDaily",
+  "FB_InuvoPrism": "Facebook_InuvoPrism_Daily",
   "FB_CodeFuel": "Facebook_CodeFuel_Daily",
   "FB_Predicto": 'Facebook_Predicto_Daily',
   "FB_Affinity": "Facebook_Affinity_Daily",
@@ -3241,7 +3241,7 @@ const Daily = ({ functionCallForCampaigns, context, taxDetails, functionCallForC
           collectionName = "Facebook_DActive_Names";
           break;
         case "FB_InuvoPrism":
-          collectionName = "Facebook_InuvoPrismDaily";
+          collectionName = "Facebook_InuvoPrism_Daily";
           break;
         case "Outbrain_TonicRsoc":
           collectionName = "Outbrain_TonicRsoc";
