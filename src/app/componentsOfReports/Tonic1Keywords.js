@@ -542,7 +542,7 @@ const Tonic1Keywords = ({startDate, endDate, newaccount, newtime, newRevenuePrat
                                     <Button key="cancel" onClick={handleCancels} style={{marginLeft:"4px"}}>
                                         Cancel
                                     </Button>
-                                    <Button key="ok" onClick={handleOks} style={{marginLeft:"4px", backgroundColor:"#91C25F"}}>
+                                    <Button key="ok" onClick={handleOks} style={{marginLeft:"4px", backgroundColor:"#5B8CFF"}}>
                                         Ok
                                     </Button>
                                     </div>

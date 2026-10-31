@@ -2623,9 +2623,9 @@ const AddComponent = ({
                       <div className="ad-button">
                         <button
                           style={{
-                            backgroundColor: "#91C25F",
+                            backgroundColor: "#5B8CFF",
                             color: "#000",
-                            borderColor: "#91C25F",
+                            borderColor: "#5B8CFF",
                             borderWidth: "0px",
                           }}
                         >
@@ -4165,7 +4165,7 @@ const AdsetComponent = ({
                                 /> */}
                   <Switch
                     size="small"
-                    style={{ backgroundColor: isDynamicCreative ? "#91C25F" : undefined }}
+                    style={{ backgroundColor: isDynamicCreative ? "#5B8CFF" : undefined }}
                     onClick={(checked, e) => e.stopPropagation()}
                     onChange={(checked) => {
                       // console.log("Dynamic Creative:", checked);
@@ -4696,7 +4696,7 @@ const AdsetComponent = ({
                     disabled={adSchedulingToShowCampaign || budgetType === "daily" || CampaignBudgetActive}
                     checked={!!adSchedulingToShow[adset.id]}
                     style={{
-                      backgroundColor: adSchedulingToShow[adset.id] ? "#91C25F" : undefined,
+                      backgroundColor: adSchedulingToShow[adset.id] ? "#5B8CFF" : undefined,
                     }}
                     onChange={(checked) => {
                       setAdSchedulingToShow(prev => ({
@@ -5116,7 +5116,7 @@ const AdsetComponent = ({
                             fontWeight: 500,
                             padding: "2px 8px",
                             borderRadius: 12,
-                            background: "#91c25f",
+                            background: "#5B8CFF",
                             color: "white",
                             cursor: "pointer",
                             border: "1px solid #91caff",
@@ -5187,7 +5187,7 @@ const AdsetComponent = ({
                       valuePropName="checked"
                     >
                       <Switch size="small" style={{
-                        backgroundColor: isChecked ? "#91C25F" : undefined,
+                        backgroundColor: isChecked ? "#5B8CFF" : undefined,
                       }} />
                     </Form.Item>
                   </div>
@@ -5374,7 +5374,7 @@ const AdsetComponent = ({
                           }}
                           style={{
                             backgroundColor: (hasCountries ? true : (minAgeToggle[adset.id] ?? true))
-                              ? "#91C25F"
+                              ? "#5B8CFF"
                               : "#d9d9d9",
                           }}
                           size="small"
@@ -5909,7 +5909,7 @@ const AdsetComponent = ({
                             fontWeight: activeMediaIndex[index] === -1 ? "500" : "normal",
                             color:
                               activeMediaIndex[index] === -1
-                                ? "#91C25F"
+                                ? "#5B8CFF"
                                 : theme === "dark"
                                   ? "#fff"
                                   : "#333",
@@ -5949,7 +5949,7 @@ const AdsetComponent = ({
                               fontWeight: activeMediaIndex[index] === i ? "500" : "normal",
                               color:
                                 activeMediaIndex[index] === i
-                                  ? "#91C25F"
+                                  ? "#5B8CFF"
                                   : theme === "dark"
                                     ? "#fff"
                                     : "#333",
@@ -7797,9 +7797,9 @@ const AdsetComponent = ({
                               <div className="ad-button">
                                 <button
                                   style={{
-                                    backgroundColor: "#91C25F",
+                                    backgroundColor: "#5B8CFF",
                                     color: "#000",
-                                    borderColor: "#91C25F",
+                                    borderColor: "#5B8CFF",
                                     borderWidth: "0px",
                                   }}
                                 >
@@ -13587,7 +13587,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
                     icon={<PlusOutlined />}
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={addReportCategory}
-                    style={{ backgroundColor: "#91c25f", border: "1px solid #4caf50" }}
+                    style={{ backgroundColor: "#5B8CFF", border: "1px solid #4caf50" }}
                   />
                 </div>
               </div>
@@ -13668,9 +13668,9 @@ const CloneMultipleAdsetCampaignDrawer = ({
             <Button
               type="primary"
               style={{
-                backgroundColor: "#91C25F",
+                backgroundColor: "#5B8CFF",
                 color: "#000",
-                borderColor: "#91C25F",
+                borderColor: "#5B8CFF",
                 borderWidth: 0,
                 marginBottom: "10px",
                 cursor: "pointer",
@@ -14103,7 +14103,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
                                       fontWeight: 500,
                                       padding: "2px 8px",
                                       borderRadius: 12,
-                                      background: "#91c25f",
+                                      background: "#5B8CFF",
                                       color: "white",
                                       cursor: "pointer",
                                       border: "1px solid #91caff",
@@ -14404,7 +14404,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
                           checked={adSchedulingToShowCampaign}
                           onChange={(checked) => setAdSchedulingToShowCampaign(checked)}
                           style={{
-                            backgroundColor: adSchedulingToShowCampaign ? "#91C25F" : undefined,
+                            backgroundColor: adSchedulingToShowCampaign ? "#5B8CFF" : undefined,
                           }}
                         />
                       </Tooltip>
@@ -14625,7 +14625,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
                     <Button
                       type="primary"
                       style={{
-                        background: "#91c25f",
+                        background: "#5B8CFF",
                         minWidth: "200px",
                         borderWidth: "0px",
                       }}
@@ -14864,7 +14864,7 @@ const CloneMultipleAdsetCampaignDrawer = ({
                                     onCancel={handleCancelPop}
                                     okButtonProps={{ loading: confirmLoading }}
                                 >
-                                    <Button type="primary" style={{ background: '#91c25f', minWidth: '100px', borderWidth: '0px', marginLeft: '10px' }} onClick={() => setOpen(true)}>
+                                    <Button type="primary" style={{ background: '#5B8CFF', minWidth: '100px', borderWidth: '0px', marginLeft: '10px' }} onClick={() => setOpen(true)}>
                                         Draft
                                     </Button>
                                 </Popconfirm> */}

@@ -610,7 +610,7 @@ const Newaddaccounts = ({ visible, onClose, AccountsData }) => {
                                     </Option>
                                 ))}
                             </Select>
-                            <Button style={{ backgroundColor: '#91C25F', width: '24px', marginLeft: '5px' }} onClick={() => setIsModalOpen(true)}>
+                            <Button style={{ backgroundColor: '#5B8CFF', width: '24px', marginLeft: '5px' }} onClick={() => setIsModalOpen(true)}>
                                 <PlusOutlined className="black-icon" />
                             </Button>
                         </div>
@@ -736,7 +736,7 @@ const Newaddaccounts = ({ visible, onClose, AccountsData }) => {
                         <Input autoComplete="off" className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} style={{ backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : 'black' }} />
                     </Form.Item>
                     <Form.Item>
-                        <Button style={{ backgroundColor: '#91C25F' }} onClick={showModal}>Submit</Button>
+                        <Button style={{ backgroundColor: '#5B8CFF' }} onClick={showModal}>Submit</Button>
                     </Form.Item>
                 </Form>
             </Drawer>

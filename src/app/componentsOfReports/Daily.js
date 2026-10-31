@@ -673,7 +673,7 @@ const Daily = ({ handleChangeInput, handleBlur, onClickRefresh, taxDetails, func
                                         <Button key="cancel" onClick={handleCancels} style={{ marginLeft: "4px" }}>
                                             Cancel
                                         </Button>
-                                        <Button key="ok" onClick={handleOks} style={{ marginLeft: "4px", backgroundColor: "#91C25F" }}>
+                                        <Button key="ok" onClick={handleOks} style={{ marginLeft: "4px", backgroundColor: "#5B8CFF" }}>
                                             Ok
                                         </Button>
                                     </div>
@@ -1195,7 +1195,7 @@ const Daily = ({ handleChangeInput, handleBlur, onClickRefresh, taxDetails, func
             ...baseTabStyle,
             backgroundColor: isActive ? (theme === 'dark' ? '#1e1e1e' : '#fff') : (theme === 'dark' ? '#2a2a2a' : '#f0f2f5'),
             color: isActive ? (theme === 'dark' ? '#fff' : '#000') : (theme === 'dark' ? '#aaa' : '#6b7280'),
-            boxShadow: isActive ? '0 0 0 1px #91C25F inset' : 'none',
+            boxShadow: isActive ? '0 0 0 1px #5B8CFF inset' : 'none',
             fontWeight: isActive ? 'normal' : 'bold',
         });
 
@@ -1633,12 +1633,12 @@ const Daily = ({ handleChangeInput, handleBlur, onClickRefresh, taxDetails, func
         //                                         title={ !toggleStatus ? "Turn on toggle to column re-arrangement" : "Turn off to stop column re-arrangement"} 
         //                                         mouseEnterDelay={0} // Tooltip appears after 1 second
         //                                     >
-        //                                         <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#91C25F" }}/>
+        //                                         <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#5B8CFF" }}/>
         //                                     </Tooltip>
         //                                 </Col> */}
         //                                 <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
         //                                     <Tooltip title="Export to CSV">
-        //                                         <Button type="primary" style={{ backgroundColor: '#91C25F', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={() => onBtExport(gridRef1, "Daily")} />
+        //                                         <Button type="primary" style={{ backgroundColor: '#5B8CFF', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={() => onBtExport(gridRef1, "Daily")} />
         //                                     </Tooltip>
         //                                 </Col>
         //                             </Row>

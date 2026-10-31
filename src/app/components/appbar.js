@@ -16,7 +16,8 @@ import {
   BarChartOutlined,
   PictureOutlined,
   LineChartOutlined,
-  AppstoreOutlined
+  AppstoreOutlined,
+  DeploymentUnitOutlined
 } from '@ant-design/icons';
 import { Layout, Menu, Button, theme, message, Spin, Skeleton } from 'antd';
 import React, { useState, useEffect } from "react";
@@ -33,6 +34,7 @@ import dayjs from 'dayjs';
 import { notification } from 'antd';
 // import io from 'socket.io-client';
 import soundFile from "../../../public/notification_sounds.mp3";
+import { AppFabric } from 'aws-sdk';
 function getItem(label, key, icon, text) {
   return {
     key,
@@ -237,6 +239,8 @@ const Appbar = ({ children, usersDataForLogin }) => {
   }, []);
   const menuItems = [
     usersDataForLogin[0]?.role !== 'Network_Partner' && usersDataForLogin[0]?.email !== "careers@adsgoat.in" && getItem('Dashboard', '/Dashboard', <AppstoreOutlined className={pathname === '/Dashboard' && 'black-icon'} />, 'Dashboard'),
+
+    usersDataForLogin[0]?.role !== 'Network_Partner' && usersDataForLogin[0]?.email !== "careers@adsgoat.in" && getItem('Intelligence', '/Intelligence', <DeploymentUnitOutlined className={pathname === '/Intelligence' && 'black-icon'} />, 'Intelligence'),
     // usersDataForLogin[0]?.role !== 'Network_Partner' && usersDataForLogin[0]?.email !== "careers@adsgoat.in" && usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Reports', '/Reports', <BarChartOutlined className={pathname === '/Reports' && 'black-icon'} />, 'Reports'),
      usersDataForLogin[0]?.role !== 'Network_Partner' && usersDataForLogin[0]?.email !== "careers@adsgoat.in" && usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Reports', reportPath , <BarChartOutlined className={pathname === reportPath && 'black-icon'} />, 'Reports'),
     usersDataForLogin[0]?.role !== 'Network_Partner' && usersDataForLogin[0]?.email !== "careers@adsgoat.in" && usersDataForLogin[0]?.role !== 'Revenue_Partner' && getItem('Creatives', '/Creatives', <PictureOutlined className={pathname === '/Creatives' && 'black-icon'} />, 'Creatives'),
@@ -297,7 +301,7 @@ const Appbar = ({ children, usersDataForLogin }) => {
                     // background: '#fff',
                     // color: '#007BFF',
                     // background: "rgb(199 243 154)",
-                    background: '#91C25F',
+                    background: '#5B8CFF',
                     color: "rgb(56 102 121)",
                     border: `solid 5px ${darkMode ? '#282628' : '#f1f1f1'}`,
 
@@ -369,10 +373,10 @@ const Appbar = ({ children, usersDataForLogin }) => {
                             borderRadius: '8px', 
                             margin: '5px 0', 
                             color: darkMode ? item.label === pathname.split("/")[1] ? "#000" : '#ffffff' : '#000', 
-                            // backgroundColor: darkMode ? item.label === pathname.split("/")[1] ? "#91C25F" : 'transparent' : '#91C25F',
+                            // backgroundColor: darkMode ? item.label === pathname.split("/")[1] ? "#5B8CFF" : 'transparent' : '#5B8CFF',
                             backgroundColor:
                             item.text === pathname.split("/")[1]
-                                ? '#91C25F'
+                                ? '#5B8CFF'
                                 : 'transparent',
                             fontWeight: "500", fontSize: "16px" 
                           }}
@@ -442,7 +446,7 @@ const Appbar = ({ children, usersDataForLogin }) => {
 
                     backgroundColor:
                       item.text === pathname.split("/")[1]
-                        ? '#91C25F'
+                        ? '#5B8CFF'
                         : 'transparent',
 
                     fontWeight: "500",
@@ -454,7 +458,7 @@ const Appbar = ({ children, usersDataForLogin }) => {
             <>
               {collapsed ? (
                 <Image
-                  src={darkMode ? "/Collapselogo.png" : "/light.png"}
+                  src={darkMode ? "/metryx-icon-dark.png" : "/metryx-icon-light.png"}
                   width={100}
                   height={70}
                   priority={true}
@@ -467,13 +471,13 @@ const Appbar = ({ children, usersDataForLogin }) => {
                 />
               ) : (
                 <Image
-                  src={darkMode ? "/Expandlogo.png" : "/logolight.png"}
-                  width={150}
+                  src={darkMode ? "/metryx-logo-dark.png" : "/metryx-logo-light.png"}
+                  width={200}
                   height={65}
                   priority={true}
                   alt="Expanded Logo"
                   style={{
-                    margin: "0px 20px",
+                    margin: "0px 10px",
                     objectFit: "cover"
                   }}
                 />
@@ -506,7 +510,7 @@ const Appbar = ({ children, usersDataForLogin }) => {
 
                     backgroundColor:
                       item.text === pathname.split("/")[1]  
-                        ? '#91C25F'
+                        ? '#5B8CFF'
                         : 'transparent',
 
                     fontWeight: "500",

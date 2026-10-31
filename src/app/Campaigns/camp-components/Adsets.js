@@ -464,7 +464,7 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst, network })
           onChange={(checked) => onToggleStatus(record, checked)}
           checkedChildren="ACTIVE"
           unCheckedChildren="PAUSED"
-          style={{ backgroundColor: record.Status === 'ACTIVE' && "#91C25F" }}
+          style={{ backgroundColor: record.Status === 'ACTIVE' && "#5B8CFF" }}
           disabled={
             !(
               ovrallcampdetal?.fbstatus === 'Live' &&
@@ -508,7 +508,7 @@ export default function Adsets({ selectedRow, onClose, changeRRefrst, network })
           Adsets
         </Title>
         <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <Button style={{ backgroundColor: '#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px", marginRight: '10px' }} onClick={showDrawer1}>
+          <Button style={{ backgroundColor: '#5B8CFF', color: "#000", borderColor: '#5B8CFF', borderWidth: "0px", marginRight: '10px' }} onClick={showDrawer1}>
             Create adset
           </Button>
         </div>

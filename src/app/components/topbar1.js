@@ -183,16 +183,16 @@ const TopBar1 = () => {
             }}
         >
         {/* Show logo only if the user is NOT authenticated */}
-            <div>
+            {/* <div>
                 <Image
-                src={darkMode ? "/4.png" : "/logolight.png"}
+                src={darkMode ? "/metryx-logo-dark.png" : "/metryx-logo-light.png"}
                 width={180}
                 height={70}
                 priority={true}
                 alt="Logo"
                 style={{ margin: "5px 20px", objectFit: "cover" }}
                 />
-            </div>
+            </div> */}
     
             <div
             style={{
@@ -371,10 +371,10 @@ const TopBar1 = () => {
         <div style={{ position: 'relative', width: '100%', height: '84vh', overflow: 'hidden',backgroundColor:'#edfaf3'}}>
           <img
             style={{
-              width: '60%',
+              width: '100%',
               height: '100%',
-              maxHeight: '85vh',
-              marginLeft:'50px'
+              // maxHeight: '85vh',
+              // marginLeft:'0px'
             }}
             src="/robot.png"
             alt="img"

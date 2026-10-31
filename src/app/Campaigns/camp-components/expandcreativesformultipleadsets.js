@@ -449,7 +449,7 @@ const AdsetCard = ({
             unCheckedChildren="✗"
             style={{
               // backgroundColor:
-              // record.Status === "ACTIVE" ? "#91C25F" : undefined,
+              // record.Status === "ACTIVE" ? "#5B8CFF" : undefined,
               minWidth: 32,
               height: 22,
               transform: "scale(0.8)",
@@ -458,7 +458,7 @@ const AdsetCard = ({
           /> */}
           {adset?.is_dynamic_creative && (
             <Tooltip title="This ad set belongs to dynamic ads">
-              <InfoCircleOutlined style={{ color: "#91C25F", cursor: "pointer" }} />
+              <InfoCircleOutlined style={{ color: "#5B8CFF", cursor: "pointer" }} />
             </Tooltip>
           )}
           <Switch
@@ -468,7 +468,7 @@ const AdsetCard = ({
             checked={isActive}
             onChange={handleChange}
             style={{
-              backgroundColor: isActive ? "#91C25F" : undefined,
+              backgroundColor: isActive ? "#5B8CFF" : undefined,
               minWidth: 32,
               height: 22,
               transform: 'scale(0.8)',
@@ -479,7 +479,7 @@ const AdsetCard = ({
             <HistoryOutlined
               style={{
                 fontSize: 16,
-                color: theme === "dark" ? "#91C25F" : "#37474F",
+                color: theme === "dark" ? "#5B8CFF" : "#37474F",
                 cursor: "pointer",
               }}
               onClick={(e) => {
@@ -554,7 +554,7 @@ const AdsetCard = ({
                 cancelText="No"
                 okButtonProps={{
                   style: {
-                    backgroundColor: "#91C25F",
+                    backgroundColor: "#5B8CFF",
                     color: "#000",
                     border: "none",
                   },
@@ -726,7 +726,7 @@ const AdsetCard = ({
                             onChange={makeHandleChangeAd(item, adsetKey)}
                             style={{
                               backgroundColor: adIsActive
-                                ? "#91C25F"
+                                ? "#5B8CFF"
                                 : undefined,
                               transform: "scale(0.8)",
                             }}
@@ -880,14 +880,14 @@ const AdsetCard = ({
                           style={{
                             padding: "6px 8px",
                             borderRadius: "20px",
-                            backgroundColor: "#91C25F",
+                            backgroundColor: "#5B8CFF",
                             color: "#000",
                             border: "none",
                             cursor: "pointer",
                             flexShrink: 0,
                             marginBottom: "5px",
                           }}
-                          // style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}}
+                          // style={{backgroundColor:'#5B8CFF', color: "#000", borderColor: '#5B8CFF', borderWidth: "0px"}}
                           onClick={() => console.log("Learn More clicked:", item)}
                         >
                           Learn more
@@ -1014,9 +1014,9 @@ const AdsetCard = ({
                             >
                               <Button
                                 style={{
-                                  backgroundColor: "#91C25F",
+                                  backgroundColor: "#5B8CFF",
                                   color: "#000",
-                                  borderColor: "#91C25F",
+                                  borderColor: "#5B8CFF",
                                   borderWidth: "0px",
                                   margin: "20px",
                                   padding: "10px",
@@ -1190,7 +1190,7 @@ const AdsetCard = ({
                       unCheckedChildren="✗"
                       style={{
                         // backgroundColor:
-                        // record.Status === "ACTIVE" ? "#91C25F" : undefined,
+                        // record.Status === "ACTIVE" ? "#5B8CFF" : undefined,
                         minWidth: 32,
                         height: 22,
                         transform: "scale(0.8)",
@@ -1204,7 +1204,7 @@ const AdsetCard = ({
                             disabled={item.facebookUploadFailed}
                             onChange={makeHandleChangeAd(item, adsetKey)}
                             style={{
-                              backgroundColor: adIsActive ? "#91C25F" : undefined,
+                              backgroundColor: adIsActive ? "#5B8CFF" : undefined,
                               minWidth: 32,
                               height: 22,
                               transform: 'scale(0.8)',
@@ -1214,7 +1214,7 @@ const AdsetCard = ({
                             <HistoryOutlined
                               style={{
                                 fontSize: 16,
-                                color: theme === "dark" ? "#91C25F" : "#37474F",
+                                color: theme === "dark" ? "#5B8CFF" : "#37474F",
                                 cursor: "pointer",
                               }}
                               onClick={(e) => {
@@ -1315,14 +1315,14 @@ const AdsetCard = ({
                             style={{
                               padding: "6px 8px",
                               borderRadius: "20px",
-                              backgroundColor: "#91C25F",
+                              backgroundColor: "#5B8CFF",
                               color: "#000",
                               border: "none",
                               cursor: "pointer",
                               flexShrink: 0,
                               marginBottom: "5px",
                             }}
-                            // style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}}
+                            // style={{backgroundColor:'#5B8CFF', color: "#000", borderColor: '#5B8CFF', borderWidth: "0px"}}
                             onClick={() => console.log("Learn More clicked:", item)}
                           >
                             Learn more
@@ -1445,9 +1445,9 @@ const AdsetCard = ({
                               >
                                 <Button
                                   style={{
-                                    backgroundColor: "#91C25F",
+                                    backgroundColor: "#5B8CFF",
                                     color: "#000",
-                                    borderColor: "#91C25F",
+                                    borderColor: "#5B8CFF",
                                     borderWidth: "0px",
                                     margin: "20px",
                                     padding: "10px",
@@ -1569,9 +1569,9 @@ const AdsetCard = ({
                       type="primary"
                       icon={<PlusOutlined className="black-icon" />}
                       style={{
-                        backgroundColor: '#91C25F',
+                        backgroundColor: '#5B8CFF',
                         color: "#000",
-                        borderColor: '#91C25F',
+                        borderColor: '#5B8CFF',
                         borderWidth: "0px",
                         padding: '8px 16px',
                         borderRadius: '8px',
@@ -1894,7 +1894,7 @@ const ExpandedAdsetsContent = ({ record, changeRRefrst, network }) => {
             type="primary"
             icon={<PlusOutlined />}
             style={{
-              backgroundColor: "#91C25F",
+              backgroundColor: "#5B8CFF",
               color: "#000",
               border: "none",
               borderRadius: "6px",

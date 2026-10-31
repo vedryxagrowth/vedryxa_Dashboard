@@ -188,7 +188,7 @@ export default function CampaignHistoryPage() {
                     <Text style={textColor}>
                         From{" "}
                         <Tag color={theme === "dark" ? "#444" : "default"}>{old_value || "-"}</Tag> →{" "}
-                        <Tag color={theme === "dark" ? "#595959" : "#91c25f"}>{new_value || "-"}</Tag>
+                        <Tag color={theme === "dark" ? "#595959" : "#5B8CFF"}>{new_value || "-"}</Tag>
                     </Text>
                 )}
                 {renderReadableExtraData(extra_data, record.event_type)}
@@ -344,7 +344,7 @@ export default function CampaignHistoryPage() {
                             className={`${theme === "dark" ? "dark-theme" : "light-theme"} green-border-select`}
                             style={{
                                 width: 200,
-                                borderColor: "#91c25f",
+                                borderColor: "#5B8CFF",
                                 color: theme === "dark" ? "#fff" : "#000",
                             }}
                             options={filterOptions}

@@ -493,7 +493,7 @@ const EditAccountAccess = ({ editeddata, visible, onClose, AccountsData }) => {
                 style={{ flex: 1 }}
               />
               <Button
-                style={{ backgroundColor: "#91C25F", width: "24px", marginLeft: "5px" }}
+                style={{ backgroundColor: "#5B8CFF", width: "24px", marginLeft: "5px" }}
                 onClick={() => setIsModalOpen(true)}
               >
                 <PlusOutlined className="black-icon" />
@@ -634,7 +634,7 @@ const EditAccountAccess = ({ editeddata, visible, onClose, AccountsData }) => {
           </Form.Item>
 
           <Form.Item>
-            <Button style={{ border: 'none', backgroundColor: '#91C25F', color: 'black', fontWeight: '600' }} onClick={showModal}>
+            <Button style={{ border: 'none', backgroundColor: '#5B8CFF', color: 'black', fontWeight: '600' }} onClick={showModal}>
               Submit
             </Button>
           </Form.Item>

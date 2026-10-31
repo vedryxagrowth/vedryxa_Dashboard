@@ -1953,7 +1953,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                     </Form.Item>
                                 )}
                             </div>
-                            <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "#91C25F" }}>Targeting</span>
+                            <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "#5B8CFF" }}>Targeting</span>
                             <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
                                 <Form.Item
                                     name="countries"
@@ -2518,7 +2518,7 @@ const CreateCampaignDrawer = ({ visible, onClose, changeRRefrst, accountis, netw
                                                     </div>
                                                     <div className="ad-button" style={{ marginTop: '10px' }}>
                                                         <button type="button" style={{
-                                                            backgroundColor: '#91C25F',
+                                                            backgroundColor: '#5B8CFF',
                                                             color: theme === 'dark' ? '#fff' : '#333',
                                                             border: 'none',
                                                             padding: '8px 12px',

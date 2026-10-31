@@ -2064,7 +2064,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                                 handlePauseClick(checked);
                             }}
                             size="small"
-                            style={{ backgroundColor: switchOn ? '#91C25F' : '#d9d9d9' }}
+                            style={{ backgroundColor: switchOn ? '#5B8CFF' : '#d9d9d9' }}
                         />
                         <Modal
                             title="Confirm Action"
@@ -2332,7 +2332,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                                                     <div
                                                         style={{
                                                             padding: "5px 12px",
-                                                            background: "#91C25F",
+                                                            background: "#5B8CFF",
                                                             color: "#000",
                                                             borderRadius: 18,
                                                             fontSize: 8,
@@ -2470,7 +2470,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                                         <Button key="cancel" onClick={handleCancels} style={{ marginLeft: "4px" }}>
                                             Cancel
                                         </Button>
-                                        <Button key="ok" onClick={handleOks} style={{ marginLeft: "4px", backgroundColor: "#91C25F" }}>
+                                        <Button key="ok" onClick={handleOks} style={{ marginLeft: "4px", backgroundColor: "#5B8CFF" }}>
                                             Ok
                                         </Button>
                                     </div>
@@ -3528,7 +3528,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                                                     </Button>,
                                                     <Button
                                                         key="ok"
-                                                        style={{ backgroundColor: "#91C25F" }}
+                                                        style={{ backgroundColor: "#5B8CFF" }}
                                                         onClick={() => {
                                                             handleSmartCommentSubmitAdset();
                                                             setIsBulkCommentModalVisible(false);
@@ -3707,7 +3707,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                                         className={theme === 'dark' ? 'inputatInsideTable custom-input-dark' : 'inputatInsideTable custom-input-light'}
                                         style={{
                                             borderRadius: 8,
-                                            border: '1px solid #91C25F',
+                                            border: '1px solid #5B8CFF',
                                             // background: theme === 'dark' ? '#2a2a2a' : '#fff',
                                             // border: `1px solid ${theme === 'dark' ? '#444' : '#d9d9d9'}`,
                                             color: theme === 'dark' ? '#fff' : '#000',
@@ -3860,7 +3860,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                                                             marginLeft: '3px',
                                                             color:
                                                                 accountStatus.current === 'Active'
-                                                                    ? '#91C25F'
+                                                                    ? '#5B8CFF'
                                                                     : accountStatus.current === 'Inactive'
                                                                         ? '#EC7117'
                                                                         : 'gray',
@@ -3886,7 +3886,7 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                                                 fontSize: '18px',
                                                 cursor: 'pointer',
                                                 marginRight: '10px',
-                                                color: "#91C25F",
+                                                color: "#5B8CFF",
                                             }}
                                             className="black-icon-info"
                                         />
@@ -3898,12 +3898,12 @@ const Daily = ({ functionCallForCommnets, context, activeTab, functionCallForCam
                                                 title={ !toggleStatus ? "Turn on toggle to column re-arrangement" : "Turn off to stop column re-arrangement"} 
                                                 mouseEnterDelay={0} // Tooltip appears after 1 second
                                             >
-                                                <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#91C25F" }}/>
+                                                <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#5B8CFF" }}/>
                                             </Tooltip>
                                         </Col> */}
                                 <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
                                     {/* <Tooltip title="Export to CSV"> */}
-                                    <Button type="primary" style={{ backgroundColor: '#91C25F', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon" />} onClick={() => onBtExport(gridRef1, "Daily")} />
+                                    <Button type="primary" style={{ backgroundColor: '#5B8CFF', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon" />} onClick={() => onBtExport(gridRef1, "Daily")} />
                                     {/* </Tooltip> */}
                                 </Col>
                             </Row>

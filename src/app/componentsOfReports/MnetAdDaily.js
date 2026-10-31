@@ -615,7 +615,7 @@ const MnetDailyAdReport = ({startDate, endDate, newaccount, newtime, newRevenueP
                                     <Button key="cancel" onClick={handleCancels} style={{marginLeft:"4px"}}>
                                         Cancel
                                     </Button>
-                                    <Button key="ok" onClick={handleOks} style={{marginLeft:"4px", backgroundColor:"#91C25F"}}>
+                                    <Button key="ok" onClick={handleOks} style={{marginLeft:"4px", backgroundColor:"#5B8CFF"}}>
                                         Ok
                                     </Button>
                                     </div>
@@ -1055,12 +1055,12 @@ const MnetDailyAdReport = ({startDate, endDate, newaccount, newtime, newRevenueP
                                                 title={ !toggleStatus ? "Turn on toggle to column re-arrangement" : "Turn off to stop column re-arrangement"} 
                                                 mouseEnterDelay={0} // Tooltip appears after 1 second
                                             >
-                                                <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#91C25F" }}/>
+                                                <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#5B8CFF" }}/>
                                             </Tooltip>
                                         </Col> */}
                                         <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
                                             <Tooltip title="Export to CSV">
-                                                <Button type="primary" style={{ backgroundColor: '#91C25F', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={() => onBtExport(gridRef1, "Daily")} />
+                                                <Button type="primary" style={{ backgroundColor: '#5B8CFF', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={() => onBtExport(gridRef1, "Daily")} />
                                             </Tooltip>
                                         </Col>
                                     </Row>

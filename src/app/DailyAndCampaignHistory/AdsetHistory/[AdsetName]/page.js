@@ -950,7 +950,7 @@ export default function AdsetNameAndAccount({ params }) {
                     return (
                         <span>
                             {params.value.replace("Copied!", "")}
-                            <span style={{ color: "#91C25F", fontWeight: "bold" }}>Copied!</span>
+                            <span style={{ color: "#5B8CFF", fontWeight: "bold" }}>Copied!</span>
                         </span>
                     );
                 }
@@ -979,7 +979,7 @@ export default function AdsetNameAndAccount({ params }) {
                     return (
                         <span>
                             {params.value.replace("Copied!", "")}
-                            <span style={{ color: "#91C25F", fontWeight: "bold" }}>Copied!</span>
+                            <span style={{ color: "#5B8CFF", fontWeight: "bold" }}>Copied!</span>
                         </span>
                     );
                 }
@@ -1918,7 +1918,7 @@ export default function AdsetNameAndAccount({ params }) {
                     checkedChildren="Tables"
                     unCheckedChildren="Hide"
                     style={{
-                        backgroundColor: showTables ? "#91c25f" : undefined,
+                        backgroundColor: showTables ? "#5B8CFF" : undefined,
                     }}
                 />
 
@@ -1930,10 +1930,10 @@ export default function AdsetNameAndAccount({ params }) {
                     onMouseEnter={() => setHovered(true)}
                     onMouseLeave={() => setHovered(false)}
                     style={{
-                        border: '2px solid #91C25F',
+                        border: '2px solid #5B8CFF',
                         // color: isGraphVisible || hovered ? '#fff' : '#555',
                         color: theme === 'dark' ? '#fff' : (isGraphVisible || hovered ? '#fff' : '#555'),
-                        backgroundColor: isGraphVisible || hovered ? '#91C25F' : 'transparent',
+                        backgroundColor: isGraphVisible || hovered ? '#5B8CFF' : 'transparent',
                         borderRadius: '18px',
                         fontWeight: 500,
                         padding: '0 13px',
@@ -2146,12 +2146,12 @@ export default function AdsetNameAndAccount({ params }) {
                         value={searchText}
                         onChange={(e) => setSearchText(e.target.value)}
                         className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
-                        style={{border: '1px solid #91C25F', width: "170px", padding: "3px",backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
+                        style={{border: '1px solid #5B8CFF', width: "170px", padding: "3px",backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
                     />
                     <Button 
                         type="default" 
                         icon={<ReloadOutlined  className='black-icon'/>} 
-                        style={{ height: "30px", marginLeft: "10px", backgroundColor: '#91C25F', border: 'solid 0px' }} 
+                        style={{ height: "30px", marginLeft: "10px", backgroundColor: '#5B8CFF', border: 'solid 0px' }} 
                         onClick={handleReload}  // Call refresh function when clicked
                     />
                 </Col> */}
@@ -2176,7 +2176,7 @@ export default function AdsetNameAndAccount({ params }) {
                         value={searchText}
                         onChange={(e) => setSearchText(e.target.value)}
                         className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
-                        // style={{marginLeft: "5px", border: '1px solid #91C25F', width: "170px", padding: "3px",backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
+                        // style={{marginLeft: "5px", border: '1px solid #5B8CFF', width: "170px", padding: "3px",backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
                         style={{
                             borderRadius: 8,
                             border: '1px solid #4CAF50',
@@ -2190,7 +2190,7 @@ export default function AdsetNameAndAccount({ params }) {
                     <Button
                         type="default"
                         icon={<ReloadOutlined className='black-icon' />}
-                        style={{ width: '35px', height: "33px", marginLeft: "5px", backgroundColor: '#91C25F', border: 'solid 0px' }}
+                        style={{ width: '35px', height: "33px", marginLeft: "5px", backgroundColor: '#5B8CFF', border: 'solid 0px' }}
                         onClick={handleReload}  // Call refresh function when clicked
                     />
                     <EditOutlined
@@ -2198,7 +2198,7 @@ export default function AdsetNameAndAccount({ params }) {
                         style={{
                             marginLeft: '3px',
                             marginRight: '3px',
-                            color: comment ? '#91C25F' : 'gray',
+                            color: comment ? '#5B8CFF' : 'gray',
                             cursor: 'pointer',
                             fontSize: '27px',
                         }}
@@ -2214,7 +2214,7 @@ export default function AdsetNameAndAccount({ params }) {
                                 height="80"
                                 width="80"
                                 radius="9"
-                                color="#91C25F"
+                                color="#5B8CFF"
                                 ariaLabel="loading"
                                 wrapperStyle
                                 wrapperClass
@@ -2287,7 +2287,7 @@ export default function AdsetNameAndAccount({ params }) {
                                                         ? budgetAndStatusData?.campaign?.campaign_status === "ACTIVE"
                                                         : budgetAndStatusData?.selected_adset?.adset_status === "ACTIVE"
                                                 )
-                                                    ? "#91c25f"
+                                                    ? "#5B8CFF"
                                                     : undefined
                                         }}
                                         onChange={(checked) => {
@@ -2342,8 +2342,8 @@ export default function AdsetNameAndAccount({ params }) {
                                             width={600}
                                             okButtonProps={{
                                                 style: {
-                                                    backgroundColor: '#91C25F',
-                                                    borderColor: '#91C25F'
+                                                    backgroundColor: '#5B8CFF',
+                                                    borderColor: '#5B8CFF'
                                                 }
                                             }}
                                             className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
@@ -2641,7 +2641,7 @@ export default function AdsetNameAndAccount({ params }) {
                             <Button key="cancel" onClick={handleCancels} style={{ marginLeft: "4px" }}>
                                 Cancel
                             </Button>
-                            <Button key="ok" onClick={handleOks} style={{ marginLeft: "4px", backgroundColor: "#91C25F" }}>
+                            <Button key="ok" onClick={handleOks} style={{ marginLeft: "4px", backgroundColor: "#5B8CFF" }}>
                                 Ok
                             </Button>
                         </div>

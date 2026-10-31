@@ -2475,7 +2475,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                                     </Form.Item>
                                 )}
                             </div>
-                            <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "#91C25F" }}>Targeting</span>
+                            <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "#5B8CFF" }}>Targeting</span>
                             <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
                                 <Form.Item
                                     name={["Adset", "countries"]}
@@ -3817,7 +3817,7 @@ const EditAllLevelDataDrawer = ({ visible, onClose, changeRRefrst, accountis, ne
                         <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
                             <Button
                                 type="primary"
-                                style={{ background: '#91C25F', minWidth: '200px', borderWidth: '0px', border: '1px solid #4caf50' }}
+                                style={{ background: '#5B8CFF', minWidth: '200px', borderWidth: '0px', border: '1px solid #4caf50' }}
                                 onClick={async () => {
                                     try {
                                         const values = await form.validateFields(); // Validates all form fields

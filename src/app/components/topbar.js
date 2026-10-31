@@ -344,7 +344,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
                   cursor: 'pointer',
                   color:
                     expandedIndex === index || hoveredIndex === index
-                      ? '#91C25F'
+                      ? '#5B8CFF'
                       : darkMode
                         ? '#fff'
                         : '#000',
@@ -554,7 +554,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
             style={{
               cursor: 'pointer',
               fontWeight: 500,
-              color: '#91C25F',
+              color: '#5B8CFF',
               textDecoration: 'underline',
               fontSize: '14px',
             }}
@@ -566,7 +566,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
           <Button
             type="primary"
             style={{
-              backgroundColor: '#91C25F',
+              backgroundColor: '#5B8CFF',
               color: '#000',
               border: 'none',
               boxShadow: 'none',
@@ -1667,7 +1667,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
       {status !== 'authenticated' && status !== 'loading' && (
         <div>
           <Image
-            src={darkMode ? "/4.png" : "/RR1.png"}
+            src={darkMode ? "/metryx-logo-dark.png" : "/metryx-logo-light.png"}
             width={150}
             height={60}
             priority={true}
@@ -1695,7 +1695,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
             <div>
               <Image
                 // src="/ssk1.png"
-                src={darkMode ? "/ssk2.png" : "/ssk1.png"}
+                src={darkMode ? "/metryx-icon-dark.png" : "/metryx-icon-light.png"}
                 width={70}   // Smaller logo when collapsed
                 height={35}
                 priority={true}
@@ -2014,7 +2014,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
               />
 
               <Upload {...uploadProps}>
-                <Button style={{ marginTop: '10px', backgroundColor: '#91C25F', border: '#91C25F' }} icon={<UploadOutlined className="black-icon" />} loading={loading}>
+                <Button style={{ marginTop: '10px', backgroundColor: '#5B8CFF', border: '#5B8CFF' }} icon={<UploadOutlined className="black-icon" />} loading={loading}>
                   {loading ? 'Uploading...' : 'Upload Image'}
                 </Button>
               </Upload>
@@ -2550,7 +2550,7 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
             overflow: "hidden",
             position: "relative",
             display: 'flex',
-            padding: '20px',
+            padding: '1px',
             boxSizing: 'border-box',
 
           }}
@@ -2570,9 +2570,9 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
               style={{
                 width: '100%',
                 height: '100%',
-                marginTop: '80px',
-                marginLeft: '40px',
-                objectFit: 'contain',
+                // marginTop: '0px',
+                // marginLeft: '0px',
+                // objectFit: 'contain',
               }}
             />
           </div>
@@ -2583,7 +2583,7 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
               flexDirection: 'column',
               justifyContent: 'center',
               alignItems: 'center',
-              maxWidth: '500px',
+              maxWidth: '400px',
               height: '100%',
             }}
           >
@@ -2600,7 +2600,7 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
               <div style={{ textAlign: 'center', marginBottom: '10px' }}>
                 <h2 style={{ margin: '10px', color: '#1B1F23', fontSize: '18px' }}>Welcome Back</h2>
                 <p style={{ color: '#6B7280', fontSize: '13px', marginTop: '10px' }}>
-                  Sign in to your Vyaktimetrics dashboard
+                  Sign in to your vedryxa  dashboard
                 </p>
               </div>
               <Button
@@ -2620,7 +2620,7 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
                 }}
               >
                 <img src="/google-logo.png" alt="Google" style={{ width: '18px', height: '18px' }} />
-                Continue with Google
+                Continue with Google SSO
               </Button>
 
               <Divider style={{ margin: '12px 0', color: '#9CA3AF' }}>or</Divider>
@@ -2712,17 +2712,17 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
             </div>
 
           </div>
-          <img
-            src="/logolight.png"
+          {/* <img
+            src="/metryx-logo-dark.png"
             alt="Logo"
             style={{
               position: 'absolute',
-              top: '-50px',
-              left: '10px',
+              top: '0px',
+              left: '0px',
               width: '180px',
               height: 'auto',
             }}
-          />
+          /> */}
 
           <div
             style={{
@@ -2748,7 +2748,7 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
                 fontSize: "12px",
               }}
             >
-              © {new Date().getFullYear()} Vyaktimetrics. All rights reserved.
+              © {new Date().getFullYear()} vedryxa . All rights reserved.
             </span>
 
             {/* Right */}

@@ -2385,7 +2385,7 @@ const App = () => {
         >
           {record.fbstatus === "Live" ? (
             <CheckCircleFilled
-              style={{ color: "#91C25F", fontSize: 16 }}
+              style={{ color: "#5B8CFF", fontSize: 16 }}
               className="black-icon-active-1"
             />
           ) : (
@@ -2402,7 +2402,7 @@ const App = () => {
             size="default"
             style={{
               backgroundColor:
-                record.Status === "ACTIVE" ? "#91C25F" : undefined,
+                record.Status === "ACTIVE" ? "#5B8CFF" : undefined,
               minWidth: 40,
               height: 22,
             }}
@@ -2694,9 +2694,9 @@ const App = () => {
             <>
               <Button
                 style={{
-                  backgroundColor: "#91C25F",
+                  backgroundColor: "#5B8CFF",
                   color: "#000",
-                  borderColor: "#91C25F",
+                  borderColor: "#5B8CFF",
                   borderWidth: "0px",
                 }}
                 onClick={() => handleApproval(record)} // This sets useaproval and opens modal
@@ -3002,7 +3002,7 @@ const App = () => {
         return (
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             {status
-              ? <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }} className='black-icon-active-1' />
+              ? <CheckCircleFilled style={{ color: '#5B8CFF', fontSize: 15 }} className='black-icon-active-1' />
               : <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} className='black-icon-pause-1' />}
             <span>{text}</span>
           </div>
@@ -3513,7 +3513,7 @@ const App = () => {
               (
                 record.fbstatus === "Live" ? (
                   <CheckCircleFilled
-                    style={{ color: "#91C25F", fontSize: 16 }}
+                    style={{ color: "#5B8CFF", fontSize: 16 }}
                     className="black-icon-active-1"
                   />
                 ) : (
@@ -3525,7 +3525,7 @@ const App = () => {
               )}
             {/* {record.fbstatus === "Live" ? (
               <CheckCircleFilled
-                style={{ color: "#91C25F", fontSize: 16 }}
+                style={{ color: "#5B8CFF", fontSize: 16 }}
                 className="black-icon-active-1"
               />
             ) : (
@@ -3547,7 +3547,7 @@ const App = () => {
               size="default"
               style={{
                 backgroundColor:
-                  record.Status === "ACTIVE" ? "#91C25F" : undefined,
+                  record.Status === "ACTIVE" ? "#5B8CFF" : undefined,
                 minWidth: 40,
                 height: 22,
               }}
@@ -4070,7 +4070,7 @@ const App = () => {
                 cancelText="No"
                 disabled={record.fbstatus !== "No-Live"}
                 okButtonProps={{
-                  style: { backgroundColor: "#91C25F", color: "#fff" },
+                  style: { backgroundColor: "#5B8CFF", color: "#fff" },
                 }}
                 cancelButtonProps={{
                   style: {
@@ -4114,7 +4114,7 @@ const App = () => {
               <div
                 style={{
                   // backgroundColor: "#bce396ff",
-                  backgroundColor: hasAnyError ? "#EC7117" : "#91C25F",
+                  backgroundColor: hasAnyError ? "#EC7117" : "#5B8CFF",
                   color: "#000",
                   borderRadius: "60%",
                   width: "20px",
@@ -4371,9 +4371,9 @@ const App = () => {
     //         <>
     //           <Button
     //             style={{
-    //               backgroundColor: "#91C25F",
+    //               backgroundColor: "#5B8CFF",
     //               color: "#000",
-    //               borderColor: "#91C25F",
+    //               borderColor: "#5B8CFF",
     //               borderWidth: "0px",
     //             }}
     //             onClick={() => handleApprovalforAdsets(record)} // This sets useaproval and opens modal
@@ -4413,7 +4413,7 @@ const App = () => {
     //         <HistoryOutlined
     //           style={{
     //             fontSize: 16,
-    //             color: theme === "dark" ? "#91C25F" : "#37474F",
+    //             color: theme === "dark" ? "#5B8CFF" : "#37474F",
     //             cursor: "pointer",
     //           }}
     //           onClick={(e) => {
@@ -4432,7 +4432,7 @@ const App = () => {
     //       <>
     //         <Button
     //           style={{
-    //             backgroundColor: "#91C25F",
+    //             backgroundColor: "#5B8CFF",
     //             color: "#000",
     //             border: "none",
     //           }}
@@ -4487,7 +4487,7 @@ const App = () => {
               <HistoryOutlined
                 style={{
                   fontSize: 16,
-                  color: theme === "dark" ? "#91C25F" : "#37474F",
+                  color: theme === "dark" ? "#5B8CFF" : "#37474F",
                   cursor: "pointer",
                 }}
                 onClick={(e) => {
@@ -4513,7 +4513,7 @@ const App = () => {
               }}>
                 <Button
                   style={{
-                    backgroundColor: "#91C25F",
+                    backgroundColor: "#5B8CFF",
                     color: "#000",
                     border: "none",
                     width: "62px"
@@ -4710,7 +4710,7 @@ const App = () => {
   //                     onChange={(checked) => onToggleStatus(record, checked)}
   //                     checkedChildren="ACTIVE"
   //                     unCheckedChildren="PAUSED"
-  //                     style={{ backgroundColor: record.Status === 'ACTIVE' && "#91C25F" }}
+  //                     style={{ backgroundColor: record.Status === 'ACTIVE' && "#5B8CFF" }}
   //                 />
   //             )
   //         },
@@ -4801,7 +4801,7 @@ const App = () => {
   //                             <Button className="dark-icon-button" icon={<EditOutlined />} onClick={() => handleEditClickAllLevelData(record)}></Button>
   //                         )}
   //                         {record.Approval === 'PENDING_APPROVAL' && (
-  //                             <Button style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}} onClick={() => handleApproval(record)}>Approve</Button>
+  //                             <Button style={{backgroundColor:'#5B8CFF', color: "#000", borderColor: '#5B8CFF', borderWidth: "0px"}} onClick={() => handleApproval(record)}>Approve</Button>
   //                         )}
   //                         <Modal
   //                             title="Confirm Approval"
@@ -5008,7 +5008,7 @@ const App = () => {
   //           </div>
   //           <span style={{ textAlign: 'right', marginLeft: 10 }}>
   //             {account.status === "Active" ? (
-  //               <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }} className='black-icon-active-1' />
+  //               <CheckCircleFilled style={{ color: '#5B8CFF', fontSize: 15 }} className='black-icon-active-1' />
   //             ) : (
   //               <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} className='black-icon-pause-1' />
   //             )}
@@ -5369,7 +5369,7 @@ const App = () => {
                 </div>
                 <span style={{ textAlign: 'right', marginLeft: 10 }}>
                   {account.status === "Active" ? (
-                    <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }} />
+                    <CheckCircleFilled style={{ color: '#5B8CFF', fontSize: 15 }} />
                   ) : (
                     <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} />
                   )}
@@ -5728,7 +5728,7 @@ const App = () => {
                   {isActive ? (
                     <CheckCircleFilled
                       style={{
-                        color: "#91C25F",
+                        color: "#5B8CFF",
                         fontSize: 15,
                       }}
                       className="black-icon-active-1"
@@ -6318,7 +6318,7 @@ const App = () => {
               }}
 
               style={{
-                backgroundColor: "#91C25F",
+                backgroundColor: "#5B8CFF",
                 color: "#000",
                 border: "none",
                 border: "#4caf50",
@@ -6332,7 +6332,7 @@ const App = () => {
                 onClick={showDrawer}
                 icon={<PlusOutlined className="black-icon" />}
                 style={{
-                  backgroundColor: "#91C25F",
+                  backgroundColor: "#5B8CFF",
                   color: "#000",
                   border: "none",
                   border: "#4caf50",
@@ -6390,7 +6390,7 @@ const App = () => {
                     <Option key={option.value} value={option.value}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                         {isActive
-                          ? <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }} className='black-icon-active-1' />
+                          ? <CheckCircleFilled style={{ color: '#5B8CFF', fontSize: 15 }} className='black-icon-active-1' />
                           : <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} className='black-icon-pause-1' />}
                         <span>{option.label}</span>
                       </div>
@@ -6469,7 +6469,7 @@ const App = () => {
                     <span>
                       {option.status === "Active" ? (
                         <CheckCircleFilled
-                          style={{ color: "#91C25F", fontSize: 15 }}
+                          style={{ color: "#5B8CFF", fontSize: 15 }}
                           className='black-icon-active-1'
                         />
                       ) : (
@@ -6530,7 +6530,7 @@ const App = () => {
             {/* 🔹 Date Picker */}
             {/* <ConfigProvider
               theme={{
-                token: { colorPrimary: "#91C25F", colorTextLightSolid: "#000" },
+                token: { colorPrimary: "#5B8CFF", colorTextLightSolid: "#000" },
               }}
             >
               <RangePicker
@@ -6554,7 +6554,7 @@ const App = () => {
                 // locale={locale}
                 theme={{
                   token: {
-                    colorPrimary: '#91C25F',
+                    colorPrimary: '#5B8CFF',
                     colorTextLightSolid: '#000',
                   },
                 }}
@@ -6582,7 +6582,7 @@ const App = () => {
                 // locale={locale}
                 theme={{
                   token: {
-                    colorPrimary: '#91C25F',
+                    colorPrimary: '#5B8CFF',
                     colorTextLightSolid: '#000',
                   },
                 }}
@@ -6613,7 +6613,7 @@ const App = () => {
               onMouseLeave={() => setHovered(false)}
               onClick={handleApply}
               style={{
-                backgroundColor: hovered ? "#91C25F" : "transparent",
+                backgroundColor: hovered ? "#5B8CFF" : "transparent",
                 border: "1px solid #4CAF50",
                 borderRadius: "8px",
                 color: theme === "dark" ? "#ffffff" : "#000000",
@@ -6632,7 +6632,7 @@ const App = () => {
                 // onClick={() => setShowTaboolaStatus(!showTaboolaStatus)}
                 onClick={handleToggleTaboolaStatus}
                 style={{
-                  backgroundColor: "#91C25F",
+                  backgroundColor: "#5B8CFF",
                   border: "1px solid #4CAF50",
                   borderRadius: "8px",
                   color: theme === "dark" ? "#ffffff" : "#000000",
@@ -6652,7 +6652,7 @@ const App = () => {
                 // onClick={() => setShowTaboolaStatus(!showTaboolaStatus)}
                 onClick={handleTogglePredictoAdStatus}
                 style={{
-                  backgroundColor: "#91C25F",
+                  backgroundColor: "#5B8CFF",
                   border: "1px solid #4CAF50",
                   borderRadius: "8px",
                   color: theme === "dark" ? "#ffffff" : "#000000",
@@ -6672,7 +6672,7 @@ const App = () => {
                 // onClick={() => setShowTaboolaStatus(!showTaboolaStatus)}
                 onClick={handleTogglePredictoKeywordStatus}
                 style={{
-                  backgroundColor: "#91C25F",
+                  backgroundColor: "#5B8CFF",
                   border: "1px solid #4CAF50",
                   borderRadius: "8px",
                   color: theme === "dark" ? "#ffffff" : "#000000",
@@ -6963,7 +6963,7 @@ const App = () => {
               onClick={handleRefresh}
               icon={<ReloadOutlined className="black-icon" />}
               style={{
-                backgroundColor: "#91C25F",
+                backgroundColor: "#5B8CFF",
                 color: "#000",
                 border: "none",
               }}
@@ -7189,8 +7189,8 @@ const App = () => {
                 loading={loading}
                 disabled={loading}
                 style={{
-                  backgroundColor: "#91c25f",
-                  border: "1px solid #91c25f",
+                  backgroundColor: "#5B8CFF",
+                  border: "1px solid #5B8CFF",
                   width: "100px",
                 }}
                 type="primary"
@@ -7269,7 +7269,7 @@ const App = () => {
                   // locale={locale}
                   theme={{
                     token: {
-                      colorPrimary: '#91C25F',
+                      colorPrimary: '#5B8CFF',
                       colorTextLightSolid: '#000',
                     },
                   }}
@@ -7297,7 +7297,7 @@ const App = () => {
                   // locale={locale}
                   theme={{
                     token: {
-                      colorPrimary: '#91C25F',
+                      colorPrimary: '#5B8CFF',
                       colorTextLightSolid: '#000',
                     },
                   }}
@@ -7326,8 +7326,8 @@ const App = () => {
                   loading={loading}
                   disabled={loading}
                   style={{
-                    backgroundColor: "#91c25f",
-                    border: "1px solid #91c25f",
+                    backgroundColor: "#5B8CFF",
+                    border: "1px solid #5B8CFF",
                     width: "100px",
                   }}
                   type="primary"
@@ -7342,7 +7342,7 @@ const App = () => {
                   onClick={fetchInitialDataForPredictoAdStatus}
                   icon={<ReloadOutlined className="black-icon" />}
                   style={{
-                    backgroundColor: "#91C25F",
+                    backgroundColor: "#5B8CFF",
                     color: "#000",
                     border: "none",
                     width: "50px",
@@ -7488,8 +7488,8 @@ const App = () => {
                 onClick={() => setOpenComponentForCreateArticle(true)}
                 icon={<PlusOutlined className="black-icon" />}
                 style={{
-                  backgroundColor: "#91c25f",
-                  border: "1px solid #91c25f",
+                  backgroundColor: "#5B8CFF",
+                  border: "1px solid #5B8CFF",
                   width: "120px",
                   // marginRight: "5px"
                 }}
@@ -7514,8 +7514,8 @@ const App = () => {
                   loading={loading}
                   disabled={loading}
                   style={{
-                    backgroundColor: "#91c25f",
-                    border: "1px solid #91c25f",
+                    backgroundColor: "#5B8CFF",
+                    border: "1px solid #5B8CFF",
                     width: "120px",
                   }}
                   type="primary"
@@ -7529,7 +7529,7 @@ const App = () => {
                 onClick={fetchInitialDataForPredictoKeywordStatus}
                 icon={<ReloadOutlined className="black-icon" />}
                 style={{
-                  backgroundColor: "#91C25F",
+                  backgroundColor: "#5B8CFF",
                   color: "#000",
                   border: "none",
                   width: "50px",
@@ -7977,7 +7977,7 @@ const App = () => {
                             {isActive ? (
                               <CheckCircleFilled
                                 style={{
-                                  color: "#91C25F",
+                                  color: "#5B8CFF",
                                   fontSize: 15,
                                 }}
                                 className="black-icon-active-1"
@@ -8225,7 +8225,7 @@ const App = () => {
               <Button key="cancel" onClick={handleCancels} style={{ marginLeft: "4px" }}>
                 Cancel
               </Button>
-              <Button key="ok" onClick={handleOks} style={{ marginLeft: "4px", backgroundColor: "#91C25F" }}>
+              <Button key="ok" onClick={handleOks} style={{ marginLeft: "4px", backgroundColor: "#5B8CFF" }}>
                 Ok
               </Button>
             </div>
@@ -8266,7 +8266,7 @@ const App = () => {
               <Button key="cancel" onClick={handleCancelsForBulkComments} style={{ marginLeft: "4px" }}>
                 Cancel
               </Button>
-              <Button key="ok" onClick={handleOksForBulkComments} style={{ marginLeft: "4px", backgroundColor: "#91C25F" }}>
+              <Button key="ok" onClick={handleOksForBulkComments} style={{ marginLeft: "4px", backgroundColor: "#5B8CFF" }}>
                 Ok
               </Button>
             </div>

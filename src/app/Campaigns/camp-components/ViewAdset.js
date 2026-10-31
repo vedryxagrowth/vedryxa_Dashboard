@@ -209,7 +209,7 @@ export default function Viewadsets({ selectedRow, onClose, viewadsetlevel }) {
                             <Input type="number" placeholder="$" disabled className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'} />
                         </Form.Item>
                     </div>
-                    <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "#91C25F" }}>Targeting</span>
+                    <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "#5B8CFF" }}>Targeting</span>
                     <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
                         <Form.Item
                             name="countries"

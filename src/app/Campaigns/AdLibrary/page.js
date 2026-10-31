@@ -290,7 +290,7 @@ const FacebookAdsScraper = () => {
                                 </div>
                                 <span style={{ textAlign: 'right', marginLeft: 10 }}>
                                     {account.status === "Active" ? (
-                                        <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }} />
+                                        <CheckCircleFilled style={{ color: '#5B8CFF', fontSize: 15 }} />
                                     ) : (
                                         <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} />
                                     )}
@@ -367,8 +367,8 @@ const FacebookAdsScraper = () => {
                             onClick={handleSubmit}
                             // size="large"
                             style={{
-                                backgroundColor: "#91C25F",
-                                borderColor: "#91C25F",
+                                backgroundColor: "#5B8CFF",
+                                borderColor: "#5B8CFF",
                                 color: "#000",
                                 fontWeight: 600,
                                 width: "80px",
@@ -421,7 +421,7 @@ const FacebookAdsScraper = () => {
                                         <Option key={option.value} value={option.value}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                                 {isActive
-                                                    ? <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }} className='black-icon-active-1' />
+                                                    ? <CheckCircleFilled style={{ color: '#5B8CFF', fontSize: 15 }} className='black-icon-active-1' />
                                                     : <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} className='black-icon-pause-1' />}
                                                 <span>{option.label}</span>
                                             </div>
@@ -482,8 +482,8 @@ const FacebookAdsScraper = () => {
                                 onClick={showDrawer}
                                 disabled={!createcamselectedacc?.length}
                                 style={{
-                                    backgroundColor: "#91C25F",
-                                    borderColor: "#91C25F",
+                                    backgroundColor: "#5B8CFF",
+                                    borderColor: "#5B8CFF",
                                     color: "#000",
                                     fontWeight: 600,
                                     width: "130px",
@@ -525,7 +525,7 @@ const FacebookAdsScraper = () => {
                             style={{
                                 position: "relative",
                                 border: isSelected(ad.adId)
-                                    ? "2px solid #91C25F"
+                                    ? "2px solid #5B8CFF"
                                     : "1px solid #ddd",
                                 borderRadius: "8px",
                                 overflow: "hidden",

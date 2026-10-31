@@ -563,7 +563,7 @@ const ViewDrawer = ({ rowData, visible, onClose }) => {
                                                     border: "none",
                                                     cursor: "pointer",
                                                     flexShrink: 0,
-                                                    backgroundColor: '#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"
+                                                    backgroundColor: '#5B8CFF', color: "#000", borderColor: '#5B8CFF', borderWidth: "0px"
                                                 }}
                                                 onClick={() => console.log('Learn more clicked:', item)}
                                             >
@@ -625,7 +625,7 @@ const ViewDrawer = ({ rowData, visible, onClose }) => {
                                 <Button onClick={handleCancel} className="dark-icon-button" style={{ color: theme === "dark" ? "white" : "#000" }}>Cancel</Button>
                             </div>
                             <div style={{ flex: 1 }}>
-                                <Button style={{ backgroundColor: '#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px" }} onClick={handleApproval}>Approval</Button>
+                                <Button style={{ backgroundColor: '#5B8CFF', color: "#000", borderColor: '#5B8CFF', borderWidth: "0px" }} onClick={handleApproval}>Approval</Button>
                             </div>
                         </div>
                     )}

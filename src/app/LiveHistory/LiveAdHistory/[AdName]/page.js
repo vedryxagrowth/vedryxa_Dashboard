@@ -762,7 +762,7 @@ const MnetLiveAdHistory = ({ params }) => {
                     return (
                         <span>
                             {params.value.replace("Copied!", "")}
-                            <span style={{ color: "#91C25F", fontWeight: "bold" }}>Copied!</span>
+                            <span style={{ color: "#5B8CFF", fontWeight: "bold" }}>Copied!</span>
                         </span>
                     );
                 }
@@ -791,7 +791,7 @@ const MnetLiveAdHistory = ({ params }) => {
                     return (
                         <span>
                             {params.value.replace("Copied!", "")}
-                            <span style={{ color: "#91C25F", fontWeight: "bold" }}>Copied!</span>
+                            <span style={{ color: "#5B8CFF", fontWeight: "bold" }}>Copied!</span>
                         </span>
                     );
                 }
@@ -1785,7 +1785,7 @@ const MnetLiveAdHistory = ({ params }) => {
                 </Col>
             }
             <Col style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                {/* <Switch checked={isGraphVisible} style={{fontSize:"20px", paddingTop:'5px', marginRight:'10px', backgroundColor: isGraphVisible ? '#91C25F' : undefined}} onClick={onClickBarChart}/> */}
+                {/* <Switch checked={isGraphVisible} style={{fontSize:"20px", paddingTop:'5px', marginRight:'10px', backgroundColor: isGraphVisible ? '#5B8CFF' : undefined}} onClick={onClickBarChart}/> */}
                 <Button
                     type="default"
                     icon={<BarChartOutlined />}
@@ -1794,10 +1794,10 @@ const MnetLiveAdHistory = ({ params }) => {
                     onMouseEnter={() => setHovered(true)}
                     onMouseLeave={() => setHovered(false)}
                     style={{
-                        border: '3px solid #91C25F',
+                        border: '3px solid #5B8CFF',
                         // color: isGraphVisible || hovered ? '#fff' : '#555',
                         color: theme === 'dark' ? '#fff' : (isGraphVisible || hovered ? '#fff' : '#555'),
-                        backgroundColor: isGraphVisible || hovered ? '#91C25F' : 'transparent',
+                        backgroundColor: isGraphVisible || hovered ? '#5B8CFF' : 'transparent',
                         borderRadius: '999px',
                         fontWeight: 500,
                         padding: '0 12px',
@@ -2053,7 +2053,7 @@ const MnetLiveAdHistory = ({ params }) => {
                 {/* <Col>
                                     style={{
                                         borderRadius: 8,
-                                        border: '1px solid #91C25F',
+                                        border: '1px solid #5B8CFF',
                                         // background: theme === 'dark' ? '#2a2a2a' : '#fff',
                                         // border: `1px solid ${theme === 'dark' ? '#444' : '#d9d9d9'}`,
                                         color: theme === 'dark' ? '#fff' : '#000',
@@ -2064,7 +2064,7 @@ const MnetLiveAdHistory = ({ params }) => {
                                     <Button
                                             type="primary"
                                             style={{
-                                            backgroundColor: '#91C25F',
+                                            backgroundColor: '#5B8CFF',
                                             border: 'solid 0px',
                                             color: 'black',
                                             height:'30px'
@@ -2096,7 +2096,7 @@ const MnetLiveAdHistory = ({ params }) => {
                         value={searchText}
                         onChange={(e) => setSearchText(e.target.value)}
                         className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
-                        // style={{marginLeft: "5px", border: '1px solid #91C25F', width: "170px", padding: "3px",backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
+                        // style={{marginLeft: "5px", border: '1px solid #5B8CFF', width: "170px", padding: "3px",backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
                         style={{
                             borderRadius: 8,
                             border: '1px solid #4CAF50',
@@ -2110,7 +2110,7 @@ const MnetLiveAdHistory = ({ params }) => {
                     <Button
                         type="default"
                         icon={<ReloadOutlined className='black-icon' />}
-                        style={{ width: '35px', height: "33px", marginLeft: "5px", backgroundColor: '#91C25F', border: 'solid 0px' }}
+                        style={{ width: '35px', height: "33px", marginLeft: "5px", backgroundColor: '#5B8CFF', border: 'solid 0px' }}
                         onClick={handleReload}  // Call refresh function when clicked
                     />
                     <EditOutlined
@@ -2118,7 +2118,7 @@ const MnetLiveAdHistory = ({ params }) => {
                         style={{
                             marginLeft: '3px',
                             marginRight: '3px',
-                            color: comment ? '#91C25F' : 'gray',
+                            color: comment ? '#5B8CFF' : 'gray',
                             cursor: 'pointer',
                             fontSize: '27px',
                         }}
@@ -2134,7 +2134,7 @@ const MnetLiveAdHistory = ({ params }) => {
                                 height="80"
                                 width="80"
                                 radius="9"
-                                color="#91C25F"
+                                color="#5B8CFF"
                                 ariaLabel="loading"
                                 wrapperStyle
                                 wrapperClass
@@ -2339,7 +2339,7 @@ const MnetLiveAdHistory = ({ params }) => {
                             <Button key="cancel" onClick={handleCancels} style={{ marginLeft: "4px" }}>
                                 Cancel
                             </Button>
-                            <Button key="ok" onClick={handleOks} style={{ marginLeft: "4px", backgroundColor: "#91C25F" }}>
+                            <Button key="ok" onClick={handleOks} style={{ marginLeft: "4px", backgroundColor: "#5B8CFF" }}>
                                 Ok
                             </Button>
                         </div>

@@ -298,7 +298,7 @@ const RequestComponent = ({ network, adAccounts, NetworkData }) => {
                 header={
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                         {NetworkData?.find(n => n.Network === network)?.Status === 'Active' ? (
-                            <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }} className='black-icon-active-1' />
+                            <CheckCircleFilled style={{ color: '#5B8CFF', fontSize: 15 }} className='black-icon-active-1' />
                         ) : (
                             <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} className='black-icon-pause-1' />
                         )}
@@ -366,7 +366,7 @@ const RequestComponent = ({ network, adAccounts, NetworkData }) => {
 
                     <Button
                         // type="primary" 
-                        style={{ backgroundColor: "#91C25F", color: "black" }}
+                        style={{ backgroundColor: "#5B8CFF", color: "black" }}
                         loading={loading}
                         onClick={() => handleSubmit(network)}
                     >

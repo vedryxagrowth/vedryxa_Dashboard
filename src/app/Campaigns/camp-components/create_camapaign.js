@@ -879,7 +879,7 @@ const AccountForm = ({
               >
 
                 <Button style={{
-                  border: "1px solid #91C25F", color: theme === "dark" ? "#fff" : "#000",              // keep text color fixed
+                  border: "1px solid #5B8CFF", color: theme === "dark" ? "#fff" : "#000",              // keep text color fixed
                   backgroundColor: "transparent", marginLeft: "50px"
                 }}>Set to All Accounts</Button>
               </Popconfirm>
@@ -1195,8 +1195,8 @@ const AdPreviewPerAccount = ({
                 <Button
                   type="primary"
                   style={{
-                    backgroundColor: "#91C25F",
-                    borderColor: "#91C25F",
+                    backgroundColor: "#5B8CFF",
+                    borderColor: "#5B8CFF",
                     color: "#000",
                     fontWeight: "bold",
                   }}
@@ -3192,7 +3192,7 @@ const AdsetComponent = ({
                 /> */}
                 <Switch
                   size="small"
-                  style={{ backgroundColor: isDynamicCreative ? "#91C25F" : undefined }}
+                  style={{ backgroundColor: isDynamicCreative ? "#5B8CFF" : undefined }}
                   onClick={(checked, e) => e.stopPropagation()}
                   onChange={(checked) => {
                     // console.log("Dynamic Creative:", checked);
@@ -3792,7 +3792,7 @@ const AdsetComponent = ({
                     disabled={adSchedulingToShowCampaign || budgetType === "daily" || CampaignBudgetActive}
                     checked={!!adSchedulingToShow[adset.id]}
                     style={{
-                      backgroundColor: adSchedulingToShow[adset.id] ? "#91C25F" : undefined,
+                      backgroundColor: adSchedulingToShow[adset.id] ? "#5B8CFF" : undefined,
                     }}
                     onChange={(checked) => {
                       setAdSchedulingToShow(prev => ({
@@ -4146,7 +4146,7 @@ const AdsetComponent = ({
           style={{
             fontFamily: "monospace",
             fontWeight: "bold",
-            color: "#91C25F",
+            color: "#5B8CFF",
           }}
         >
           Targeting
@@ -4482,7 +4482,7 @@ const AdsetComponent = ({
                             fontWeight: 500,
                             padding: "2px 8px",
                             borderRadius: 12,
-                            background: "#91c25f",
+                            background: "#5B8CFF",
                             color: "white",
                             cursor: "pointer",
                             border: "1px solid #91caff",
@@ -4702,7 +4702,7 @@ const AdsetComponent = ({
                             type="text"
                             // style={{ textAlign: "left" }}
                             style={{
-                              border: "1px solid #91C25F", color: theme === "dark" ? "#fff" : "#000",              // keep text color fixed
+                              border: "1px solid #5B8CFF", color: theme === "dark" ? "#fff" : "#000",              // keep text color fixed
                               backgroundColor: "transparent"
                             }}
                             onClick={() => {
@@ -4739,7 +4739,7 @@ const AdsetComponent = ({
                     style={{ marginBottom: 0 }}
                   >
                     <Switch size="small" style={{
-                      backgroundColor: isChecked ? "#91C25F" : undefined,
+                      backgroundColor: isChecked ? "#5B8CFF" : undefined,
                     }} />
                   </Form.Item>
                 </div>
@@ -5004,7 +5004,7 @@ const AdsetComponent = ({
                           }}
                           style={{
                             backgroundColor: (hasCountries ? true : (minAgeToggle[index] ?? true))
-                              ? "#91C25F"
+                              ? "#5B8CFF"
                               : "#d9d9d9",
                           }}
                           size="small"
@@ -5845,7 +5845,7 @@ const AdsetComponent = ({
                               fontWeight: activeMediaIndex[index] === i ? "500" : "normal",
                               color:
                                 activeMediaIndex[index] === i
-                                  ? "#91C25F"
+                                  ? "#5B8CFF"
                                   : theme === "dark"
                                     ? "#fff"
                                     : "#333",
@@ -7208,7 +7208,7 @@ const AdsetComponent = ({
                         style={{
                           cursor: "pointer",
                           display: "inline-block", 
-                          border: selectedIndex === String(account) ? "2px solid #91C25F" : "none",
+                          border: selectedIndex === String(account) ? "2px solid #5B8CFF" : "none",
                           borderRadius: "4px",
                           padding: "0 8px",
                           margin: "0 4px",
@@ -7229,7 +7229,7 @@ const AdsetComponent = ({
                           onClick={() => setSelectedIndex(String(account))}
                           style={{
                             cursor: "pointer",
-                            border: selectedIndex === String(account) ? "1px solid #91C25F" : "",
+                            border: selectedIndex === String(account) ? "1px solid #5B8CFF" : "",
                             borderRadius: selectedIndex === String(account) && "4px",
                             padding: "4px 8px",
                             // backgroundColor: selectedIndex === String(account) ? "#f0f0f0" : "#ffffff",
@@ -7524,9 +7524,9 @@ const AdsetComponent = ({
                             <div className="ad-button">
                               <button
                                 style={{
-                                  backgroundColor: "#91C25F",
+                                  backgroundColor: "#5B8CFF",
                                   color: "#000",
-                                  borderColor: "#91C25F",
+                                  borderColor: "#5B8CFF",
                                   borderWidth: "0px",
                                 }}
                               >
@@ -7922,7 +7922,7 @@ const CreateCampaignDrawer = ({
             </div>
             <span style={{ textAlign: 'right', marginLeft: 10 }}>
               {account.status === "Active" ? (
-                <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }} className='black-icon-active-1' />
+                <CheckCircleFilled style={{ color: '#5B8CFF', fontSize: 15 }} className='black-icon-active-1' />
               ) : (
                 <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} className='black-icon-pause-1' />
               )}
@@ -13637,7 +13637,7 @@ const CreateCampaignDrawer = ({
                       icon={<PlusOutlined />}
                       onMouseDown={(e) => e.preventDefault()}
                       onClick={addReportCategory}
-                      style={{ backgroundColor: "#91c25f", border: "1px solid #4caf50" }}
+                      style={{ backgroundColor: "#5B8CFF", border: "1px solid #4caf50" }}
                     />
                   </div>
                 </div>
@@ -13687,7 +13687,7 @@ const CreateCampaignDrawer = ({
                 unCheckedChildren="Geo"
                 style={{
                   marginRight: "10px",
-                  backgroundColor: geo === "Geos" ? "#91C25F" : "#d9d9d9",
+                  backgroundColor: geo === "Geos" ? "#5B8CFF" : "#d9d9d9",
                   color: "#fff"
                 }}
               />
@@ -13711,7 +13711,7 @@ const CreateCampaignDrawer = ({
                 unCheckedChildren="Pixel"
                 style={{
                   marginRight: "10px",
-                  backgroundColor: pixel === "Pixels" ? "#91C25F" : "#d9d9d9",
+                  backgroundColor: pixel === "Pixels" ? "#5B8CFF" : "#d9d9d9",
                   color: "#fff"
                 }}
               />
@@ -13735,7 +13735,7 @@ const CreateCampaignDrawer = ({
                 unCheckedChildren="Page"
                 style={{
                   marginRight: "10px",
-                  backgroundColor: page === "Pages" ? "#91C25F" : "#d9d9d9",
+                  backgroundColor: page === "Pages" ? "#5B8CFF" : "#d9d9d9",
                   color: "#fff"
                 }}
               />
@@ -13964,7 +13964,7 @@ const CreateCampaignDrawer = ({
 
                       >
                         {/* <MdOutlineNumbers
-                          style={{ fontSize: 16, color: "#91c25f", cursor: "pointer" }}
+                          style={{ fontSize: 16, color: "#5B8CFF", cursor: "pointer" }}
                         /> */}
                         <span>Multiple Accounts</span>
                       </Tooltip>
@@ -14523,7 +14523,7 @@ const CreateCampaignDrawer = ({
                                       fontWeight: 500,
                                       padding: "2px 8px",
                                       borderRadius: 12,
-                                      background: "#91c25f",
+                                      background: "#5B8CFF",
                                       color: "white",
                                       cursor: "pointer",
                                       border: "1px solid #91caff",
@@ -14817,7 +14817,7 @@ const CreateCampaignDrawer = ({
                           checked={adSchedulingToShowCampaign}
                           onChange={(checked) => setAdSchedulingToShowCampaign(checked)}
                           style={{
-                            backgroundColor: adSchedulingToShowCampaign ? "#91C25F" : undefined,
+                            backgroundColor: adSchedulingToShowCampaign ? "#5B8CFF" : undefined,
                           }}
                         />
                       </Tooltip>
@@ -15229,7 +15229,7 @@ const CreateCampaignDrawer = ({
                     <Button
                       type="primary"
                       style={{
-                        background: "#91c25f",
+                        background: "#5B8CFF",
                         minWidth: "120px",
                         borderWidth: "0px",
                       }}
@@ -15487,7 +15487,7 @@ const CreateCampaignDrawer = ({
                                   icon={<PlusOutlined />}
                                   onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
                                   onClick={(e) => { e.preventDefault(); e.stopPropagation(); addCategory(); }}
-                                  style={{ backgroundColor: "#91c25f", border: "1px solid #4caf50", fontSize: 10, width: 20, height: 20 }}
+                                  style={{ backgroundColor: "#5B8CFF", border: "1px solid #4caf50", fontSize: 10, width: 20, height: 20 }}
                                 />
                               </div>
                             </div>
@@ -15533,7 +15533,7 @@ const CreateCampaignDrawer = ({
                     okButtonProps={{
                       loading: confirmLoading,
                       style: {
-                        backgroundColor: "#91C25F",
+                        backgroundColor: "#5B8CFF",
                         color: "#000",
                         border: "none",
                       },
@@ -15542,7 +15542,7 @@ const CreateCampaignDrawer = ({
                     <Button
                       type="primary"
                       style={{
-                        background: "#91c25f",
+                        background: "#5B8CFF",
                         minWidth: "120px",
                         borderWidth: "0px",
                         marginLeft: "10px",
@@ -15557,7 +15557,7 @@ const CreateCampaignDrawer = ({
                     <Button
                       type="primary"
                       loading={confirmLoading}
-                      style={{ background: "#91c25f", minWidth: "120px", marginLeft: 20, borderWidth: 0 }}
+                      style={{ background: "#5B8CFF", minWidth: "120px", marginLeft: 20, borderWidth: 0 }}
                       onClick={handleSaveEditedDraft}
                     >
                       Save
@@ -15566,7 +15566,7 @@ const CreateCampaignDrawer = ({
                     <Button
                       type="primary"
                       loading={confirmLoading}
-                      style={{ background: "#91c25f", minWidth: "120px", marginLeft: 20, borderWidth: 0 }}
+                      style={{ background: "#5B8CFF", minWidth: "120px", marginLeft: 20, borderWidth: 0 }}
                       onClick={handleConfirm} // your existing "create new draft" handler
                     >
                       Save Template
@@ -15663,7 +15663,7 @@ const CreateCampaignDrawer = ({
                   okButtonProps={{
                     loading: confirmLoading,
                     style: {
-                      backgroundColor: "#91C25F",
+                      backgroundColor: "#5B8CFF",
                       color: "#000",
                       border: "none",
                     },
@@ -15672,7 +15672,7 @@ const CreateCampaignDrawer = ({
                   <Button
                     type="primary"
                     style={{
-                      background: "#91c25f",
+                      background: "#5B8CFF",
                       minWidth: "100px",
                       borderWidth: "0px",
                       marginLeft: "10px",

@@ -1542,7 +1542,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, taxDetails, context, fu
                             }}
                             size="small"
                             style={{
-                                backgroundColor: switchOn ? '#91C25F' : '#d9d9d9',
+                                backgroundColor: switchOn ? '#5B8CFF' : '#d9d9d9',
                             }}
                         />
                         <Modal
@@ -1830,7 +1830,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, taxDetails, context, fu
                                                     <div
                                                         style={{
                                                             padding: "5px 12px",
-                                                            background: "#91C25F",
+                                                            background: "#5B8CFF",
                                                             color: "#000",
                                                             borderRadius: 18,
                                                             fontSize: 8,
@@ -1981,7 +1981,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, taxDetails, context, fu
                                         <Button key="cancel" onClick={handleCancels} style={{ marginLeft: "4px" }}>
                                             Cancel
                                         </Button>
-                                        <Button key="ok" onClick={handleOks} style={{ marginLeft: "4px", backgroundColor: "#91C25F" }}>
+                                        <Button key="ok" onClick={handleOks} style={{ marginLeft: "4px", backgroundColor: "#5B8CFF" }}>
                                             Ok
                                         </Button>
                                     </div>
@@ -3143,7 +3143,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, taxDetails, context, fu
                                                     </Button>,
                                                     <Button
                                                         key="ok"
-                                                        style={{ backgroundColor: "#91C25F" }}
+                                                        style={{ backgroundColor: "#5B8CFF" }}
                                                         onClick={() => {
                                                             handleSmartCommentSubmit();
                                                             setIsBulkCommentModalVisible(false);
@@ -3327,7 +3327,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, taxDetails, context, fu
                                         className={theme === 'dark' ? 'inputatInsideTable custom-input-dark' : 'inputatInsideTable custom-input-light'}
                                         style={{
                                             borderRadius: 8,
-                                            border: '1px solid #91C25F',
+                                            border: '1px solid #5B8CFF',
                                             // background: theme === 'dark' ? '#2a2a2a' : '#fff',
                                             // border: `1px solid ${theme === 'dark' ? '#444' : '#d9d9d9'}`,
                                             color: theme === 'dark' ? '#fff' : '#000',
@@ -3475,7 +3475,7 @@ const CampaignLevelReports = ({ functionCallForCommnets, taxDetails, context, fu
 
                                                 </Text>
                                                 <div>Account:
-                                                    <span style={{ marginLeft: '3px', color: accountStatus.current === 'Active' ? '#91C25F' : '#EC7117', }}>
+                                                    <span style={{ marginLeft: '3px', color: accountStatus.current === 'Active' ? '#5B8CFF' : '#EC7117', }}>
                                                         {accountStatus.current}
                                                     </span>
                                                 </div>
@@ -3489,13 +3489,13 @@ const CampaignLevelReports = ({ functionCallForCommnets, taxDetails, context, fu
                                             // fontWeight: 500,
                                         }}
                                     >
-                                        <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px', color: "#91C25F" }} className="black-icon-info" />
+                                        <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px', color: "#5B8CFF" }} className="black-icon-info" />
                                     </Tooltip>
                                 </Col>
 
                                 <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
                                     {/* <Tooltip title="Export to CSV"> */}
-                                    <Button type="primary" style={{ backgroundColor: '#91C25F', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon" />} onClick={onBtExport1} />
+                                    <Button type="primary" style={{ backgroundColor: '#5B8CFF', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon" />} onClick={onBtExport1} />
                                     {/* </Tooltip> */}
                                 </Col>
                             </Row>

@@ -2602,14 +2602,14 @@ const MyTablePage = () => {
                                 onCancel={handleCancel}
                                 width={600}
                                 style={{ padding: '20px' }}
-                                okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }}
+                                okButtonProps={{ style: { backgroundColor: '#5B8CFF', borderColor: '#5B8CFF' } }}
                                 className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                             >
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
                                     <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                         <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
-                                        <Switch checked={campaignStatus} style={{ backgroundColor: campaignStatus && "#91C25F" }} onChange={onChangeCampaignStatus} />
+                                        <Switch checked={campaignStatus} style={{ backgroundColor: campaignStatus && "#5B8CFF" }} onChange={onChangeCampaignStatus} />
                                     </div>
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <Typography.Text strong style={{ marginBottom: '10px' }}>Budget: <span style={{ fontWeight: 'normal' }}>{campaignActualSpend.daily_budget ? "Daily" : campaignActualSpend.lifetime_budget ? "Lifetime" : "Adset"}</span></Typography.Text>
@@ -3383,13 +3383,13 @@ const MyTablePage = () => {
                                 onCancel={handleCancel}
                                 width={600}  // Set a custom width for the modal
                                 style={{ padding: '20px' }}  // Adjust body padding
-                                okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }}
+                                okButtonProps={{ style: { backgroundColor: '#5B8CFF', borderColor: '#5B8CFF' } }}
                                 className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                             >
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                         <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
-                                        <Switch checked={campaignStatus} style={{ backgroundColor: campaignStatus && "#91C25F" }} onChange={onChangeCampaignStatus} />
+                                        <Switch checked={campaignStatus} style={{ backgroundColor: campaignStatus && "#5B8CFF" }} onChange={onChangeCampaignStatus} />
                                     </div>
 
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -4583,13 +4583,13 @@ const MyTablePage = () => {
     //                             onCancel={handleCancel}
     //                             width={600}  
     //                             style={{ padding: '20px' }} 
-    //                             okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }} 
+    //                             okButtonProps={{ style: { backgroundColor: '#5B8CFF', borderColor: '#5B8CFF' } }} 
     //                         >
     //                             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
     //                                 <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
     //                                     <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
-    //                                     <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#91C25F"}} onChange={onChangeCampaignStatus} />
+    //                                     <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#5B8CFF"}} onChange={onChangeCampaignStatus} />
     //                                 </div>
     //                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
     //                                     <Typography.Text strong style={{ marginBottom: '10px' }}>Budget: <span style={{fontWeight:'normal'}}>{campaignActualSpend.daily_budget ? "Daily" : campaignActualSpend.lifetime_budget ? "Lifetime" : "Adset"}</span></Typography.Text>
@@ -5086,12 +5086,12 @@ const MyTablePage = () => {
     //                             onCancel={handleCancel}
     //                             width={600}  // Set a custom width for the modal
     //                             style={{ padding: '20px' }}  // Adjust body padding
-    //                             okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }} 
+    //                             okButtonProps={{ style: { backgroundColor: '#5B8CFF', borderColor: '#5B8CFF' } }} 
     //                         >
     //                             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
     //                                 <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
     //                                     <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
-    //                                     <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#91C25F"}} onChange={onChangeCampaignStatus} />
+    //                                     <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#5B8CFF"}} onChange={onChangeCampaignStatus} />
     //                                 </div>
 
     //                                 {/* Input Field */}
@@ -5689,13 +5689,13 @@ const MyTablePage = () => {
         //                         onCancel={handleCancel}
         //                         width={600}  
         //                         style={{ padding: '20px' }}
-        //                         okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }} 
+        //                         okButtonProps={{ style: { backgroundColor: '#5B8CFF', borderColor: '#5B8CFF' } }} 
         //                     >
         //                         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
         //                             <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
         //                                 <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
-        //                                 <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#91C25F"}} onChange={onChangeCampaignStatus} />
+        //                                 <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#5B8CFF"}} onChange={onChangeCampaignStatus} />
         //                             </div>
         //                             <div style={{ display: 'flex', flexDirection: 'column' }}>
         //                                 <Typography.Text strong style={{ marginBottom: '10px' }}>Budget: <span style={{fontWeight:'normal'}}>{campaignActualSpend.daily_budget ? "Daily" : campaignActualSpend.lifetime_budget ? "Lifetime" : "Adset"}</span></Typography.Text>
@@ -5996,7 +5996,7 @@ const MyTablePage = () => {
 
                 if (hasBudget && hasBid) {
                     tooltipText = 'Ad Set Budget & Bid are available';
-                    iconColor = '#91C25F'; // Green
+                    iconColor = '#5B8CFF'; // Green
                 } else if (hasBudget || hasBid) {
                     tooltipText = hasBudget ? 'Ad Set exists with Budget but no Bid' : 'Ad Set exists with Bid but no Budget';
                     iconColor = '#FFBF00'; // Yellow
@@ -6022,7 +6022,7 @@ const MyTablePage = () => {
                                 onOk={handleOk}
                                 onCancel={() => setIsModalVisible(false)}
                                 width={600}
-                                okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }}
+                                okButtonProps={{ style: { backgroundColor: '#5B8CFF', borderColor: '#5B8CFF' } }}
                                 className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                             >
                                 {confirmLoading && (
@@ -7680,14 +7680,14 @@ const MyTablePage = () => {
                                 onCancel={handleCancel}
                                 width={600}
                                 style={{ padding: '20px' }}
-                                okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }}
+                                okButtonProps={{ style: { backgroundColor: '#5B8CFF', borderColor: '#5B8CFF' } }}
                                 className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                             >
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
                                     <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                         <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
-                                        <Switch checked={campaignStatus} style={{ backgroundColor: campaignStatus && "#91C25F" }} onChange={onChangeCampaignStatus} />
+                                        <Switch checked={campaignStatus} style={{ backgroundColor: campaignStatus && "#5B8CFF" }} onChange={onChangeCampaignStatus} />
                                     </div>
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <Typography.Text strong style={{ marginBottom: '10px' }}>Budget: <span style={{ fontWeight: 'normal' }}>{campaignActualSpend.daily_budget ? "Daily" : campaignActualSpend.lifetime_budget ? "Lifetime" : "Adset"}</span></Typography.Text>
@@ -9597,7 +9597,7 @@ const MyTablePage = () => {
             //                     onOk={handleOk}
             //                     onCancel={() => setIsModalVisible(false)}
             //                     width={600}
-            //                     okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }}
+            //                     okButtonProps={{ style: { backgroundColor: '#5B8CFF', borderColor: '#5B8CFF' } }}
             //                     className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
             //                 >
             //                     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -9787,7 +9787,7 @@ const MyTablePage = () => {
                                 onOk={handleOk}
                                 onCancel={() => setIsModalVisible(false)}
                                 width={600}
-                                okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }}
+                                okButtonProps={{ style: { backgroundColor: '#5B8CFF', borderColor: '#5B8CFF' } }}
                                 className={`custom-modal ${params.context?.theme === 'dark' ? 'dark-theme-modal' : ''}`}
                             >
                                 {confirmLoading && (
@@ -12012,12 +12012,12 @@ const MyTablePage = () => {
         //                         onCancel={handleCancel}
         //                         width={600}  // Set a custom width for the modal
         //                         style={{ padding: '20px' }}  // Adjust body padding
-        //                         okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }} 
+        //                         okButtonProps={{ style: { backgroundColor: '#5B8CFF', borderColor: '#5B8CFF' } }} 
         //                     >
         //                         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         //                             <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
         //                                 <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
-        //                                 <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#91C25F"}} onChange={onChangeCampaignStatus} />
+        //                                 <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#5B8CFF"}} onChange={onChangeCampaignStatus} />
         //                             </div>
 
         //                             {/* Input Field */}
@@ -12333,7 +12333,7 @@ const MyTablePage = () => {
 
                 if (hasBudget && hasBid) {
                     tooltipText = 'Ad Set Budget & Bid are available';
-                    iconColor = '#91C25F'; // Green
+                    iconColor = '#5B8CFF'; // Green
                 } else if (hasBudget || hasBid) {
                     tooltipText = hasBudget ? 'Ad Set exists with Budget but no Bid' : 'Ad Set exists with Bid but no Budget';
                     iconColor = '#FFBF00'; // Yellow
@@ -12359,7 +12359,7 @@ const MyTablePage = () => {
                                 onOk={handleOk}
                                 onCancel={() => setIsModalVisible(false)}
                                 width={600}
-                                okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }}
+                                okButtonProps={{ style: { backgroundColor: '#5B8CFF', borderColor: '#5B8CFF' } }}
                                 className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                             >
                                 {confirmLoading && (
@@ -13895,12 +13895,12 @@ const MyTablePage = () => {
         //                         onCancel={handleCancel}
         //                         width={600}  // Set a custom width for the modal
         //                         style={{ padding: '20px' }}  // Adjust body padding
-        //                         okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }} 
+        //                         okButtonProps={{ style: { backgroundColor: '#5B8CFF', borderColor: '#5B8CFF' } }} 
         //                     >
         //                         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         //                             <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
         //                                 <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
-        //                                 <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#91C25F"}} onChange={onChangeCampaignStatus} />
+        //                                 <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#5B8CFF"}} onChange={onChangeCampaignStatus} />
         //                             </div>
 
         //                             {/* Input Field */}
@@ -14216,7 +14216,7 @@ const MyTablePage = () => {
 
             //     if (hasBudget && hasBid) {
             //         tooltipText = 'Ad Set Budget & Bid are available';
-            //         iconColor = '#91C25F'; // Green
+            //         iconColor = '#5B8CFF'; // Green
             //     } else if (hasBudget || hasBid) {
             //         tooltipText = hasBudget ? 'Ad Set exists with Budget but no Bid' : 'Ad Set exists with Bid but no Budget';
             //         iconColor = '#FFBF00'; // Yellow
@@ -14242,7 +14242,7 @@ const MyTablePage = () => {
             //                     onOk={handleOk}
             //                     onCancel={() => setIsModalVisible(false)}
             //                     width={600}
-            //                     okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }}
+            //                     okButtonProps={{ style: { backgroundColor: '#5B8CFF', borderColor: '#5B8CFF' } }}
             //                     className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
             //                 >
             //                     {confirmLoading && (
@@ -15787,13 +15787,13 @@ const MyTablePage = () => {
                                 onCancel={handleCancel}
                                 width={600}  // Set a custom width for the modal
                                 style={{ padding: '20px' }}  // Adjust body padding
-                                okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }}
+                                okButtonProps={{ style: { backgroundColor: '#5B8CFF', borderColor: '#5B8CFF' } }}
                                 className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                             >
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                         <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
-                                        <Switch checked={campaignStatus} style={{ backgroundColor: campaignStatus && "#91C25F" }} onChange={onChangeCampaignStatus} />
+                                        <Switch checked={campaignStatus} style={{ backgroundColor: campaignStatus && "#5B8CFF" }} onChange={onChangeCampaignStatus} />
                                     </div>
                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                                         <Typography.Text strong style={{ marginBottom: '10px' }}>Budget: <span style={{ fontWeight: 'normal' }}>{campaignActualSpend.daily_budget ? "Daily" : campaignActualSpend.lifetime_budget ? "Lifetime" : "Adset"}</span></Typography.Text>
@@ -17482,13 +17482,13 @@ const MyTablePage = () => {
                                 onCancel={handleCancel}
                                 width={600}  // Set a custom width for the modal
                                 style={{ padding: '20px' }}  // Adjust body padding
-                                okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }}
+                                okButtonProps={{ style: { backgroundColor: '#5B8CFF', borderColor: '#5B8CFF' } }}
                                 className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                             >
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                         <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
-                                        <Switch checked={campaignStatus} style={{ backgroundColor: campaignStatus && "#91C25F" }} onChange={onChangeCampaignStatus} />
+                                        <Switch checked={campaignStatus} style={{ backgroundColor: campaignStatus && "#5B8CFF" }} onChange={onChangeCampaignStatus} />
                                     </div>
 
                                     {/* Input Field */}
@@ -18801,12 +18801,12 @@ const MyTablePage = () => {
         //                         onCancel={handleCancel}
         //                         width={600}  // Set a custom width for the modal
         //                         style={{ padding: '20px' }}  // Adjust body padding
-        //                         okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }}
+        //                         okButtonProps={{ style: { backgroundColor: '#5B8CFF', borderColor: '#5B8CFF' } }}
         //                     >
         //                         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         //                             <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
         //                                 <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
-        //                                 <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#91C25F"}} onChange={onChangeCampaignStatus} />
+        //                                 <Switch checked={campaignStatus} style={{backgroundColor: campaignStatus && "#5B8CFF"}} onChange={onChangeCampaignStatus} />
         //                             </div>
 
 
@@ -18963,7 +18963,7 @@ const MyTablePage = () => {
             //                     onOk={handleOk}
             //                     onCancel={() => setIsModalVisible(false)}
             //                     width={600}
-            //                     okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }}
+            //                     okButtonProps={{ style: { backgroundColor: '#5B8CFF', borderColor: '#5B8CFF' } }}
             //                     className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
             //                 >
             //                     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -19177,7 +19177,7 @@ const MyTablePage = () => {
                                 onOk={handleOk}
                                 onCancel={() => setIsModalVisible(false)}
                                 width={600}
-                                okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }}
+                                okButtonProps={{ style: { backgroundColor: '#5B8CFF', borderColor: '#5B8CFF' } }}
                                 className={`custom-modal ${params.context?.theme === 'dark' ? 'dark-theme-modal' : ''}`}
                             >
                                 {confirmLoading && (
@@ -20779,13 +20779,13 @@ const MyTablePage = () => {
                                 onCancel={handleCancel}
                                 width={600}  // Set a custom width for the modal
                                 style={{ padding: '20px' }}  // Adjust body padding
-                                okButtonProps={{ style: { backgroundColor: '#91C25F', borderColor: '#91C25F' } }}
+                                okButtonProps={{ style: { backgroundColor: '#5B8CFF', borderColor: '#5B8CFF' } }}
                                 className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
                             >
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
                                         <Typography.Text strong style={{ paddingRight: '20px' }}>Campaign Status: Activate/Pause</Typography.Text>
-                                        <Switch checked={campaignStatus} style={{ backgroundColor: campaignStatus && "#91C25F" }} onChange={onChangeCampaignStatus} />
+                                        <Switch checked={campaignStatus} style={{ backgroundColor: campaignStatus && "#5B8CFF" }} onChange={onChangeCampaignStatus} />
                                     </div>
 
                                     {/* Input Field */}
@@ -22700,7 +22700,7 @@ const MyTablePage = () => {
     //                     </div>
     //                     <span style={{ textAlign: 'right', marginLeft: 10 }}>
     //                         {account.status === "Active" ? (
-    //                             <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }} className='black-icon-active-1' />
+    //                             <CheckCircleFilled style={{ color: '#5B8CFF', fontSize: 15 }} className='black-icon-active-1' />
     //                         ) : (
     //                             <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} className='black-icon-pause-1' />
     //                         )}
@@ -22795,7 +22795,7 @@ const MyTablePage = () => {
                                 </div>
                                 <span style={{ textAlign: 'right', marginLeft: 10 }}>
                                     {account.status === 'Active'
-                                        ? <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }} className='black-icon-active-1' />
+                                        ? <CheckCircleFilled style={{ color: '#5B8CFF', fontSize: 15 }} className='black-icon-active-1' />
                                         : <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} className='black-icon-pause-1' />}
                                 </span>
                             </div>
@@ -22831,7 +22831,7 @@ const MyTablePage = () => {
                                 <span style={{ textAlign: 'right', marginLeft: 10 }}>
                                     {account.status === 'Active' ? (
                                         <CheckCircleFilled
-                                            style={{ color: '#91C25F', fontSize: 15 }}
+                                            style={{ color: '#5B8CFF', fontSize: 15 }}
                                             className="black-icon-active-1"
                                         />
                                     ) : (
@@ -22919,7 +22919,7 @@ const MyTablePage = () => {
                         {/* Right Section: Status Icon */}
                         <span style={{ marginLeft: '10px', flexShrink: 0 }}>
                             {account.status === "Active" ? (
-                                <CheckCircleFilled style={{ color: '#91C25F', fontSize: '15px' }} className='black-icon-active-1' />
+                                <CheckCircleFilled style={{ color: '#5B8CFF', fontSize: '15px' }} className='black-icon-active-1' />
                             ) : (
                                 <CloseCircleFilled style={{ color: '#EC7117', fontSize: '15px' }} className='black-icon-pause-1' />
                             )}
@@ -23583,7 +23583,7 @@ const MyTablePage = () => {
                             locale={locale}
                             theme={{
                                 token: {
-                                  colorPrimary: '#91C25F', 
+                                  colorPrimary: '#5B8CFF', 
                                   colorTextLightSolid: '#000',
                                 },
                             }}
@@ -23608,7 +23608,7 @@ const MyTablePage = () => {
                             locale={locale}
                             theme={{
                                 token: {
-                                  colorPrimary: '#91C25F', 
+                                  colorPrimary: '#5B8CFF', 
                                   colorTextLightSolid: '#000',
                                 },
                             }}
@@ -23656,7 +23656,7 @@ const MyTablePage = () => {
   onMouseEnter={() => setHovered(true)}
   onMouseLeave={() => setHovered(false)}
   style={{
-    backgroundColor: hovered ? '#91C25F' : 'transparent',
+    backgroundColor: hovered ? '#5B8CFF' : 'transparent',
     border: '2px solid green',
     color: 'black',
     fontWeight: '600',
@@ -23715,7 +23715,7 @@ const MyTablePage = () => {
                                             label: (
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                                     {isActive ? (
-                                                        <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }} />
+                                                        <CheckCircleFilled style={{ color: '#5B8CFF', fontSize: 15 }} />
                                                     ) : (
                                                         <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} />
                                                     )}
@@ -23818,7 +23818,7 @@ const MyTablePage = () => {
                             locale={locale}
                             theme={{
                                 token: {
-                                    colorPrimary: '#91C25F',
+                                    colorPrimary: '#5B8CFF',
                                     colorTextLightSolid: '#000',
                                 },
                             }}
@@ -23850,7 +23850,7 @@ const MyTablePage = () => {
                             locale={locale}
                             theme={{
                                 token: {
-                                    colorPrimary: '#91C25F',
+                                    colorPrimary: '#5B8CFF',
                                     colorTextLightSolid: '#000',
                                 },
                             }}
@@ -23911,7 +23911,7 @@ const MyTablePage = () => {
                             onMouseEnter={() => setHovered(true)}
                             onMouseLeave={() => setHovered(false)}
                             style={{
-                                backgroundColor: hovered ? '#91C25F' : 'transparent',
+                                backgroundColor: hovered ? '#5B8CFF' : 'transparent',
                                 border: '1px solid #4CAF50',
                                 borderRadius: '6px',
                                 color: theme === 'dark' ? '#ffffff' : '#000000',
@@ -23941,7 +23941,7 @@ const MyTablePage = () => {
                             onMouseEnter={() => setHovered(true)}
                             onMouseLeave={() => setHovered(false)}
                             style={{
-                                backgroundColor: hovered ? "#91C25F" : "transparent",
+                                backgroundColor: hovered ? "#5B8CFF" : "transparent",
                                 border: "1px solid #4CAF50",
                                 borderRadius: "6px",
                                 color: theme === "dark" ? "#ffffff" : "#000000",
@@ -24099,7 +24099,7 @@ const MyTablePage = () => {
                             <Col>
                                 <Button
                                 style={{
-                                    backgroundColor: '#91C25F',
+                                    backgroundColor: '#5B8CFF',
                                     border: 'solid 0px',
                                     color: 'black',
                                     height:'30px'
@@ -24112,7 +24112,7 @@ const MyTablePage = () => {
                                     <Button
                                     type="primary"
                                     style={{
-                                        backgroundColor: '#91C25F',
+                                        backgroundColor: '#5B8CFF',
                                         border: 'solid 0px',
                                         color: 'black',
                                         height:'30px'
@@ -24356,7 +24356,7 @@ const MyTablePage = () => {
                                 <Button
                                     type="primary"
                                     style={{
-                                        backgroundColor: '#91C25F',
+                                        backgroundColor: '#5B8CFF',
                                         border: 'solid 0px',
                                         color: 'black',
                                         height: '30px'

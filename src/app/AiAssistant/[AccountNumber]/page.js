@@ -514,7 +514,7 @@ export default function RecommendationsPage({ params }) {
                     <Button
                         type="primary"
                         style={{
-                            backgroundColor: '#91C25F',
+                            backgroundColor: '#5B8CFF',
                             border: 'solid 0px',
                             color: 'black',
                             height: '30px'

@@ -873,7 +873,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
                             </div>
                         ))}
                     </div>
-                    <Button type="dashed" style={{ border: 'none', backgroundColor: '#91C25F', color: 'black', fontWeight: '600' }} onClick={handleAddAccount} icon={<span style={{ color: theme === 'dark' ? 'white' : 'black' }}> 
+                    <Button type="dashed" style={{ border: 'none', backgroundColor: '#5B8CFF', color: 'black', fontWeight: '600' }} onClick={handleAddAccount} icon={<span style={{ color: theme === 'dark' ? 'white' : 'black' }}> 
                         <PlusOutlined className="black-icon" />
                     </span>}>
                         Add Project
@@ -1059,7 +1059,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
 
                             {/* Add New Project */}
                             <Form.Item style={{ marginTop: 8 }}>
-                                <Button type="dashed" onClick={handleAddAccount} icon={<PlusOutlined className="black-icon" />} style={{ border: 'none', backgroundColor: '#91C25F', color: 'black', fontWeight: '600' }}>
+                                <Button type="dashed" onClick={handleAddAccount} icon={<PlusOutlined className="black-icon" />} style={{ border: 'none', backgroundColor: '#5B8CFF', color: 'black', fontWeight: '600' }}>
                                     Add Project
                                 </Button>
                             </Form.Item>
@@ -1069,7 +1069,7 @@ const Edituseraccesses = ({ editeddata, visible, onClose, AccountsData }) => {
 
 
                 <Form.Item>
-                    <Button style={{ border: 'none', backgroundColor: '#91C25F', color: 'black', fontWeight: '600' }} htmlType="submit">
+                    <Button style={{ border: 'none', backgroundColor: '#5B8CFF', color: 'black', fontWeight: '600' }} htmlType="submit">
                         Submit
                     </Button>
                 </Form.Item>

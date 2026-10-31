@@ -1530,7 +1530,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                         <ConfigProvider
                             theme={{
                                 token: {
-                                    colorPrimary: '#91C25F',
+                                    colorPrimary: '#5B8CFF',
                                     colorTextLightSolid: '#000',
                                 },
                             }}>
@@ -1569,7 +1569,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                     <Col>
                         {fromCampaigns === true ? (
 
-                            <Button onClick={onSubmitData} className={theme === 'dark' ? 'dark-theme' : 'light-theme'} style={{ display: 'flex', border: 'none', justifyContent: 'center', maxWidth: '160px', backgroundColor: '#91C25F', color: theme === 'dark' ? 'black' : undefined }}>
+                            <Button onClick={onSubmitData} className={theme === 'dark' ? 'dark-theme' : 'light-theme'} style={{ display: 'flex', border: 'none', justifyContent: 'center', maxWidth: '160px', backgroundColor: '#5B8CFF', color: theme === 'dark' ? 'black' : undefined }}>
                                 Submit
                                 {checkboxSelected.length > 0 && (
                                     <Badge
@@ -1606,7 +1606,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                     transition: 'background 0.3s',
                                     marginLeft: '-22px'
                                 }}
-                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#91C25F'}
+                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#5B8CFF'}
                                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                             >
                                 New campaign
@@ -1672,7 +1672,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                             <Option key={option.value} value={option.value} title={null}>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                                     {isActive ? (
-                                                        <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }} className='black-icon-active-1' />
+                                                        <CheckCircleFilled style={{ color: '#5B8CFF', fontSize: 15 }} className='black-icon-active-1' />
                                                     ) : (
                                                         <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} className='black-icon-pause-1' />
                                                     )}
@@ -1758,7 +1758,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                             </div>
                                             <span style={{ marginLeft: '10px', flexShrink: 0 }}>
                                                 {option.status === "Active" ? (
-                                                    <CheckCircleFilled style={{ color: '#91C25F', fontSize: '15px' }} className='black-icon-active-1' />
+                                                    <CheckCircleFilled style={{ color: '#5B8CFF', fontSize: '15px' }} className='black-icon-active-1' />
                                                 ) : (
                                                     <CloseCircleFilled style={{ color: '#EC7117', fontSize: '15px' }} className='black-icon-pause-1' />
                                                 )}
@@ -1776,7 +1776,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                         <ConfigProvider
                             theme={{
                                 token: {
-                                    colorPrimary: '#91C25F',
+                                    colorPrimary: '#5B8CFF',
                                     colorTextLightSolid: '#000',
                                 },
                             }}>
@@ -1815,7 +1815,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                 transition: 'background 0.3s',
 
                             }}
-                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#91C25F'}
+                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#5B8CFF'}
                             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                         >
                             Create campaign
@@ -1841,7 +1841,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                     <Col>
                         {fromCampaigns === true ? (
 
-                            <Button onClick={onSubmitData} className={theme === 'dark' ? 'dark-theme' : 'light-theme'} style={{ display: 'flex', border: 'none', justifyContent: 'center', maxWidth: '160px', backgroundColor: '#91C25F', color: theme === 'dark' ? 'black' : undefined }}>
+                            <Button onClick={onSubmitData} className={theme === 'dark' ? 'dark-theme' : 'light-theme'} style={{ display: 'flex', border: 'none', justifyContent: 'center', maxWidth: '160px', backgroundColor: '#5B8CFF', color: theme === 'dark' ? 'black' : undefined }}>
                                 Submit
                                 {checkboxSelected.length > 0 && (
                                     <Badge
@@ -1878,7 +1878,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                             //         transition: 'background 0.3s',
                             //         marginLeft: '0px'
                             //     }}
-                            //     onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#91C25F'}
+                            //     onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#5B8CFF'}
                             //     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                             // >
                             //     New campaign
@@ -1957,12 +1957,12 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                             onChange={handleSearch} // Call function on user input
                             style={{ width: '170px', border: '1px solid #4caf50' }}
                         />
-                        <Button style={{ backgroundColor: '#91C25F', border: 'none', marginLeft: '7px' }} onClick={fetchUserImages} icon={<ReloadOutlined className="black-icon" />} />
+                        <Button style={{ backgroundColor: '#5B8CFF', border: 'none', marginLeft: '7px' }} onClick={fetchUserImages} icon={<ReloadOutlined className="black-icon" />} />
                         <Button
                             icon={<DeleteOutlined className="black-icon" />}
                             onClick={() => setIsTrashView(prev => !prev)}
                             style={{
-                                backgroundColor: isTrashView ? '#e6f7ff' : '#91C25F',
+                                backgroundColor: isTrashView ? '#e6f7ff' : '#5B8CFF',
                                 color: isTrashView ? '#1d39c4' : 'black',
                                 border: isTrashView ? '1px solid #91d5ff' : '1px solid #4caf50',
                                 marginLeft: '5px',
@@ -1978,7 +1978,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
 
             <div style={{ display: 'flex' }}>
                 {currentFolder && (
-                    <Button type="link" icon={<ArrowLeftOutlined style={{ color: theme === 'dark' ? '#91C25F' : 'black' }} />} onClick={() => {
+                    <Button type="link" icon={<ArrowLeftOutlined style={{ color: theme === 'dark' ? '#5B8CFF' : 'black' }} />} onClick={() => {
                         if (searchQuery.trim() !== "" && previousSearchResults.current) {
                             setFilteredImages(previousSearchResults.current);
                             return;
@@ -1992,7 +1992,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                 )}
 
                 {currentFolder && (
-                    <div style={{ marginTop: '8px', fontSize: '14px', color: theme === 'dark' ? '#91C25F' : '#000' }}>
+                    <div style={{ marginTop: '8px', fontSize: '14px', color: theme === 'dark' ? '#5B8CFF' : '#000' }}>
                         {currentFolder
                             .split('/')
                             .filter(Boolean) // remove empty
@@ -2032,8 +2032,8 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                         gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
                         gap: '10px',
                         marginTop: '20px',
-                        // border: '2px solid #91C25F',
-                        border: isTrashView ? '2px solid #91d5ff' : '2px solid #91C25F',
+                        // border: '2px solid #5B8CFF',
+                        border: isTrashView ? '2px solid #91d5ff' : '2px solid #5B8CFF',
                         padding: '10px',
                         width: '100%',
                         position: 'relative',
@@ -2100,8 +2100,8 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                         backgroundColor:
                                             hoveredImage === image.uid
                                                 ? theme === 'dark'
-                                                    ? '#91C25F'
-                                                    : '#91C25F'
+                                                    ? '#5B8CFF'
+                                                    : '#5B8CFF'
                                                 : 'transparent',
                                         display: 'flex',
                                         flexDirection: 'column',
@@ -2193,7 +2193,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
 
                                                 border:
                                                     highlightedFolders.includes(image.uid)
-                                                        ? '2px solid #91C25F'
+                                                        ? '2px solid #5B8CFF'
                                                         : '1px solid transparent',
 
 
@@ -2346,7 +2346,7 @@ const ImageUploadPage = ({ selectedFilesData, fromCampaigns, network, Account_Nu
                                                 right: '8px',
                                                 width: '24px',
                                                 height: '24px',
-                                                backgroundColor: '#91C25F',
+                                                backgroundColor: '#5B8CFF',
                                                 color: 'black',
                                                 borderRadius: '50%',
                                                 display: 'flex',

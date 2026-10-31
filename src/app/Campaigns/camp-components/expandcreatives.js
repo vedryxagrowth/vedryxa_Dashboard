@@ -287,14 +287,14 @@ const ExpandedRowContent = ({ record, changeRRefrst, network}) => {
                                         style={{
                                             padding: "8px 12px",
                                             borderRadius: "20px",
-                                            backgroundColor: "#91C25F",
+                                            backgroundColor: "#5B8CFF",
                                             color: "#000",
                                             border: "none",
                                             cursor: "pointer",
                                             flexShrink: 0,
                                             marginBottom:'5px'
                                         }}
-                                        // style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}}
+                                        // style={{backgroundColor:'#5B8CFF', color: "#000", borderColor: '#5B8CFF', borderWidth: "0px"}}
                                         onClick={() => console.log('Learn More clicked:', item)}
                                     >
                                         Learn more
@@ -341,7 +341,7 @@ const ExpandedRowContent = ({ record, changeRRefrst, network}) => {
                                     {/* Approve/Reject buttons (only if the user is not a media buyer and the item is not approved or rejected) */}
                                     {(!isMediaBuyer && item.status !== "Approved" && item.status !== "Rejected") && (
                                         <div style={{ display: 'flex',justifyContent: "space-evenly", width: '100%' }}>
-                                            <Button style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px",margin:'18px'}} onClick={() => handleApprove(item)}>Approve</Button>
+                                            <Button style={{backgroundColor:'#5B8CFF', color: "#000", borderColor: '#5B8CFF', borderWidth: "0px",margin:'18px'}} onClick={() => handleApprove(item)}>Approve</Button>
                                             <Button type='primary' danger style={{ margin:'18px', borderColor: ' #ff6666',backgroundColor:'#EC7117',backgroundColor:'#EC7117' }} onClick={() => handleRejectClick(item)}>Reject</Button>
                                         </div>
                                     )}
@@ -396,7 +396,7 @@ const ExpandedRowContent = ({ record, changeRRefrst, network}) => {
                                 //     padding: '8px 16px',
                                 //     borderRadius: '8px',
                                 // }}
-                                style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px",padding: '8px 16px',borderRadius: '8px',}}
+                                style={{backgroundColor:'#5B8CFF', color: "#000", borderColor: '#5B8CFF', borderWidth: "0px",padding: '8px 16px',borderRadius: '8px',}}
                             >
                                 Create ads
                             </Button>

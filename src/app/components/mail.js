@@ -117,7 +117,7 @@ const ContactForm = () => {
                     <div style={{display:'flex',justifyContent:'flex-end',marginTop:'-15px'}} 
                     >
                         <div style={{marginRight:'10px'}}  onClick={handleCancel}><Button>Cancel</Button></div>
-                        <div ><Button style={{backgroundColor:'#91C25F',border:'1px solid #4caf50'}}  onClick={handleOk}>Ok</Button></div>
+                        <div ><Button style={{backgroundColor:'#5B8CFF',border:'1px solid #4caf50'}}  onClick={handleOk}>Ok</Button></div>
                     </div>
                 </Form>
             </div>

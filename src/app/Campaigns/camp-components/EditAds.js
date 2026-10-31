@@ -867,7 +867,7 @@ const Editads = ({ doubleAdset, viewCampaignData, changeRRefrst, editdata, onClo
 
         <Form.Item>
           <Space>
-            <Button htmlType="submit" style={{ backgroundColor: '#91C25F', border: '1px solid #4caf50' }}>
+            <Button htmlType="submit" style={{ backgroundColor: '#5B8CFF', border: '1px solid #4caf50' }}>
               Submit
             </Button>
             <Button style={{ backgroundColor: 'transparent', border: '1px solid #4caf50', color: theme === 'dark' ? '#fff' : '333' }} onClick={() => form.resetFields()}>Clear</Button>

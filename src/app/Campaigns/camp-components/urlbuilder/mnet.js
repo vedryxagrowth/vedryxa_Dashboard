@@ -464,7 +464,7 @@ const MnetUrlBuilder = ({ defaultValues, indexValueForAccount, onReturnMessage, 
         </Col>
         <Col>
           <Button onClick={onClickGet} style={{ marginRight: '10px', backgroundColor: '#b7e8c6', borderColor: '#b7e8c6', color: 'black' }}>Get</Button>
-          {!showSubmitButton && <Button style={{ backgroundColor: '#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px" }} onClick={onClickSubmit}>Submit</Button>}
+          {!showSubmitButton && <Button style={{ backgroundColor: '#5B8CFF', color: "#000", borderColor: '#5B8CFF', borderWidth: "0px" }} onClick={onClickSubmit}>Submit</Button>}
         </Col>
       </Row>
       <Row justify="center" style={{ marginTop: '10px' }}>

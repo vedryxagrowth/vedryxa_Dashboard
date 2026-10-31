@@ -1115,7 +1115,7 @@ const RevenuePartnerDashboard = () => {
                             locale={locale}
                             theme={{
                                 token: {
-                                    colorPrimary: '#91C25F',
+                                    colorPrimary: '#5B8CFF',
                                     colorTextLightSolid: '#000',
                                 },
                             }}
@@ -1145,7 +1145,7 @@ const RevenuePartnerDashboard = () => {
                             locale={locale}
                             theme={{
                                 token: {
-                                    colorPrimary: '#91C25F',
+                                    colorPrimary: '#5B8CFF',
                                     colorTextLightSolid: '#000',
                                 },
                             }}
@@ -1182,7 +1182,7 @@ const RevenuePartnerDashboard = () => {
                         />
                     </Col> */}
                     <Col xs={12} sm={12} md={2}>
-                        <Button onClick={onClickSubmit} style={{ backgroundColor: '#91C25F', color: "black", fontWeight: '600', border: ' 1px solid #4caf50' }}>
+                        <Button onClick={onClickSubmit} style={{ backgroundColor: '#5B8CFF', color: "black", fontWeight: '600', border: ' 1px solid #4caf50' }}>
                             Submit
                         </Button>
                     </Col>
@@ -2908,7 +2908,7 @@ const Dashboard = () => {
                                                 </div>
                                                 <div>
                                                     {item.status === 'Active' ? (
-                                                        <CheckCircleFilled style={{ color: '#91C25F', fontSize: 14 }} />
+                                                        <CheckCircleFilled style={{ color: '#5B8CFF', fontSize: 14 }} />
                                                     ) : (
                                                         <CloseCircleFilled style={{ color: '#EC7117', fontSize: 14 }} />
                                                     )}
@@ -6357,7 +6357,7 @@ const Dashboard = () => {
                                                             </Button>
                                                             <Button
                                                                 className='custom-button1'
-                                                                style={{ backgroundColor: '#91C25F', border: ' 1px solid #4caf50' }}
+                                                                style={{ backgroundColor: '#5B8CFF', border: ' 1px solid #4caf50' }}
                                                                 onClick={handleSubmit}
                                                             >
                                                                 Submit
@@ -6470,7 +6470,7 @@ const Dashboard = () => {
                                                             label: (
                                                                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                                                     {isActive
-                                                                        ? <CheckCircleFilled style={{ color: '#91C25F', fontSize: 15 }} className='black-icon-active-1' />
+                                                                        ? <CheckCircleFilled style={{ color: '#5B8CFF', fontSize: 15 }} className='black-icon-active-1' />
                                                                         : <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} className='black-icon-pause-1' />}
                                                                     <span style={{ color: theme === 'dark' ? '#fff' : '#000' }}>{category}</span>
                                                                 </div>
@@ -6537,7 +6537,7 @@ const Dashboard = () => {
                                                 locale={locale}
                                                 theme={{
                                                     token: {
-                                                        colorPrimary: '#91C25F',
+                                                        colorPrimary: '#5B8CFF',
                                                         colorTextLightSolid: '#000',
                                                     },
                                                 }}
@@ -6574,7 +6574,7 @@ const Dashboard = () => {
                                                             </Button>
                                                             <Button
                                                                 className='custom-button1'
-                                                                style={{ backgroundColor: '#91C25F', border: ' 1px solid #4caf50' }}
+                                                                style={{ backgroundColor: '#5B8CFF', border: ' 1px solid #4caf50' }}
                                                                 onClick={handleSubmit}
                                                             >
                                                                 Submit
@@ -6588,7 +6588,7 @@ const Dashboard = () => {
                                             <Button
                                                 type="default"
                                                 icon={<ReloadOutlined className='black-icon' />}
-                                                style={{ float: "right", marginLeft: "10px", backgroundColor: '#91C25F' }}
+                                                style={{ float: "right", marginLeft: "10px", backgroundColor: '#5B8CFF' }}
                                                 onClick={refreshUsers}  // Call refresh function when clicked
                                             >
                                             </Button>
@@ -6638,7 +6638,7 @@ const Dashboard = () => {
                                             //     { title: 'Spend', value: spend1.current, prefix: '$', color: '#5C58EE', dot: '#5C58EE' },
                                             //     { title: 'Leads', value: leads1.current, color: '#EC7117', dot: '#EC7117' },
                                             //     { title: 'Conversions', value: conversions1.current, color: '#5C58EE', dot: '#5C58EE' },
-                                            //     { title: 'NCPL', value: ncpl1.current, prefix: '$', color: '#91C25F', dot: '#91C25F' },
+                                            //     { title: 'NCPL', value: ncpl1.current, prefix: '$', color: '#5B8CFF', dot: '#5B8CFF' },
                                             //     { title: 'CPL', value: cpl1.current, color: '#EC7117', dot: '#EC7117' },
                                             //     { title: 'CTR', value: ctr1.current, color: '#5C58EE', dot: '#5C58EE' },
                                             //     { title: 'CPC', value: cpc1.current, prefix: '$', color: '#EC7117', dot: '#EC7117' },
@@ -6652,7 +6652,7 @@ const Dashboard = () => {
                                                 { title: 'Spend', value: spend1.current, prefix: '$', color: '#5C58EE', dot: '#5C58EE', comparater: data.length > 0 ? spend1Previous.current : 0, camparisionPercentage: Number(spend1Previous.current) === 0 ? 0 : ((Number(spend1.current || 0) - Number(spend1Previous.current || 0)) / Math.abs(Number(spend1Previous.current))) * 100 },
                                                 { title: 'Leads', value: leads1.current, color: '#EC7117', dot: '#EC7117', comparater: data.length > 0 ? leads1Previous.current : 0, camparisionPercentage: Number(leads1Previous.current) === 0 ? 0 : ((Number(leads1.current || 0) - Number(leads1Previous.current || 0)) / Math.abs(Number(leads1Previous.current))) * 100 },
                                                 { title: 'Conversions', value: conversions1.current, color: '#5C58EE', dot: '#5C58EE', comparater: data.length > 0 ? conversions1Previous.current : 0, camparisionPercentage: Number(conversions1Previous.current) === 0 ? 0 : ((Number(conversions1.current || 0) - Number(conversions1Previous.current || 0)) / Math.abs(Number(conversions1Previous.current))) * 100 },
-                                                { title: 'NCPL', value: ncpl1.current, prefix: '$', color: '#91C25F', dot: '#91C25F', comparater: data.length > 0 ? ncpl1Previous.current : 0, camparisionPercentage: Number(ncpl1Previous.current) === 0 ? 0 : ((Number(ncpl1.current || 0) - Number(ncpl1Previous.current || 0)) / Math.abs(Number(ncpl1Previous.current))) * 100 },
+                                                { title: 'NCPL', value: ncpl1.current, prefix: '$', color: '#5B8CFF', dot: '#5B8CFF', comparater: data.length > 0 ? ncpl1Previous.current : 0, camparisionPercentage: Number(ncpl1Previous.current) === 0 ? 0 : ((Number(ncpl1.current || 0) - Number(ncpl1Previous.current || 0)) / Math.abs(Number(ncpl1Previous.current))) * 100 },
                                                 { title: 'CPL', value: cpl1.current, color: '#EC7117', dot: '#EC7117', comparater: data.length > 0 ? cpl1Previous.current : 0, camparisionPercentage: Number(cpl1Previous.current) === 0 ? 0 : ((Number(cpl1.current || 0) - Number(cpl1Previous.current || 0)) / Math.abs(Number(cpl1Previous.current))) * 100 },
                                                 { title: 'CTR', value: ctr1.current, color: '#5C58EE', dot: '#5C58EE', comparater: data.length > 0 ? ctr1Previous.current : 0, camparisionPercentage: Number(ctr1Previous.current) === 0 ? 0 : ((Number(ctr1.current || 0) - Number(ctr1Previous.current || 0)) / Math.abs(Number(ctr1Previous.current))) * 100 },
                                                 { title: 'CPC', value: cpc1.current, prefix: '$', color: '#EC7117', dot: '#EC7117', comparater: data.length > 0 ? cpc1Previous.current : 0, camparisionPercentage: Number(cpc1Previous.current) === 0 ? 0 : ((Number(cpc1.current || 0) - Number(cpc1Previous.current || 0)) / Math.abs(Number(cpc1Previous.current))) * 100 },
@@ -7363,7 +7363,7 @@ const Dashboard = () => {
                                         style={{
                                             border: '2px solid #4CAF50',
                                             color: showGraphs || hovered ? 'green' : theme === 'dark' ? '#f9fafb' : '#1f2937',
-                                            backgroundColor: showGraphs || hovered ? '#91C25F' : 'transparent',
+                                            backgroundColor: showGraphs || hovered ? '#5B8CFF' : 'transparent',
                                             borderRadius: '999px',
                                             fontWeight: 500,
                                             padding: '0 10px',
@@ -7431,8 +7431,8 @@ const Dashboard = () => {
                                                             onMouseEnter={() => setHovered(true)}
                                                             onMouseLeave={() => setHovered(false)}
                                                             style={{
-                                                                border: '3px solid #91C25F',
-                                                                color: showGraphs || hovered ? '#91C25F' : '#555',
+                                                                border: '3px solid #5B8CFF',
+                                                                color: showGraphs || hovered ? '#5B8CFF' : '#555',
                                                                 backgroundColor: showGraphs || hovered ? 'green' : 'transparent',
                                                                 borderRadius: '999px',
                                                                 fontWeight: 500,
@@ -7458,7 +7458,7 @@ const Dashboard = () => {
                                                     {/* <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: 10 }}>
       <Switch
         checked={showGraphs}
-        style={{ backgroundColor: showGraphs ? '#91C25F' : undefined }}
+        style={{ backgroundColor: showGraphs ? '#5B8CFF' : undefined }}
         onClick={onClickBarChart}
       />
       <span style={{ fontSize: '14px', color: theme === 'dark' ? '#fff' : '#000' }}>

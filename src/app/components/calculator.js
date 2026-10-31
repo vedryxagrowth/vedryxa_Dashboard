@@ -324,7 +324,7 @@ export default function Calculator() {
             {renderButton('CE', handleClear)}
             {renderButton('C', handleClear)}
             <Button
-              style={{ width: 150,backgroundColor:'#91C25F',border:'#91C25F' }}
+              style={{ width: 150,backgroundColor:'#5B8CFF',border:'#5B8CFF' }}
               onClick={calculate}
             >
               =

@@ -2156,7 +2156,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                     </Form.Item>
                                 )}
                             </div>
-                            <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "#91C25F" }}>Targeting</span>
+                            <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "#5B8CFF" }}>Targeting</span>
                             <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
                                 <Form.Item
                                     name="countries"
@@ -2930,7 +2930,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                                                                 <div className="desc" style={{ color: theme === "dark" && "white" }}>{description}</div>
                                                             </div>
                                                             <div className="ad-button">
-                                                                <button style={{ backgroundColor: '#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px" }}>Learn More</button>
+                                                                <button style={{ backgroundColor: '#5B8CFF', color: "#000", borderColor: '#5B8CFF', borderWidth: "0px" }}>Learn More</button>
                                                             </div>
                                                         </div>
                                                         <a href={websiteURL} target="_blank" rel="noopener noreferrer" style={{ wordWrap: 'break-word', whiteSpace: 'normal', color: '#0066cc', padding: '10px' }}>
@@ -3084,7 +3084,7 @@ const CreateDraft = ({ visible, onClose, changeRRefrst, accountis, network, sele
                             </div>
                         )}
                     </Form.Item> */}
-                    <Form.Item label=" "><Button style={{ backgroundColor: '#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px" }} htmlType="submit" onClick={() => {
+                    <Form.Item label=" "><Button style={{ backgroundColor: '#5B8CFF', color: "#000", borderColor: '#5B8CFF', borderWidth: "0px" }} htmlType="submit" onClick={() => {
                         //  console.log(form, "form Values value")
                           }}>Save</Button></Form.Item>
 

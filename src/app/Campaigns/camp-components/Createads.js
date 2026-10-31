@@ -1506,7 +1506,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
                             <div className="desc" style={{ color: theme === "dark" && "white" }}>{description}</div>
                           </div>
                           <div className="ad-button">
-                            <button style={{ backgroundColor: '#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px" }}>Learn More</button>
+                            <button style={{ backgroundColor: '#5B8CFF', color: "#000", borderColor: '#5B8CFF', borderWidth: "0px" }}>Learn More</button>
                           </div>
                         </div>
                         <a href={websiteURL} target="_blank" rel="noopener noreferrer" style={{ wordWrap: 'break-word', whiteSpace: 'normal', color: '#0066cc', padding: '10px' }}>
@@ -1596,7 +1596,7 @@ const Createnewads = ({ data, rerenders, onClose, network, visible, adsData }) =
           </div>
           <Form.Item>
             <Space>
-              <Button style={{ backgroundColor: '#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px" }} htmlType="submit">
+              <Button style={{ backgroundColor: '#5B8CFF', color: "#000", borderColor: '#5B8CFF', borderWidth: "0px" }} htmlType="submit">
                 Submit
               </Button>
               <Button className="dark-icon-button" style={{ color: theme === "dark" ? "white" : "#000" }} onClick={handleClear}>Clear</Button>

@@ -555,7 +555,7 @@ const EditCampaignDrawer = ({ rowData, visible, onClose }) => {
 
 
                             </div>
-                            <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "#91C25F" }}>Targeting</span>
+                            <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "#5B8CFF" }}>Targeting</span>
                             <div style={{ display: "flex" }}>
                                 <Form.Item
                                     name="countries"

@@ -302,7 +302,7 @@ export default function Viewads({ selectedRow, viewdata }) {
                                             <div className="desc" style={{color : theme === "dark" && "white"}}>{viewdata.Description}</div>
                                         </div>
                                         <div className="ad-button">
-                                            <button style={{backgroundColor:'#91C25F', color: "#000", borderColor: '#91C25F', borderWidth: "0px"}}>Learn More</button>
+                                            <button style={{backgroundColor:'#5B8CFF', color: "#000", borderColor: '#5B8CFF', borderWidth: "0px"}}>Learn More</button>
                                         </div>
                                     </div>
                                     <div className="icons">
