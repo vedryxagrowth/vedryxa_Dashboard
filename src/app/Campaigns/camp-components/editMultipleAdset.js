@@ -2229,9 +2229,9 @@ const AddComponent = ({
                       <div className="ad-button">
                         <button
                           style={{
-                            backgroundColor: "#5B8CFF",
+                            backgroundColor: "#59BCE8",
                             color: "#000",
-                            borderColor: "#5B8CFF",
+                            borderColor: "#59BCE8",
                             borderWidth: "0px",
                           }}
                         >
@@ -4288,7 +4288,7 @@ const AdsetComponent = ({
                         size="small"
                         disabled
                         checked={adset?.is_dynamic_creative}
-                        style={{ backgroundColor: adset.is_dynamic_creative ? "#5B8CFF" : undefined }}
+                        style={{ backgroundColor: adset.is_dynamic_creative ? "#59BCE8" : undefined }}
                       // onClick={(checked, e) => e.stopPropagation()}
                       // onChange={(checked) => {
                       //   console.log("Dynamic Creative:", checked);
@@ -5291,7 +5291,7 @@ const AdsetComponent = ({
                                   fontWeight: activeMediaIndex === -1 ? "500" : "normal",
                                   color:
                                     activeMediaIndex === -1
-                                      ? "#5B8CFF"
+                                      ? "#59BCE8"
                                       : theme === "dark"
                                         ? "#fff"
                                         : "#333",
@@ -5328,7 +5328,7 @@ const AdsetComponent = ({
                                     fontWeight: activeMediaIndex === i ? "500" : "normal",
                                     color:
                                       activeMediaIndex === i
-                                        ? "#5B8CFF"
+                                        ? "#59BCE8"
                                         : theme === "dark"
                                           ? "#fff"
                                           : "#333",
@@ -6823,9 +6823,9 @@ const AdsetComponent = ({
                                     <div className="ad-button">
                                       <button
                                         style={{
-                                          backgroundColor: "#5B8CFF",
+                                          backgroundColor: "#59BCE8",
                                           color: "#000",
-                                          borderColor: "#5B8CFF",
+                                          borderColor: "#59BCE8",
                                           borderWidth: "0px",
                                         }}
                                       >
@@ -6946,7 +6946,7 @@ const AdsetComponent = ({
             <Button
               type="primary"
               style={{
-                background: "#5B8CFF",
+                background: "#59BCE8",
                 minWidth: "200px",
                 borderWidth: "0px",
                 marginTop: "10px",

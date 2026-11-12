@@ -899,7 +899,7 @@ export default function AdNameAndAccount({ params }) {
                     return (
                         <span>
                             {params.value.replace("Copied!", "")}
-                            <span style={{ color: "#5B8CFF", fontWeight: "bold" }}>Copied!</span>
+                            <span style={{ color: "#59BCE8", fontWeight: "bold" }}>Copied!</span>
                         </span>
                     );
                 }
@@ -928,7 +928,7 @@ export default function AdNameAndAccount({ params }) {
                     return (
                         <span>
                             {params.value.replace("Copied!", "")}
-                            <span style={{ color: "#5B8CFF", fontWeight: "bold" }}>Copied!</span>
+                            <span style={{ color: "#59BCE8", fontWeight: "bold" }}>Copied!</span>
                         </span>
                     );
                 }
@@ -1610,7 +1610,7 @@ export default function AdNameAndAccount({ params }) {
                 </div>
             </Col>
             <Col style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                {/* <Switch checked={isGraphVisible} style={{fontSize:"20px", paddingTop:'5px', marginRight:'10px', backgroundColor: isGraphVisible ? '#5B8CFF' : undefined}} onClick={onClickBarChart}/> */}
+                {/* <Switch checked={isGraphVisible} style={{fontSize:"20px", paddingTop:'5px', marginRight:'10px', backgroundColor: isGraphVisible ? '#59BCE8' : undefined}} onClick={onClickBarChart}/> */}
                 <Button
                     type="default"
                     icon={<BarChartOutlined />}
@@ -1619,10 +1619,10 @@ export default function AdNameAndAccount({ params }) {
                     onMouseEnter={() => setHovered(true)}
                     onMouseLeave={() => setHovered(false)}
                     style={{
-                        border: '3px solid #5B8CFF',
+                        border: '3px solid #59BCE8',
                         // color: isGraphVisible || hovered ? '#fff' : '#555',
                         color: theme === 'dark' ? '#fff' : (isGraphVisible || hovered ? '#fff' : '#555'),
-                        backgroundColor: isGraphVisible || hovered ? '#5B8CFF' : 'transparent',
+                        backgroundColor: isGraphVisible || hovered ? '#59BCE8' : 'transparent',
                         borderRadius: '999px',
                         fontWeight: 500,
                         padding: '0 12px',
@@ -1834,12 +1834,12 @@ export default function AdNameAndAccount({ params }) {
                         value={searchText}
                         onChange={(e) => setSearchText(e.target.value)}
                         className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
-                        style={{border: '1px solid #5B8CFF', width: "170px", padding: "3px",backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
+                        style={{border: '1px solid #59BCE8', width: "170px", padding: "3px",backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
                     />
                     <Button 
                         type="default" 
                         icon={<ReloadOutlined  className='black-icon'/>} 
-                        style={{ height: "30px", marginLeft: "10px", backgroundColor: '#5B8CFF', border: 'solid 0px' }} 
+                        style={{ height: "30px", marginLeft: "10px", backgroundColor: '#59BCE8', border: 'solid 0px' }} 
                         onClick={handleReload}  // Call refresh function when clicked
                     />
                 </Col> */}
@@ -1847,7 +1847,7 @@ export default function AdNameAndAccount({ params }) {
                     placeholder="Select a range"
                     value={selectedValue}
                     onChange={handleChange}
-                    style={{ width: "200px", border: '1px solid #5B8CFF', borderRadius: '8px', marginBottom: '5px'}}
+                    style={{ width: "200px", border: '1px solid #59BCE8', borderRadius: '8px', marginBottom: '5px'}}
                     dropdownClassName={theme === 'dark' && "custom-dropdown"}
                     allowClear
                 >
@@ -1878,7 +1878,7 @@ export default function AdNameAndAccount({ params }) {
                         value={searchText}
                         onChange={(e) => setSearchText(e.target.value)}
                         className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
-                        // style={{marginLeft: "5px", border: '1px solid #5B8CFF', width: "170px", padding: "3px",backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
+                        // style={{marginLeft: "5px", border: '1px solid #59BCE8', width: "170px", padding: "3px",backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
                         style={{
                             borderRadius: 8,
                             border: '1px solid #4CAF50',
@@ -1892,7 +1892,7 @@ export default function AdNameAndAccount({ params }) {
                     <Button
                         type="default"
                         icon={<ReloadOutlined className='black-icon' />}
-                        style={{ width: '35px', height: "33px", marginLeft: "5px", backgroundColor: '#5B8CFF', border: 'solid 0px' }}
+                        style={{ width: '35px', height: "33px", marginLeft: "5px", backgroundColor: '#59BCE8', border: 'solid 0px' }}
                         onClick={handleReload}  // Call refresh function when clicked
                     />
                     <EditOutlined
@@ -1900,7 +1900,7 @@ export default function AdNameAndAccount({ params }) {
                         style={{
                             marginLeft: '3px',
                             marginRight: '3px',
-                            color: comment ? '#5B8CFF' : 'gray',
+                            color: comment ? '#59BCE8' : 'gray',
                             cursor: 'pointer',
                             fontSize: '27px',
                         }}
@@ -1916,7 +1916,7 @@ export default function AdNameAndAccount({ params }) {
                                 height="80"
                                 width="80"
                                 radius="9"
-                                color="#5B8CFF"
+                                color="#59BCE8"
                                 ariaLabel="loading"
                                 wrapperStyle
                                 wrapperClass
@@ -2135,7 +2135,7 @@ export default function AdNameAndAccount({ params }) {
                             <Button key="cancel" onClick={handleCancels} style={{ marginLeft: "4px" }}>
                                 Cancel
                             </Button>
-                            <Button key="ok" onClick={handleOks} style={{ marginLeft: "4px", backgroundColor: "#5B8CFF" }}>
+                            <Button key="ok" onClick={handleOks} style={{ marginLeft: "4px", backgroundColor: "#59BCE8" }}>
                                 Ok
                             </Button>
                         </div>

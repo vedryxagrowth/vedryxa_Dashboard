@@ -234,7 +234,7 @@ export default function Createads({ selectedRow, network }) {
           onChange={(checked) => onToggleStatus(record, checked)}
           checkedChildren="ACTIVE"
           unCheckedChildren="PAUSED"
-          style={{ backgroundColor: record.Ad_Status === 'ACTIVE' && "#5B8CFF" }}
+          style={{ backgroundColor: record.Ad_Status === 'ACTIVE' && "#59BCE8" }}
           disabled={
             !(
               ovrallcampdetal?.fbstatus === 'Live' &&
@@ -251,7 +251,7 @@ export default function Createads({ selectedRow, network }) {
         <Space>
           {/* <Button icon={<EditOutlined />} onClick={() => handleadsEdit(record)}>Edit</Button> */}
           <Button className="dark-icon-button" icon={<EyeOutlined />} onClick={() => handleadsView(record)} style={{ color: theme === "dark" ? "white" : "#000" }}>View</Button>
-          <Button style={{ backgroundColor: '#5B8CFF', color: "#000", borderColor: '#5B8CFF', borderWidth: "0px" }} onClick={() => handleadsdelete(record)}>Delete</Button>
+          <Button style={{ backgroundColor: '#59BCE8', color: "#000", borderColor: '#59BCE8', borderWidth: "0px" }} onClick={() => handleadsdelete(record)}>Delete</Button>
         </Space>
       ),
     },
@@ -283,7 +283,7 @@ export default function Createads({ selectedRow, network }) {
           Total ads
         </Title>
         <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <Button style={{ backgroundColor: '#5B8CFF', color: "#000", borderColor: '#5B8CFF', borderWidth: "0px", marginRight: '10px' }} onClick={createnewads}>
+          <Button style={{ backgroundColor: '#59BCE8', color: "#000", borderColor: '#59BCE8', borderWidth: "0px", marginRight: '10px' }} onClick={createnewads}>
             Create ads
           </Button>
         </div>

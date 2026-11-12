@@ -28,7 +28,7 @@ export default function ReportSwitch() {
             <Switch
                 style={{
                     backgroundColor:
-                        pathname === "/Basereport" ? "#5B8CFF" : undefined,
+                        pathname === "/Basereport" ? "#59BCE8" : undefined,
                 }}
                 checked={pathname === "/Basereport"}
                 checkedChildren="R"

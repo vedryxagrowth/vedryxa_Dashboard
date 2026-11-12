@@ -257,7 +257,7 @@ const UserTable = () => {
                         }
                       >
                         <strong>IP address:</strong>{" "}
-                        <span style={{ backgroundColor: theme === "dark" ? " #5B8CFF" : "#5B8CFF" }}>{activity.ip || "Unknown"}</span>
+                        <span style={{ backgroundColor: theme === "dark" ? " #59BCE8" : "#59BCE8" }}>{activity.ip || "Unknown"}</span>
                       </Tooltip>
                     </p>
                     <p>
@@ -268,7 +268,7 @@ const UserTable = () => {
                       {activity.location?.zip || "Unknown"})
                     </p>
                     <p>
-                      <strong style={{ backgroundColor: theme === "dark" ? "#5B8CFF" : " #5B8CFF" }}>Device:</strong> {activity.device?.type || "Unknown"}
+                      <strong style={{ backgroundColor: theme === "dark" ? "#59BCE8" : " #59BCE8" }}>Device:</strong> {activity.device?.type || "Unknown"}
                     </p>
                     <p>
                       <strong>User agent:</strong>{" "}

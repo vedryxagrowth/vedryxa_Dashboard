@@ -185,7 +185,7 @@ const TopBar1 = () => {
         {/* Show logo only if the user is NOT authenticated */}
             {/* <div>
                 <Image
-                src={darkMode ? "/metryx-logo-dark.png" : "/metryx-logo-light.png"}
+                src={darkMode ? "/rpcpilot-logo-dark.png" : "/rpcpilot-logo-light.png"}
                 width={180}
                 height={70}
                 priority={true}

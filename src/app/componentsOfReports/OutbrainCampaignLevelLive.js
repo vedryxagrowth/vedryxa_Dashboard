@@ -886,7 +886,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.map(col => {
   //                             onChange={handlePauseClick} 
   //                             size="small" 
   //                             style={{
-  //                               backgroundColor: switchOn ? '#5B8CFF' : '#d9d9d9',
+  //                               backgroundColor: switchOn ? '#59BCE8' : '#d9d9d9',
   //                             }} 
   //                         />
   //                         <Modal
@@ -1088,7 +1088,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.map(col => {
   //                                     <Button key="cancel" onClick={handleCancels} style={{marginLeft:"4px"}}>
   //                                         Cancel
   //                                     </Button>
-  //                                     <Button key="ok" onClick={handleOks} style={{marginLeft:"4px", backgroundColor:"#5B8CFF"}}>
+  //                                     <Button key="ok" onClick={handleOks} style={{marginLeft:"4px", backgroundColor:"#59BCE8"}}>
   //                                         Ok
   //                                     </Button>
   //                                     </div>
@@ -2789,7 +2789,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.map(col => {
                 handlePauseClick(checked);
               }}
               size="small"
-              style={{ backgroundColor: switchOn ? '#5B8CFF' : '#d9d9d9' }}
+              style={{ backgroundColor: switchOn ? '#59BCE8' : '#d9d9d9' }}
             />
             <Modal
               title="Confirm Action"
@@ -3057,7 +3057,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.map(col => {
                           <div
                             style={{
                               padding: "5px 12px",
-                              background: "#5B8CFF",
+                              background: "#59BCE8",
                               color: "#000",
                               borderRadius: 18,
                               fontSize: 8,
@@ -3195,7 +3195,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.map(col => {
                     <Button key="cancel" onClick={handleCancels} style={{ marginLeft: "4px" }}>
                       Cancel
                     </Button>
-                    <Button key="ok" onClick={handleOks} style={{ marginLeft: "4px", backgroundColor: "#5B8CFF" }}>
+                    <Button key="ok" onClick={handleOks} style={{ marginLeft: "4px", backgroundColor: "#59BCE8" }}>
                       Ok
                     </Button>
                   </div>
@@ -4182,7 +4182,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.map(col => {
                           </Button>,
                           <Button
                             key="ok"
-                            style={{ backgroundColor: "#5B8CFF" }}
+                            style={{ backgroundColor: "#59BCE8" }}
                             onClick={() => {
                               handleSmartCommentSubmit();
                               setIsBulkCommentModalVisible(false);
@@ -4367,7 +4367,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.map(col => {
                                                     </>
                                                 }
                                             >
-                                                <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px', color:"#5B8CFF" }} className="black-icon-info"/>
+                                                <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px', color:"#59BCE8" }} className="black-icon-info"/>
                                             </Tooltip>
                                         </Col> */}
                 <Col>
@@ -4381,7 +4381,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.map(col => {
                     className={theme === 'dark' ? 'inputatInsideTable custom-input-dark' : 'inputatInsideTable custom-input-light'}
                     style={{
                       borderRadius: 8,
-                      border: '1px solid #5B8CFF',
+                      border: '1px solid #59BCE8',
                       // background: theme === 'dark' ? '#2a2a2a' : '#fff',
                       // border: `1px solid ${theme === 'dark' ? '#444' : '#d9d9d9'}`,
                       color: theme === 'dark' ? '#fff' : '#000',
@@ -4535,7 +4535,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.map(col => {
                               marginLeft: '3px',
                               color:
                                 accountStatus.current === 'Active'
-                                  ? '#5B8CFF'
+                                  ? '#59BCE8'
                                   : accountStatus.current === 'Inactive'
                                     ? '#EC7117'
                                     : 'gray',
@@ -4561,7 +4561,7 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.map(col => {
                         fontSize: '18px',
                         cursor: 'pointer',
                         marginRight: '10px',
-                        color: "#5B8CFF",
+                        color: "#59BCE8",
                       }}
                       className="black-icon-info"
                     />
@@ -4574,12 +4574,12 @@ const memorizedColumnDef1 = useMemo(() => [...columnDefs.map(col => {
                                                 title={ !toggleStatus ? "Turn on toggle to column re-arrangement" : "Turn off to stop column re-arrangement"} 
                                                 mouseEnterDelay={0} // Tooltip appears after 1 second
                                             >
-                                                <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#5B8CFF" }}/>
+                                                <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#59BCE8" }}/>
                                             </Tooltip>
                                         </Col> */}
                 <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
                   {/* <Tooltip title="Export to CSV"> */}
-                  <Button type="primary" style={{ backgroundColor: '#5B8CFF', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon" />} onClick={() => onBtExport(gridRef1, "Daily")} />
+                  <Button type="primary" style={{ backgroundColor: '#59BCE8', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon" />} onClick={() => onBtExport(gridRef1, "Daily")} />
                   {/* </Tooltip> */}
                 </Col>
               </Row>

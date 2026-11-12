@@ -762,7 +762,7 @@ const MnetLiveAdsetHistory = ({ params }) => {
                     return (
                         <span>
                             {params.value.replace("Copied!", "")}
-                            <span style={{ color: "#5B8CFF", fontWeight: "bold" }}>Copied!</span>
+                            <span style={{ color: "#59BCE8", fontWeight: "bold" }}>Copied!</span>
                         </span>
                     );
                 }
@@ -783,7 +783,7 @@ const MnetLiveAdsetHistory = ({ params }) => {
                     return (
                         <span>
                             {params.value.replace("Copied!", "")}
-                            <span style={{ color: "#5B8CFF", fontWeight: "bold" }}>Copied!</span>
+                            <span style={{ color: "#59BCE8", fontWeight: "bold" }}>Copied!</span>
                         </span>
                     );
                 }
@@ -2092,11 +2092,11 @@ const MnetLiveAdsetHistory = ({ params }) => {
                     checkedChildren="Tables"
                     unCheckedChildren="Hide"
                     style={{
-                        backgroundColor: showTables ? "#5B8CFF" : undefined,
+                        backgroundColor: showTables ? "#59BCE8" : undefined,
                     }}
                 />
 
-                {/* <Switch checked={isGraphVisible} style={{fontSize:"20px", paddingTop:'5px', marginRight:'10px', backgroundColor: isGraphVisible ? '#5B8CFF' : undefined}} onClick={onClickBarChart}/> */}
+                {/* <Switch checked={isGraphVisible} style={{fontSize:"20px", paddingTop:'5px', marginRight:'10px', backgroundColor: isGraphVisible ? '#59BCE8' : undefined}} onClick={onClickBarChart}/> */}
                 <Button
                     type="default"
                     icon={<BarChartOutlined />}
@@ -2105,10 +2105,10 @@ const MnetLiveAdsetHistory = ({ params }) => {
                     onMouseEnter={() => setHovered(true)}
                     onMouseLeave={() => setHovered(false)}
                     style={{
-                        border: '2px solid #5B8CFF',
+                        border: '2px solid #59BCE8',
                         // color: isGraphVisible || hovered ? '#fff' : '#555',
                         color: theme === 'dark' ? '#fff' : (isGraphVisible || hovered ? '#fff' : '#555'),
-                        backgroundColor: isGraphVisible || hovered ? '#5B8CFF' : 'transparent',
+                        backgroundColor: isGraphVisible || hovered ? '#59BCE8' : 'transparent',
                         borderRadius: '18px',
                         fontWeight: 500,
                         padding: '0 13px',
@@ -2371,7 +2371,7 @@ const MnetLiveAdsetHistory = ({ params }) => {
                         placeholder="Select a range"
                         value={selectedValue}
                         onChange={handleChange}
-                        style={{ width: "200px", border: '1px solid #5B8CFF', borderRadius: '8px', marginBottom: '5px' }}
+                        style={{ width: "200px", border: '1px solid #59BCE8', borderRadius: '8px', marginBottom: '5px' }}
                         dropdownClassName={theme === 'dark' && "custom-dropdown"}
                         allowClear
                     >
@@ -2387,12 +2387,12 @@ const MnetLiveAdsetHistory = ({ params }) => {
                         value={searchText}
                         onChange={(e) => setSearchText(e.target.value)}
                         className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
-                        style={{border: '1px solid #5B8CFF', width: "170px", padding: "3px",backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
+                        style={{border: '1px solid #59BCE8', width: "170px", padding: "3px",backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
                     />
                     <Button 
                         type="default" 
                         icon={<ReloadOutlined  className='black-icon'/>} 
-                        style={{ height: "30px", marginLeft: "10px", backgroundColor: '#5B8CFF', border: 'solid 0px' }} 
+                        style={{ height: "30px", marginLeft: "10px", backgroundColor: '#59BCE8', border: 'solid 0px' }} 
                         onClick={handleReload}  // Call refresh function when clicked
                     />
                 </Col> */}
@@ -2417,7 +2417,7 @@ const MnetLiveAdsetHistory = ({ params }) => {
                         value={searchText}
                         onChange={(e) => setSearchText(e.target.value)}
                         className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
-                        // style={{marginLeft: "5px", border: '1px solid #5B8CFF', width: "170px", padding: "3px",backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
+                        // style={{marginLeft: "5px", border: '1px solid #59BCE8', width: "170px", padding: "3px",backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
                         style={{
                             borderRadius: 8,
                             border: '1px solid #4CAF50',
@@ -2431,7 +2431,7 @@ const MnetLiveAdsetHistory = ({ params }) => {
                     <Button
                         type="default"
                         icon={<ReloadOutlined className='black-icon' />}
-                        style={{ width: '35px', height: "33px", marginLeft: "5px", backgroundColor: '#5B8CFF', border: 'solid 0px' }}
+                        style={{ width: '35px', height: "33px", marginLeft: "5px", backgroundColor: '#59BCE8', border: 'solid 0px' }}
                         onClick={handleReload}  // Call refresh function when clicked
                     />
                     <EditOutlined
@@ -2439,7 +2439,7 @@ const MnetLiveAdsetHistory = ({ params }) => {
                         style={{
                             marginLeft: '3px',
                             marginRight: '3px',
-                            color: comment ? '#5B8CFF' : 'gray',
+                            color: comment ? '#59BCE8' : 'gray',
                             cursor: 'pointer',
                             fontSize: '27px',
                         }}
@@ -2455,7 +2455,7 @@ const MnetLiveAdsetHistory = ({ params }) => {
                                 height="80"
                                 width="80"
                                 radius="9"
-                                color="#5B8CFF"
+                                color="#59BCE8"
                                 ariaLabel="loading"
                                 wrapperStyle
                                 wrapperClass
@@ -2527,7 +2527,7 @@ const MnetLiveAdsetHistory = ({ params }) => {
                                                         ? budgetAndStatusData?.campaign?.campaign_status === "ACTIVE"
                                                         : budgetAndStatusData?.selected_adset?.adset_status === "ACTIVE"
                                                 )
-                                                    ? "#5B8CFF"
+                                                    ? "#59BCE8"
                                                     : undefined
                                         }}
                                         onChange={(checked) => {
@@ -2582,8 +2582,8 @@ const MnetLiveAdsetHistory = ({ params }) => {
                                             width={600}
                                             okButtonProps={{
                                                 style: {
-                                                    backgroundColor: '#5B8CFF',
-                                                    borderColor: '#5B8CFF'
+                                                    backgroundColor: '#59BCE8',
+                                                    borderColor: '#59BCE8'
                                                 }
                                             }}
                                             className={`custom-modal ${theme === 'dark' ? 'dark-theme-modal' : ''}`}
@@ -2873,7 +2873,7 @@ const MnetLiveAdsetHistory = ({ params }) => {
                             <Button key="cancel" onClick={handleCancels} style={{ marginLeft: "4px" }}>
                                 Cancel
                             </Button>
-                            <Button key="ok" onClick={handleOks} style={{ marginLeft: "4px", backgroundColor: "#5B8CFF" }}>
+                            <Button key="ok" onClick={handleOks} style={{ marginLeft: "4px", backgroundColor: "#59BCE8" }}>
                                 Ok
                             </Button>
                         </div>

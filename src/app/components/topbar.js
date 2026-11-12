@@ -344,7 +344,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
                   cursor: 'pointer',
                   color:
                     expandedIndex === index || hoveredIndex === index
-                      ? '#5B8CFF'
+                      ? '#59BCE8'
                       : darkMode
                         ? '#fff'
                         : '#000',
@@ -554,7 +554,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
             style={{
               cursor: 'pointer',
               fontWeight: 500,
-              color: '#5B8CFF',
+              color: '#59BCE8',
               textDecoration: 'underline',
               fontSize: '14px',
             }}
@@ -566,7 +566,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
           <Button
             type="primary"
             style={{
-              backgroundColor: '#5B8CFF',
+              backgroundColor: '#59BCE8',
               color: '#000',
               border: 'none',
               boxShadow: 'none',
@@ -1667,7 +1667,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
       {status !== 'authenticated' && status !== 'loading' && (
         <div>
           <Image
-            src={darkMode ? "/metryx-logo-dark.png" : "/metryx-logo-light.png"}
+            src={darkMode ? "/rpcpilot-logo-dark.png" : "/rpcpilot-logo-light.png"}
             width={150}
             height={60}
             priority={true}
@@ -1695,7 +1695,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
             <div>
               <Image
                 // src="/ssk1.png"
-                src={darkMode ? "/metryx-icon-dark.png" : "/metryx-icon-light.png"}
+                src={darkMode ? "/rpcpilot-icon-dark.png" : "/rpcpilot-icon-light.png"}
                 width={70}   // Smaller logo when collapsed
                 height={35}
                 priority={true}
@@ -2014,7 +2014,7 @@ const Topbar = ({ onComplete, usersDataForLogin }) => {
               />
 
               <Upload {...uploadProps}>
-                <Button style={{ marginTop: '10px', backgroundColor: '#5B8CFF', border: '#5B8CFF' }} icon={<UploadOutlined className="black-icon" />} loading={loading}>
+                <Button style={{ marginTop: '10px', backgroundColor: '#59BCE8', border: '#59BCE8' }} icon={<UploadOutlined className="black-icon" />} loading={loading}>
                   {loading ? 'Uploading...' : 'Upload Image'}
                 </Button>
               </Upload>
@@ -2545,7 +2545,7 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
       {sessionStatus !== "authenticated" && (
         <div
           style={{
-            background: "#edfaf3",
+            background: "#FAFAFE",
             height: "100vh",
             overflow: "hidden",
             position: "relative",
@@ -2600,7 +2600,7 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
               <div style={{ textAlign: 'center', marginBottom: '10px' }}>
                 <h2 style={{ margin: '10px', color: '#1B1F23', fontSize: '18px' }}>Welcome Back</h2>
                 <p style={{ color: '#6B7280', fontSize: '13px', marginTop: '10px' }}>
-                  Sign in to your vedryxa  dashboard
+                  Sign in to your rpcpilot  dashboard
                 </p>
               </div>
               <Button
@@ -2653,7 +2653,7 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
                 </Form.Item>
 
                 <div style={{ textAlign: 'right', marginBottom: '15px' }}>
-                  <a style={{ color: '#4CAF50', fontSize: '12px', cursor: 'text', }}>
+                  <a style={{ color: '#59BCE8', fontSize: '12px', cursor: 'text', }}>
                     Forgot password?
                   </a>
                 </div>
@@ -2664,8 +2664,8 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
                     onClick={() => setLoginError(true)}
                     style={{
                       width: '100%',
-                      backgroundColor: '#4CAF50',
-                      borderColor: '#4CAF50',
+                      backgroundColor: '#59BCE8',
+                      borderColor: '#59BCE8',
                       height: '36px',
                       fontWeight: 'bold',
                       //  cursor: 'not-allowed',
@@ -2694,7 +2694,7 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
 
               <div style={{ textAlign: 'center', fontSize: '13px', marginTop: '18px' }}>
                 Don’t have an account?{' '}
-                <a style={{ color: '#4CAF50', cursor: 'text' }}>
+                <a style={{ color: '#59BCE8', cursor: 'text' }}>
                   Contact your administrator
                 </a>
               </div>
@@ -2713,7 +2713,7 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
 
           </div>
           {/* <img
-            src="/metryx-logo-dark.png"
+            src="/rpcpilot-logo-dark.png"
             alt="Logo"
             style={{
               position: 'absolute',
@@ -2731,7 +2731,7 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
               left: 0,
               width: "100%",
               height: "38px",
-              background: "#edfaf3",
+              background: "#FAFAFE",
               display: "flex",
               justifyContent: "space-around",
               alignItems: "center",
@@ -2748,7 +2748,7 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
                 fontSize: "12px",
               }}
             >
-              © {new Date().getFullYear()} vedryxa . All rights reserved.
+              © {new Date().getFullYear()} rpcpilot . All rights reserved.
             </span>
 
             {/* Right */}
@@ -2760,7 +2760,7 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
               }}
             >
               <a
-                href="/privacy-policy.html"
+                href="https://rpcpilot.com/privacy"
                 style={{
                   color: "#666",
                   textDecoration: "none",
@@ -2772,7 +2772,7 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
               <span style={{ color: "#C5C5C5" }}>|</span>
 
               <a
-                href="/terms-of-service.html"
+                href="https://rpcpilot.com/terms"
                 style={{
                   color: "#666",
                   textDecoration: "none",
@@ -2784,7 +2784,7 @@ const LayoutWrapper = ({ children, usersDataForLogin, onComplete }) => {
               <span style={{ color: "#C5C5C5" }}>|</span>
 
               <a
-                href="/data-deletion.html"
+                href="https://rpcpilot.com/data-deletion"
                 style={{
                   color: "#666",
                   textDecoration: "none",

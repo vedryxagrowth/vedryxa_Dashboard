@@ -619,7 +619,7 @@ const MnetLiveAdReports = ({startDate, endDate, newaccount, newtime, newRevenueP
                                     <Button key="cancel" onClick={handleCancels} style={{marginLeft:"4px"}}>
                                         Cancel
                                     </Button>
-                                    <Button key="ok" onClick={handleOks} style={{marginLeft:"4px", backgroundColor:"#5B8CFF"}}>
+                                    <Button key="ok" onClick={handleOks} style={{marginLeft:"4px", backgroundColor:"#59BCE8"}}>
                                         Ok
                                     </Button>
                                     </div>
@@ -1155,7 +1155,7 @@ const MnetLiveAdReports = ({startDate, endDate, newaccount, newtime, newRevenueP
                                                 </>
                                             }
                                             >
-                                                <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px', color:"#5B8CFF" }} />
+                                                <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px', color:"#59BCE8" }} />
                                             </Tooltip>
                                         </Col>
                                         {/* <Col>
@@ -1163,12 +1163,12 @@ const MnetLiveAdReports = ({startDate, endDate, newaccount, newtime, newRevenueP
                                                 title={ !toggleStatus ? "Turn on toggle to column re-arrangement" : "Turn off to stop column re-arrangement"} 
                                                 mouseEnterDelay={0} // Tooltip appears after 1 second
                                             >
-                                                <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#5B8CFF" }}/>
+                                                <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#59BCE8" }}/>
                                             </Tooltip>
                                         </Col> */}
                                         <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
                                             <Tooltip title="Export to CSV">
-                                                <Button type="primary" style={{ backgroundColor: '#5B8CFF', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={onBtExport1} />
+                                                <Button type="primary" style={{ backgroundColor: '#59BCE8', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={onBtExport1} />
                                             </Tooltip>
                                         </Col>
                                     </Row>

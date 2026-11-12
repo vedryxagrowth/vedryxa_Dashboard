@@ -179,9 +179,9 @@ export default function WorldTimeBuddy() {
 
         <Col>
           <Space>
-            <Button icon={<LeftOutlined />} onClick={goToPreviousDay} style={{ backgroundColor: theme === "dark" ? "#333" : "#fff", border: "1px solid #5B8CFF", color: theme === "dark" ? "#fff" : "#333" }} />
+            <Button icon={<LeftOutlined />} onClick={goToPreviousDay} style={{ backgroundColor: theme === "dark" ? "#333" : "#fff", border: "1px solid #59BCE8", color: theme === "dark" ? "#fff" : "#333" }} />
             <Text style={{ color: theme === "dark" ? "#fff" : "#000" }}>{displayNow.toFormat("ccc, LLL d")}{dayOffset !== 0 ? " " : ""}</Text>
-            <Button icon={<RightOutlined />} onClick={goToNextDay} style={{ backgroundColor: theme === "dark" ? "#333" : "#fff", border: "1px solid #5B8CFF", color: theme === "dark" ? "#5B8CFF" : "#2f4f2f" }} />
+            <Button icon={<RightOutlined />} onClick={goToNextDay} style={{ backgroundColor: theme === "dark" ? "#333" : "#fff", border: "1px solid #59BCE8", color: theme === "dark" ? "#59BCE8" : "#2f4f2f" }} />
             {/* quick "today" button */}
             {dayOffset !== 0 && <Button onClick={goToToday} size="small">Today</Button>}
           </Space>
@@ -189,7 +189,7 @@ export default function WorldTimeBuddy() {
 
 
         <Col>
-          {/* <Tooltip title="Settings"><Button icon={<SettingOutlined />} style={{ backgroundColor: "#5B8CFF", border: "1px solid #5B8CFF" }} /></Tooltip> */}
+          {/* <Tooltip title="Settings"><Button icon={<SettingOutlined />} style={{ backgroundColor: "#59BCE8", border: "1px solid #59BCE8" }} /></Tooltip> */}
           <Dropdown
             trigger={["click"]}
             overlay={
@@ -218,7 +218,7 @@ export default function WorldTimeBuddy() {
                     checked={showTimezones}
                     onChange={() => setShowTimezones(!showTimezones)}
                     style={{
-                      accentColor: "#5B8CFF",
+                      accentColor: "#59BCE8",
                       height: 16,
                       width: 16,
                       cursor: "pointer",
@@ -243,7 +243,7 @@ export default function WorldTimeBuddy() {
                     checked={markWeekends}
                     onChange={() => setMarkWeekends(!markWeekends)}
                     style={{
-                      accentColor: "#5B8CFF",
+                      accentColor: "#59BCE8",
                       width: 16,
                       height: 16,
                       cursor: "pointer",
@@ -257,8 +257,8 @@ export default function WorldTimeBuddy() {
             <Button
               icon={<SettingOutlined />}
               style={{
-                backgroundColor: "#5B8CFF",
-                border: "1px solid #5B8CFF",
+                backgroundColor: "#59BCE8",
+                border: "1px solid #59BCE8",
                 color: "#fff",
               }}
             />
@@ -267,7 +267,7 @@ export default function WorldTimeBuddy() {
 
         </Col>
         {/* <Col>
-          <Tooltip title="Copy Shareable Link"><Button icon={<LinkOutlined />} style={{ backgroundColor: "#5B8CFF", border: "1px solid #5B8CFF" }} /></Tooltip>
+          <Tooltip title="Copy Shareable Link"><Button icon={<LinkOutlined />} style={{ backgroundColor: "#59BCE8", border: "1px solid #59BCE8" }} /></Tooltip>
         </Col> */}
       </Row>
 

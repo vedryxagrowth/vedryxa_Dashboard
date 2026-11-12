@@ -29,7 +29,7 @@ const nextConfig = {
           {
             key: "Content-Security-Policy",
             value:
-              "frame-ancestors 'self' https://vedryxa.vercel.app;",
+              "frame-ancestors 'self' https://app.rpcpilot.com;",
           },
         ],
       },

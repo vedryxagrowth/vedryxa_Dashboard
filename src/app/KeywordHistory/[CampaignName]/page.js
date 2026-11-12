@@ -1020,7 +1020,7 @@ export default function CampaignAndAccount({ params }) {
                     return (
                         <span>
                             {params.value.replace("Copied!", "")}
-                            <span style={{ color: "#5B8CFF", }}>Copied!</span>
+                            <span style={{ color: "#59BCE8", }}>Copied!</span>
                         </span>
                     );
                 }
@@ -1071,7 +1071,7 @@ export default function CampaignAndAccount({ params }) {
                     return (
                         <span>
                             {params.value.replace("Copied!", "")}
-                            <span style={{ color: "#5B8CFF", }}>Copied!</span>
+                            <span style={{ color: "#59BCE8", }}>Copied!</span>
                         </span>
                     );
                 }
@@ -1804,7 +1804,7 @@ export default function CampaignAndAccount({ params }) {
                 </div>
             </Col>
             <Col style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                {/* <Switch checked={isGraphVisible} style={{fontSize:"20px", paddingTop:'5px', marginRight:'10px', backgroundColor: isGraphVisible ? '#5B8CFF' : undefined}} onClick={onClickBarChart}/> */}
+                {/* <Switch checked={isGraphVisible} style={{fontSize:"20px", paddingTop:'5px', marginRight:'10px', backgroundColor: isGraphVisible ? '#59BCE8' : undefined}} onClick={onClickBarChart}/> */}
                 <Button
                     type="default"
                     icon={<BarChartOutlined />}
@@ -1813,9 +1813,9 @@ export default function CampaignAndAccount({ params }) {
                     onMouseEnter={() => setHovered(true)}
                     onMouseLeave={() => setHovered(false)}
                     style={{
-                        border: '3px solid #5B8CFF',
+                        border: '3px solid #59BCE8',
                         color: isGraphVisible || hovered ? '#fff' : '#555',
-                        backgroundColor: isGraphVisible || hovered ? '#5B8CFF' : 'transparent',
+                        backgroundColor: isGraphVisible || hovered ? '#59BCE8' : 'transparent',
                         borderRadius: '999px',
                         fontWeight: 500,
                         padding: '0 12px',
@@ -2031,7 +2031,7 @@ export default function CampaignAndAccount({ params }) {
                     <Button 
                         type="default" 
                         icon={<ReloadOutlined  className='black-icon'/>} 
-                        style={{ height: "30px", marginLeft: "10px", backgroundColor: '#5B8CFF', border: 'none' }} 
+                        style={{ height: "30px", marginLeft: "10px", backgroundColor: '#59BCE8', border: 'none' }} 
                         onClick={handleReload}  
                     />
                  
@@ -2110,7 +2110,7 @@ export default function CampaignAndAccount({ params }) {
                         value={searchText}
                         onChange={(e) => setSearchText(e.target.value)}
                         className={theme === 'dark' ? 'custom-input-dark' : 'custom-input-light'}
-                        // style={{marginLeft: "5px", border: '1px solid #5B8CFF', width: "170px", padding: "3px",backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
+                        // style={{marginLeft: "5px", border: '1px solid #59BCE8', width: "170px", padding: "3px",backgroundColor: theme === 'dark' ? '#555' : "white", color: theme === 'dark' ? 'white' : '#555' }}
                         style={{
                             borderRadius: 8,
                             border: '1px solid #4CAF50',
@@ -2124,7 +2124,7 @@ export default function CampaignAndAccount({ params }) {
                     <Button
                         type="default"
                         icon={<ReloadOutlined className='black-icon' />}
-                        style={{ width: '43px', height: "33px", marginLeft: "5px", backgroundColor: '#5B8CFF', border: 'solid 0px' }}
+                        style={{ width: '43px', height: "33px", marginLeft: "5px", backgroundColor: '#59BCE8', border: 'solid 0px' }}
                         onClick={handleReload}  // Call refresh function when clicked
                     />
                     <EditOutlined
@@ -2132,7 +2132,7 @@ export default function CampaignAndAccount({ params }) {
                         style={{
                             marginLeft: '3px',
                             marginRight: '3px',
-                            color: comment ? '#5B8CFF' : 'gray',
+                            color: comment ? '#59BCE8' : 'gray',
                             cursor: 'pointer',
                             fontSize: '27px',
                         }}
@@ -2148,7 +2148,7 @@ export default function CampaignAndAccount({ params }) {
                                 height="80"
                                 width="80"
                                 radius="9"
-                                color="#5B8CFF"
+                                color="#59BCE8"
                                 ariaLabel="loading"
                                 wrapperStyle
                                 wrapperClass
@@ -2359,7 +2359,7 @@ export default function CampaignAndAccount({ params }) {
                             <Button key="cancel" onClick={handleCancels} style={{ marginLeft: "4px" }}>
                                 Cancel
                             </Button>
-                            <Button key="ok" onClick={handleOks} style={{ marginLeft: "4px", backgroundColor: "#5B8CFF" }}>
+                            <Button key="ok" onClick={handleOks} style={{ marginLeft: "4px", backgroundColor: "#59BCE8" }}>
                                 Ok
                             </Button>
                         </div>

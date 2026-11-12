@@ -11,7 +11,7 @@ export default function Intelligence() {
       }}
     >
       <iframe
-        src="https://metryxa.vedryxa.com"
+        src="https://rpcpilota.vedryxa.com"
         title="vedryxa"
         style={{
           width: "calc(100% + 18px)",

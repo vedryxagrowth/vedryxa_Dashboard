@@ -216,7 +216,7 @@ const Createadsets = () => {
 
 
           </div>
-          <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "#5B8CFF" }}>Targeting</span>
+          <span style={{ fontFamily: "monospace", fontWeight: "bold", color: "#59BCE8" }}>Targeting</span>
           <div style={{ display: "flex" }}>
             <Form.Item
               name="countries"

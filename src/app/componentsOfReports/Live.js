@@ -705,7 +705,7 @@ const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, h
                                         <Button key="cancel" onClick={handleCancels} style={{ marginLeft: "4px" }}>
                                             Cancel
                                         </Button>
-                                        <Button key="ok" onClick={handleOks} style={{ marginLeft: "4px", backgroundColor: "#5B8CFF" }}>
+                                        <Button key="ok" onClick={handleOks} style={{ marginLeft: "4px", backgroundColor: "#59BCE8" }}>
                                             Ok
                                         </Button>
                                     </div>
@@ -1303,7 +1303,7 @@ const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, h
             ...baseTabStyle,
             backgroundColor: isActive ? (theme === 'dark' ? '#1e1e1e' : '#fff') : (theme === 'dark' ? '#2a2a2a' : '#f0f2f5'),
             color: isActive ? (theme === 'dark' ? '#fff' : '#000') : (theme === 'dark' ? '#aaa' : '#6b7280'),
-            boxShadow: isActive ? '0 0 0 1px #5B8CFF inset' : 'none',
+            boxShadow: isActive ? '0 0 0 1px #59BCE8 inset' : 'none',
             fontWeight: isActive ? 'normal' : 'bold',
         });
 
@@ -1742,7 +1742,7 @@ const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, h
         //                                     </>
         //                                 }
         //                                 >
-        //                                     <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px', color:"#5B8CFF" }} className="black-icon-info"/>
+        //                                     <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px', color:"#59BCE8" }} className="black-icon-info"/>
         //                                 </Tooltip>
         //                             </Col>
         //                             {/* <Col>
@@ -1750,12 +1750,12 @@ const LiveReports = ({ handleChangeInput, allCampaignData, allProfitLossArray, h
         //                                     title={ !toggleStatus ? "Turn on toggle to column re-arrangement" : "Turn off to stop column re-arrangement"} 
         //                                     mouseEnterDelay={0} // Tooltip appears after 1 second
         //                                 >
-        //                                     <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#5B8CFF" }}/>
+        //                                     <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#59BCE8" }}/>
         //                                 </Tooltip>
         //                             </Col> */}
         //                             <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
         //                                 <Tooltip title="Export to CSV">
-        //                                     <Button type="primary" style={{ backgroundColor: '#5B8CFF', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={onBtExport1} />
+        //                                     <Button type="primary" style={{ backgroundColor: '#59BCE8', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={onBtExport1} />
         //                                 </Tooltip>
         //                             </Col>
         //                         </Row>

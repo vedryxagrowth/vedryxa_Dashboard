@@ -281,7 +281,7 @@ const SearchFilters = ({ campaignStatusLabel, theme, handleChangeInput, handleBl
                     className={theme === 'dark' ? 'inputat400px custom-input-dark' : 'inputat400px custom-input-light'}
                     style={{
                         borderRadius: 8,
-                        border: '1px solid #5B8CFF',
+                        border: '1px solid #59BCE8',
                         // background: theme === 'dark' ? '#2a2a2a' : '#fff',
                         // border: `1px solid ${theme === 'dark' ? '#444' : '#d9d9d9'}`,
                         color: theme === 'dark' ? '#fff' : '#000',
@@ -490,7 +490,7 @@ const SearchFilters = ({ campaignStatusLabel, theme, handleChangeInput, handleBl
                 <Button
                     type="primary"
                     style={{
-                        backgroundColor: '#5B8CFF',
+                        backgroundColor: '#59BCE8',
                         border: 'solid 0px',
                         color: 'black',
                         height: '30px'

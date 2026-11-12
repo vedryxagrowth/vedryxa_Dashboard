@@ -2179,9 +2179,9 @@ const AddComponent = ({
                       <div className="ad-button">
                         <button
                           style={{
-                            backgroundColor: "#5B8CFF",
+                            backgroundColor: "#59BCE8",
                             color: "#000",
-                            borderColor: "#5B8CFF",
+                            borderColor: "#59BCE8",
                             borderWidth: "0px",
                           }}
                         >
@@ -4978,7 +4978,7 @@ const NewAdsetComponent = ({
                                   fontWeight: activeMediaIndex === -1 ? "500" : "normal",
                                   color:
                                     activeMediaIndex === -1
-                                      ? "#5B8CFF"
+                                      ? "#59BCE8"
                                       : theme === "dark"
                                         ? "#fff"
                                         : "#333",
@@ -5015,7 +5015,7 @@ const NewAdsetComponent = ({
                                     fontWeight: activeMediaIndex === i ? "500" : "normal",
                                     color:
                                       activeMediaIndex === i
-                                        ? "#5B8CFF"
+                                        ? "#59BCE8"
                                         : theme === "dark"
                                           ? "#fff"
                                           : "#333",
@@ -6487,9 +6487,9 @@ const NewAdsetComponent = ({
                                     <div className="ad-button">
                                       <button
                                         style={{
-                                          backgroundColor: "#5B8CFF",
+                                          backgroundColor: "#59BCE8",
                                           color: "#000",
-                                          borderColor: "#5B8CFF",
+                                          borderColor: "#59BCE8",
                                           borderWidth: "0px",
                                         }}
                                       >
@@ -6610,7 +6610,7 @@ const NewAdsetComponent = ({
             <Button
               type="primary"
               style={{
-                background: "#5B8CFF",
+                background: "#59BCE8",
                 minWidth: "200px",
                 borderWidth: "0px",
                 marginTop: "10px",

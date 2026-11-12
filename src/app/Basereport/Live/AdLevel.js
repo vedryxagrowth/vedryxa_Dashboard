@@ -2426,7 +2426,7 @@ const AdLevelReports = ({ context, taxDetails, functionCallForCommnets, activeTa
               onMouseDown={(e) => e.stopPropagation()}
               onChange={(checked, e) => { e?.stopPropagation?.(); handlePauseClick(adid, checked); }}
               size="small"
-              style={{ backgroundColor: (universalOject?.fbStatus ? universalOject?.fbStatus === "ACTIVE" : true) ? '#5B8CFF' : '#d9d9d9' }}
+              style={{ backgroundColor: (universalOject?.fbStatus ? universalOject?.fbStatus === "ACTIVE" : true) ? '#59BCE8' : '#d9d9d9' }}
             />
             <Modal
               title="Confirm Action"
@@ -2702,7 +2702,7 @@ const AdLevelReports = ({ context, taxDetails, functionCallForCommnets, activeTa
                           <div
                             style={{
                               padding: "5px 12px",
-                              background: "#5B8CFF",
+                              background: "#59BCE8",
                               color: "#000",
                               borderRadius: 18,
                               fontSize: 10,
@@ -2812,7 +2812,7 @@ const AdLevelReports = ({ context, taxDetails, functionCallForCommnets, activeTa
                     <Button key="cancel" onClick={handleCancels} style={{ marginLeft: "4px" }}>
                       Cancel
                     </Button>
-                    <Button key="ok" onClick={handleOks} style={{ marginLeft: "4px", backgroundColor: "#5B8CFF" }}>
+                    <Button key="ok" onClick={handleOks} style={{ marginLeft: "4px", backgroundColor: "#59BCE8" }}>
                       Ok
                     </Button>
                   </div>
@@ -4056,7 +4056,7 @@ const AdLevelReports = ({ context, taxDetails, functionCallForCommnets, activeTa
   //                                             </>
   //                                         }
   //                                         >
-  //                                             <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px', color:"#5B8CFF" }} className="black-icon-info"/>
+  //                                             <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px', color:"#59BCE8" }} className="black-icon-info"/>
   //                                         </Tooltip>
   //                                     </Col>
   //                                     {/* <Col>
@@ -4064,12 +4064,12 @@ const AdLevelReports = ({ context, taxDetails, functionCallForCommnets, activeTa
   //                                             title={ !toggleStatus ? "Turn on toggle to column re-arrangement" : "Turn off to stop column re-arrangement"} 
   //                                             mouseEnterDelay={0} // Tooltip appears after 1 second
   //                                         >
-  //                                             <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#5B8CFF" }}/>
+  //                                             <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#59BCE8" }}/>
   //                                         </Tooltip>
   //                                     </Col> */}
   //                                     <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
   //                                         <Tooltip title="Export to CSV">
-  //                                             <Button type="primary" style={{ backgroundColor: '#5B8CFF', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={onBtExport1} />
+  //                                             <Button type="primary" style={{ backgroundColor: '#59BCE8', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon"/>} onClick={onBtExport1} />
   //                                         </Tooltip>
   //                                     </Col>
   //                                 </Row>
@@ -4405,7 +4405,7 @@ const AdLevelReports = ({ context, taxDetails, functionCallForCommnets, activeTa
                           </Button>,
                           <Button
                             key="ok"
-                            style={{ backgroundColor: "#5B8CFF" }}
+                            style={{ backgroundColor: "#59BCE8" }}
                             onClick={() => {
                               handleBulkCommentSubmitAd();
                               setIsBulkCommentModalVisible(false);
@@ -4587,7 +4587,7 @@ const AdLevelReports = ({ context, taxDetails, functionCallForCommnets, activeTa
                     className={theme === 'dark' ? 'inputatInsideTable custom-input-dark' : 'inputatInsideTable custom-input-light'}
                     style={{
                       borderRadius: 8,
-                      border: '1px solid #5B8CFF',
+                      border: '1px solid #59BCE8',
                       // background: theme === 'dark' ? '#2a2a2a' : '#fff',
                       // border: `1px solid ${theme === 'dark' ? '#444' : '#d9d9d9'}`,
                       color: theme === 'dark' ? '#fff' : '#000',
@@ -4741,12 +4741,12 @@ const AdLevelReports = ({ context, taxDetails, functionCallForCommnets, activeTa
                         <div>Rev status: {`${revenueCron.current?.toLowerCase()}`}</div>
                         <Text style={{ color: theme === 'dark' ? '#fff' : '#000' }}>
                           Cron status: {cronStatus.current?.toLowerCase()}
-                          {/* <span style={{ color: accountStatus.current === 'Active' ? '#5B8CFF' : '#EC7117', }}>
+                          {/* <span style={{ color: accountStatus.current === 'Active' ? '#59BCE8' : '#EC7117', }}>
                                                         {accountStatus.current}
                                                     </span> */}
                         </Text>
                         <div>Account:
-                          <span style={{ marginLeft: '3px', color: accountStatus.current === 'Active' ? '#5B8CFF' : '#EC7117', }}>
+                          <span style={{ marginLeft: '3px', color: accountStatus.current === 'Active' ? '#59BCE8' : '#EC7117', }}>
                             {accountStatus.current}
                           </span>
                         </div>
@@ -4760,7 +4760,7 @@ const AdLevelReports = ({ context, taxDetails, functionCallForCommnets, activeTa
                       // fontWeight: 500,
                     }}
                   >
-                    <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px', color: "#5B8CFF" }} className="black-icon-info" />
+                    <InfoCircleOutlined style={{ fontSize: '18px', cursor: 'pointer', marginRight: '10px', color: "#59BCE8" }} className="black-icon-info" />
                   </Tooltip>
                 </Col>
                 {/* <Col>
@@ -4768,12 +4768,12 @@ const AdLevelReports = ({ context, taxDetails, functionCallForCommnets, activeTa
                                             title={ !toggleStatus ? "Turn on toggle to column re-arrangement" : "Turn off to stop column re-arrangement"} 
                                             mouseEnterDelay={0} // Tooltip appears after 1 second
                                         >
-                                            <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#5B8CFF" }}/>
+                                            <Switch checked={toggleStatus} onChange={() => handleChangeToggle()} style={{marginLeft:'10px', marginRight:'10px', backgroundColor: toggleStatus && "#59BCE8" }}/>
                                         </Tooltip>
                                     </Col> */}
                 <Col xs={24} sm={24} md={4} lg={2} style={{ flex: '0.2 0 auto' }}>
                   {/* <Tooltip title="Export to CSV"> */}
-                  <Button type="primary" style={{ backgroundColor: '#5B8CFF', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon" />} onClick={onBtExport1} />
+                  <Button type="primary" style={{ backgroundColor: '#59BCE8', border: 'solid 0px', color: 'black' }} icon={<DownloadOutlined className="black-icon" />} onClick={onBtExport1} />
                   {/* </Tooltip> */}
                 </Col>
               </Row>

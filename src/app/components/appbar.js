@@ -301,7 +301,7 @@ const Appbar = ({ children, usersDataForLogin }) => {
                     // background: '#fff',
                     // color: '#007BFF',
                     // background: "rgb(199 243 154)",
-                    background: '#5B8CFF',
+                    background: '#59BCE8',
                     color: "rgb(56 102 121)",
                     border: `solid 5px ${darkMode ? '#282628' : '#f1f1f1'}`,
 
@@ -373,10 +373,10 @@ const Appbar = ({ children, usersDataForLogin }) => {
                             borderRadius: '8px', 
                             margin: '5px 0', 
                             color: darkMode ? item.label === pathname.split("/")[1] ? "#000" : '#ffffff' : '#000', 
-                            // backgroundColor: darkMode ? item.label === pathname.split("/")[1] ? "#5B8CFF" : 'transparent' : '#5B8CFF',
+                            // backgroundColor: darkMode ? item.label === pathname.split("/")[1] ? "#59BCE8" : 'transparent' : '#59BCE8',
                             backgroundColor:
                             item.text === pathname.split("/")[1]
-                                ? '#5B8CFF'
+                                ? '#59BCE8'
                                 : 'transparent',
                             fontWeight: "500", fontSize: "16px" 
                           }}
@@ -446,7 +446,7 @@ const Appbar = ({ children, usersDataForLogin }) => {
 
                     backgroundColor:
                       item.text === pathname.split("/")[1]
-                        ? '#5B8CFF'
+                        ? '#59BCE8'
                         : 'transparent',
 
                     fontWeight: "500",
@@ -456,10 +456,10 @@ const Appbar = ({ children, usersDataForLogin }) => {
               ]}
             /> */}
             <>
-              {collapsed ? (
+              {/* {collapsed ? (
                 <Image
-                  src={darkMode ? "/metryx-icon-dark.png" : "/metryx-icon-light.png"}
-                  width={100}
+                  src={darkMode ? "/rpcpilot-icon-dark.png" : "/rpcpilot-icon-light.png"}
+                  width={50}
                   height={70}
                   priority={true}
                   alt="Collapsed Logo"
@@ -471,8 +471,8 @@ const Appbar = ({ children, usersDataForLogin }) => {
                 />
               ) : (
                 <Image
-                  src={darkMode ? "/metryx-logo-dark.png" : "/metryx-logo-light.png"}
-                  width={200}
+                  src={darkMode ? "/rpcpilot-logo-dark.png" : "/rpcpilot-logo-light.png"}
+                  width={160}
                   height={65}
                   priority={true}
                   alt="Expanded Logo"
@@ -481,7 +481,42 @@ const Appbar = ({ children, usersDataForLogin }) => {
                     objectFit: "cover"
                   }}
                 />
-              )}
+              )} */}
+              
+{collapsed ? (
+  <Image
+    src={darkMode ? "/rpcpilot-icon-dark.png" : "/rpcpilot-icon-light.png"}
+    width={50}
+    height={50}
+    priority
+    alt="RPCPilot Icon"
+    style={{
+      display: "block",
+      width: "48px",
+      height: "48px",
+      objectFit: "contain",
+      margin: "0 auto"
+    }}
+  />
+) : (
+  <Image
+    src={darkMode ? "/rpcpilot-logo-dark.png" : "/rpcpilot-logo-light.png"}
+    width={180}
+    height={60}
+    priority
+    alt="RPCPilot Logo"
+    style={{
+      display: "block",
+      width: "160px",
+      height: "auto",
+      maxWidth: "100%",
+      objectFit: "contain",
+      objectPosition: "left center",
+      margin: "0 10px"
+    }}
+  />
+)}
+
 
               <Menu
                 mode="inline"
@@ -510,7 +545,7 @@ const Appbar = ({ children, usersDataForLogin }) => {
 
                     backgroundColor:
                       item.text === pathname.split("/")[1]  
-                        ? '#5B8CFF'
+                        ? '#59BCE8'
                         : 'transparent',
 
                     fontWeight: "500",

@@ -894,7 +894,7 @@ const AccountForm = ({
               >
 
                 <Button style={{
-                  border: "1px solid #5B8CFF", color: theme === "dark" ? "#fff" : "#000",              // keep text color fixed
+                  border: "1px solid #59BCE8", color: theme === "dark" ? "#fff" : "#000",              // keep text color fixed
                   backgroundColor: "transparent", marginLeft: "50px"
                 }}>Set to All Accounts</Button>
               </Popconfirm>
@@ -1301,8 +1301,8 @@ const AdPreviewPerAccount = ({
                 <Button
                   type="primary"
                   style={{
-                    backgroundColor: "#5B8CFF",
-                    borderColor: "#5B8CFF",
+                    backgroundColor: "#59BCE8",
+                    borderColor: "#59BCE8",
                     color: "#000",
                     fontWeight: "bold",
                   }}
@@ -3540,7 +3540,7 @@ const AdsetComponent = ({
                 /> */}
                 <Switch
                   size="small"
-                  style={{ backgroundColor: isDynamicCreative ? "#5B8CFF" : undefined }}
+                  style={{ backgroundColor: isDynamicCreative ? "#59BCE8" : undefined }}
                   onClick={(checked, e) => e.stopPropagation()}
                   onChange={(checked) => {
                     // console.log("Dynamic Creative:", checked);
@@ -4140,7 +4140,7 @@ const AdsetComponent = ({
                     disabled={adSchedulingToShowCampaign || budgetType === "daily" || CampaignBudgetActive}
                     checked={!!adSchedulingToShow[adset.id]}
                     style={{
-                      backgroundColor: adSchedulingToShow[adset.id] ? "#5B8CFF" : undefined,
+                      backgroundColor: adSchedulingToShow[adset.id] ? "#59BCE8" : undefined,
                     }}
                     onChange={(checked) => {
                       setAdSchedulingToShow(prev => ({
@@ -4494,7 +4494,7 @@ const AdsetComponent = ({
           style={{
             fontFamily: "monospace",
             fontWeight: "bold",
-            color: "#5B8CFF",
+            color: "#59BCE8",
           }}
         >
           Targeting
@@ -4830,7 +4830,7 @@ const AdsetComponent = ({
                             fontWeight: 500,
                             padding: "2px 8px",
                             borderRadius: 12,
-                            background: "#5B8CFF",
+                            background: "#59BCE8",
                             color: "white",
                             cursor: "pointer",
                             border: "1px solid #91caff",
@@ -5050,7 +5050,7 @@ const AdsetComponent = ({
                             type="text"
                             // style={{ textAlign: "left" }}
                             style={{
-                              border: "1px solid #5B8CFF", color: theme === "dark" ? "#fff" : "#000",              // keep text color fixed
+                              border: "1px solid #59BCE8", color: theme === "dark" ? "#fff" : "#000",              // keep text color fixed
                               backgroundColor: "transparent"
                             }}
                             onClick={() => {
@@ -5087,7 +5087,7 @@ const AdsetComponent = ({
                     style={{ marginBottom: 0 }}
                   >
                     <Switch size="small" style={{
-                      backgroundColor: isChecked ? "#5B8CFF" : undefined,
+                      backgroundColor: isChecked ? "#59BCE8" : undefined,
                     }} />
                   </Form.Item>
                 </div>
@@ -5352,7 +5352,7 @@ const AdsetComponent = ({
                           }}
                           style={{
                             backgroundColor: (hasCountries ? true : (minAgeToggle[index] ?? true))
-                              ? "#5B8CFF"
+                              ? "#59BCE8"
                               : "#d9d9d9",
                           }}
                           size="small"
@@ -6197,7 +6197,7 @@ const AdsetComponent = ({
                               fontWeight: activeMediaIndex[adset.id] === -1 ? "500" : "normal",
                               color:
                                 activeMediaIndex[adset.id] === -1
-                                  ? "#5B8CFF"
+                                  ? "#59BCE8"
                                   : theme === "dark"
                                     ? "#fff"
                                     : "#333",
@@ -6243,7 +6243,7 @@ const AdsetComponent = ({
                                 fontWeight: activeMediaIndex[adset.id] === i ? "500" : "normal",
                                 color:
                                   activeMediaIndex[adset.id] === i
-                                    ? "#5B8CFF"
+                                    ? "#59BCE8"
                                     : theme === "dark"
                                       ? "#fff"
                                       : "#333",
@@ -7766,7 +7766,7 @@ const AdsetComponent = ({
                         style={{
                           cursor: "pointer",
                           display: "inline-block", 
-                          border: selectedIndex === String(account) ? "2px solid #5B8CFF" : "none",
+                          border: selectedIndex === String(account) ? "2px solid #59BCE8" : "none",
                           borderRadius: "4px",
                           padding: "0 8px",
                           margin: "0 4px",
@@ -7787,7 +7787,7 @@ const AdsetComponent = ({
                           onClick={() => setSelectedIndex(String(account))}
                           style={{
                             cursor: "pointer",
-                            border: selectedIndex === String(account) ? "1px solid #5B8CFF" : "",
+                            border: selectedIndex === String(account) ? "1px solid #59BCE8" : "",
                             borderRadius: selectedIndex === String(account) && "4px",
                             padding: "4px 8px",
                             // backgroundColor: selectedIndex === String(account) ? "#f0f0f0" : "#ffffff",
@@ -8083,9 +8083,9 @@ const AdsetComponent = ({
                             <div className="ad-button">
                               <button
                                 style={{
-                                  backgroundColor: "#5B8CFF",
+                                  backgroundColor: "#59BCE8",
                                   color: "#000",
-                                  borderColor: "#5B8CFF",
+                                  borderColor: "#59BCE8",
                                   borderWidth: "0px",
                                 }}
                               >
@@ -8485,7 +8485,7 @@ const CreateCampaignDrawerForScrapping = ({
             </div>
             <span style={{ textAlign: 'right', marginLeft: 10 }}>
               {account.status === "Active" ? (
-                <CheckCircleFilled style={{ color: '#5B8CFF', fontSize: 15 }} className='black-icon-active-1' />
+                <CheckCircleFilled style={{ color: '#59BCE8', fontSize: 15 }} className='black-icon-active-1' />
               ) : (
                 <CloseCircleFilled style={{ color: '#EC7117', fontSize: 15 }} className='black-icon-pause-1' />
               )}
@@ -14406,7 +14406,7 @@ const CreateCampaignDrawerForScrapping = ({
                       icon={<PlusOutlined />}
                       onMouseDown={(e) => e.preventDefault()}
                       onClick={addReportCategory}
-                      style={{ backgroundColor: "#5B8CFF", border: "1px solid #4caf50" }}
+                      style={{ backgroundColor: "#59BCE8", border: "1px solid #4caf50" }}
                     />
                   </div>
                 </div>
@@ -14456,7 +14456,7 @@ const CreateCampaignDrawerForScrapping = ({
                 unCheckedChildren="Geo"
                 style={{
                   marginRight: "10px",
-                  backgroundColor: geo === "Geos" ? "#5B8CFF" : "#d9d9d9",
+                  backgroundColor: geo === "Geos" ? "#59BCE8" : "#d9d9d9",
                   color: "#fff"
                 }}
               />
@@ -14480,7 +14480,7 @@ const CreateCampaignDrawerForScrapping = ({
                 unCheckedChildren="Pixel"
                 style={{
                   marginRight: "10px",
-                  backgroundColor: pixel === "Pixels" ? "#5B8CFF" : "#d9d9d9",
+                  backgroundColor: pixel === "Pixels" ? "#59BCE8" : "#d9d9d9",
                   color: "#fff"
                 }}
               />
@@ -14504,7 +14504,7 @@ const CreateCampaignDrawerForScrapping = ({
                 unCheckedChildren="Page"
                 style={{
                   marginRight: "10px",
-                  backgroundColor: page === "Pages" ? "#5B8CFF" : "#d9d9d9",
+                  backgroundColor: page === "Pages" ? "#59BCE8" : "#d9d9d9",
                   color: "#fff"
                 }}
               />
@@ -14733,7 +14733,7 @@ const CreateCampaignDrawerForScrapping = ({
 
                       >
                         {/* <MdOutlineNumbers
-                          style={{ fontSize: 16, color: "#5B8CFF", cursor: "pointer" }}
+                          style={{ fontSize: 16, color: "#59BCE8", cursor: "pointer" }}
                         /> */}
                         <span>Multiple Accounts</span>
                       </Tooltip>
@@ -15292,7 +15292,7 @@ const CreateCampaignDrawerForScrapping = ({
                                       fontWeight: 500,
                                       padding: "2px 8px",
                                       borderRadius: 12,
-                                      background: "#5B8CFF",
+                                      background: "#59BCE8",
                                       color: "white",
                                       cursor: "pointer",
                                       border: "1px solid #91caff",
@@ -15586,7 +15586,7 @@ const CreateCampaignDrawerForScrapping = ({
                           checked={adSchedulingToShowCampaign}
                           onChange={(checked) => setAdSchedulingToShowCampaign(checked)}
                           style={{
-                            backgroundColor: adSchedulingToShowCampaign ? "#5B8CFF" : undefined,
+                            backgroundColor: adSchedulingToShowCampaign ? "#59BCE8" : undefined,
                           }}
                         />
                       </Tooltip>
@@ -16001,7 +16001,7 @@ const CreateCampaignDrawerForScrapping = ({
                     <Button
                       type="primary"
                       style={{
-                        background: "#5B8CFF",
+                        background: "#59BCE8",
                         minWidth: "120px",
                         borderWidth: "0px",
                       }}
@@ -16259,7 +16259,7 @@ const CreateCampaignDrawerForScrapping = ({
                                   icon={<PlusOutlined />}
                                   onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
                                   onClick={(e) => { e.preventDefault(); e.stopPropagation(); addCategory(); }}
-                                  style={{ backgroundColor: "#5B8CFF", border: "1px solid #4caf50", fontSize: 10, width: 20, height: 20 }}
+                                  style={{ backgroundColor: "#59BCE8", border: "1px solid #4caf50", fontSize: 10, width: 20, height: 20 }}
                                 />
                               </div>
                             </div>
@@ -16305,7 +16305,7 @@ const CreateCampaignDrawerForScrapping = ({
                     okButtonProps={{
                       loading: confirmLoading,
                       style: {
-                        backgroundColor: "#5B8CFF",
+                        backgroundColor: "#59BCE8",
                         color: "#000",
                         border: "none",
                       },
@@ -16314,7 +16314,7 @@ const CreateCampaignDrawerForScrapping = ({
                     <Button
                       type="primary"
                       style={{
-                        background: "#5B8CFF",
+                        background: "#59BCE8",
                         minWidth: "120px",
                         borderWidth: "0px",
                         marginLeft: "10px",
@@ -16329,7 +16329,7 @@ const CreateCampaignDrawerForScrapping = ({
                     <Button
                       type="primary"
                       loading={confirmLoading}
-                      style={{ background: "#5B8CFF", minWidth: "120px", marginLeft: 20, borderWidth: 0 }}
+                      style={{ background: "#59BCE8", minWidth: "120px", marginLeft: 20, borderWidth: 0 }}
                       onClick={handleSaveEditedDraft}
                     >
                       Save
@@ -16338,7 +16338,7 @@ const CreateCampaignDrawerForScrapping = ({
                     <Button
                       type="primary"
                       loading={confirmLoading}
-                      style={{ background: "#5B8CFF", minWidth: "120px", marginLeft: 20, borderWidth: 0 }}
+                      style={{ background: "#59BCE8", minWidth: "120px", marginLeft: 20, borderWidth: 0 }}
                       onClick={handleConfirm} // your existing "create new draft" handler
                     >
                       Save Template
@@ -16435,7 +16435,7 @@ const CreateCampaignDrawerForScrapping = ({
                   okButtonProps={{
                     loading: confirmLoading,
                     style: {
-                      backgroundColor: "#5B8CFF",
+                      backgroundColor: "#59BCE8",
                       color: "#000",
                       border: "none",
                     },
@@ -16444,7 +16444,7 @@ const CreateCampaignDrawerForScrapping = ({
                   <Button
                     type="primary"
                     style={{
-                      background: "#5B8CFF",
+                      background: "#59BCE8",
                       minWidth: "100px",
                       borderWidth: "0px",
                       marginLeft: "10px",
